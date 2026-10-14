@@ -6,10 +6,11 @@ export default function App() {
     <PlaceholderView
       appName="SlackBot"
       description="Slack automation assistant"
-      currentVersion="0.1.0"
+      currentVersion="0.2.0"
       newVersion="0.2.0"
       downloadUrl="https://github.com/thanhba0505/nexus/releases/download/v0.2.0/SlackBot_0.2.0_aarch64.dmg"
       icon={<MessageSquare className="w-10 h-10 text-emerald-400" />}
+      isDev={import.meta.env.DEV}
     />
   );
 }

@@ -16,7 +16,6 @@ import {
   MessageSquare,
   GitPullRequest,
   Box,
-  ArrowDownCircle,
   Plus,
 } from 'lucide-react';
 import { NexusAppMeta } from '@nexus/shared';
@@ -120,16 +119,6 @@ export function AppIconItem({
         {app.isUpdating && (
           <div className="absolute inset-0 rounded-[20px] sm:rounded-[22px] bg-black/60 backdrop-blur-xs flex items-center justify-center">
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-          </div>
-        )}
-
-        {/* Top-Right Update Badge */}
-        {app.hasUpdate && !app.isUpdating && (
-          <div
-            className="absolute -top-1 -right-1 p-1 bg-amber-400 text-slate-950 rounded-full shadow-lg border-2 border-slate-900 animate-bounce"
-            title="Có bản cập nhật mới (Click chuột phải để cập nhật)"
-          >
-            <ArrowDownCircle className="w-3.5 h-3.5" />
           </div>
         )}
 

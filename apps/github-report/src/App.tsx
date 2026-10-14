@@ -6,10 +6,11 @@ export default function App() {
     <PlaceholderView
       appName="GitHub Report"
       description="GitHub PR and commit monitor"
-      currentVersion="0.1.0"
+      currentVersion="0.2.0"
       newVersion="0.2.0"
       downloadUrl="https://github.com/thanhba0505/nexus/releases/download/v0.2.0/GitHub_Report_0.2.0_aarch64.dmg"
       icon={<GitPullRequest className="w-10 h-10 text-sky-400" />}
+      isDev={import.meta.env.DEV}
     />
   );
 }

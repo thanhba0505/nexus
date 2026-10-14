@@ -62,19 +62,14 @@ export default function App() {
   const [runningAppIds, setRunningAppIds] = useState<Set<AppId>>(new Set());
   const [updatingAppIds, setUpdatingAppIds] = useState<Set<AppId>>(new Set());
 
-  // 3. Trạng thái cập nhật của từng mini app
-  const [appUpdates, setAppUpdates] = useState<
-    Partial<Record<AppId, { hasUpdate: boolean; newVersion: string }>>
-  >(() => ({
-    [AppId.SLACKBOT]: { hasUpdate: true, newVersion: '0.2.0' },
-  }));
-
-  // 4. Trạng thái cập nhật riêng của Nexus (cho menu Settings)
+  // 3. Trạng thái cập nhật riêng của Nexus (cho menu Settings)
   const [nexusUpdateStatus, setNexusUpdateStatus] = useState<
     'idle' | 'checking' | 'available' | 'updating' | 'restarting'
   >('idle');
 
-  // 5. Quản lý UI Modals và Menus
+  const isDev = import.meta.env.DEV;
+
+  // 4. Quản lý UI Modals và Menus
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAppStoreOpen, setIsAppStoreOpen] = useState(false);
   const [infoModalApp, setInfoModalApp] = useState<NexusAppMeta | null>(null);
@@ -92,21 +87,16 @@ export default function App() {
 
   const enrichedApps = useMemo(() => {
     return NEXUS_APPS.filter((app) => installedAppIds.includes(app.id)).map((app) => {
-      const updateInfo = appUpdates[app.id];
-      const hasUpdate = updateInfo ? updateInfo.hasUpdate : false;
-      const newVersion = updateInfo ? updateInfo.newVersion : undefined;
       const isRunning = runningAppIds.has(app.id);
       const isUpdating = updatingAppIds.has(app.id);
 
       return {
         ...app,
-        hasUpdate,
-        newVersion,
         isRunning,
         isUpdating,
       };
     });
-  }, [installedAppIds, appUpdates, runningAppIds, updatingAppIds]);
+  }, [installedAppIds, runningAppIds, updatingAppIds]);
 
   const filteredApps = useMemo(() => {
     return enrichedApps.filter((app) => {
@@ -144,25 +134,6 @@ export default function App() {
     });
   };
 
-  const handleUpdateApp = (appId: AppId) => {
-    if (runningAppIds.has(appId)) return;
-
-    setUpdatingAppIds((prev) => new Set(prev).add(appId));
-
-    setTimeout(() => {
-      setUpdatingAppIds((prev) => {
-        const next = new Set(prev);
-        next.delete(appId);
-        return next;
-      });
-      setAppUpdates((prev) => {
-        const next = { ...prev };
-        delete next[appId];
-        return next;
-      });
-    }, 1600);
-  };
-
   const handleDeleteApp = (appId: AppId) => {
     updateInstalledAppIds((prev) => prev.filter((id) => id !== appId));
     setRunningAppIds((prev) => {
@@ -178,6 +149,7 @@ export default function App() {
   };
 
   const handleCheckNexusUpdate = () => {
+    if (isDev) return;
     setNexusUpdateStatus('checking');
     setTimeout(() => {
       setNexusUpdateStatus('available');
@@ -186,13 +158,13 @@ export default function App() {
 
   // Cập nhật toàn bộ hệ sinh thái Nexus và tất cả mini apps
   const handleApplyNexusUpdate = () => {
+    if (isDev) return;
     setNexusUpdateStatus('updating');
     setUpdatingAppIds(new Set(installedAppIds));
 
     setTimeout(() => {
       setNexusUpdateStatus('restarting');
       setUpdatingAppIds(new Set());
-      setAppUpdates({});
       setTimeout(() => {
         setNexusUpdateStatus('idle');
       }, 1500);
@@ -200,6 +172,24 @@ export default function App() {
   };
 
   const settingsMenuItems: DropdownMenuItem[] = useMemo(() => {
+    if (isDev) {
+      return [
+        {
+          id: 'nexus-version-dev',
+          label: 'Phiên bản: v0.2.0 (Môi trường Dev)',
+          icon: <Info className="w-3.5 h-3.5 text-white/50" />,
+          disabled: true,
+          onClick: () => {},
+        },
+        {
+          id: 'nexus-info',
+          label: 'Thông tin ứng dụng',
+          icon: <Info className="w-3.5 h-3.5 text-white/70" />,
+          onClick: () => setInfoModalApp(NEXUS_CORE_APP),
+        },
+      ];
+    }
+
     if (nexusUpdateStatus === 'available') {
       return [
         {
@@ -234,18 +224,15 @@ export default function App() {
         onClick: () => setInfoModalApp(NEXUS_CORE_APP),
       },
     ];
-  }, [nexusUpdateStatus]);
+  }, [isDev, nexusUpdateStatus]);
 
   const contextMenuItems: ContextMenuItem[] = useMemo(() => {
     const app = contextMenu.app;
     if (!app) return [];
 
     const isRunning = runningAppIds.has(app.id);
-    const updateInfo = appUpdates[app.id];
-    const hasUpdate = Boolean(updateInfo?.hasUpdate);
-    const isUpdating = updatingAppIds.has(app.id);
 
-    const items: ContextMenuItem[] = [
+    return [
       {
         id: 'app-info',
         label: 'Thông tin ứng dụng',
@@ -262,33 +249,15 @@ export default function App() {
         ),
         onClick: () => handleLaunchApp(app),
       },
+      {
+        id: 'delete-app',
+        label: 'Xóa khỏi màn hình',
+        icon: <Trash2 className="w-3.5 h-3.5 text-rose-400" />,
+        variant: 'danger',
+        onClick: () => handleDeleteApp(app.id),
+      },
     ];
-
-    if (hasUpdate) {
-      items.push({
-        id: 'update-app',
-        label: isUpdating
-          ? 'Đang cập nhật...'
-          : `Cập nhật lên v${updateInfo?.newVersion || '0.2.0'}`,
-        icon: <ArrowDownCircle className="w-3.5 h-3.5" />,
-        variant: 'primary',
-        isLoading: isUpdating,
-        disabled: isRunning,
-        tooltip: isRunning ? 'Vui lòng đóng ứng dụng trước khi cập nhật' : undefined,
-        onClick: () => handleUpdateApp(app.id),
-      });
-    }
-
-    items.push({
-      id: 'delete-app',
-      label: 'Xóa khỏi màn hình',
-      icon: <Trash2 className="w-3.5 h-3.5 text-rose-400" />,
-      variant: 'danger',
-      onClick: () => handleDeleteApp(app.id),
-    });
-
-    return items;
-  }, [contextMenu.app, runningAppIds, appUpdates, updatingAppIds]);
+  }, [contextMenu.app, runningAppIds]);
 
   return (
     <LaunchpadLayout>
@@ -296,7 +265,7 @@ export default function App() {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onOpenSettings={() => setIsSettingsOpen((prev) => !prev)}
-        hasNexusUpdate={nexusUpdateStatus === 'available'}
+        hasNexusUpdate={!isDev && nexusUpdateStatus === 'available'}
         settingsMenu={
           <DropdownMenu
             isOpen={isSettingsOpen}
@@ -352,7 +321,7 @@ export default function App() {
       />
 
       <Modal
-        isOpen={nexusUpdateStatus === 'updating' || nexusUpdateStatus === 'restarting'}
+        isOpen={!isDev && (nexusUpdateStatus === 'updating' || nexusUpdateStatus === 'restarting')}
         onClose={() => {}}
         title="Cập nhật hệ sinh thái Nexus"
         maxWidth="max-w-sm"

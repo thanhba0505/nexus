@@ -12,22 +12,32 @@ export interface PlaceholderViewProps {
   currentVersion?: string;
   newVersion?: string;
   downloadUrl?: string;
+  isDev?: boolean;
 }
 
 export function PlaceholderView({
   appName,
   description,
   icon,
-  currentVersion = '0.1.0',
+  currentVersion = '0.2.0',
   newVersion = '0.2.0',
   downloadUrl,
+  isDev,
 }: PlaceholderViewProps) {
+  const isDevMode =
+    isDev ??
+    Boolean(
+      typeof import.meta !== 'undefined' &&
+      (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV,
+    );
+
   const [displayedVersion, setDisplayedVersion] = useState(currentVersion);
   const [updateStatus, setUpdateStatus] = useState<
     'idle' | 'checking' | 'available' | 'updating' | 'updated'
-  >(() => (currentVersion !== newVersion ? 'available' : 'idle'));
+  >(() => (!isDevMode && currentVersion !== newVersion ? 'available' : 'idle'));
 
   const handleCheckUpdate = () => {
+    if (isDevMode) return;
     setUpdateStatus('checking');
     setTimeout(() => {
       if (displayedVersion !== newVersion) {
@@ -40,6 +50,7 @@ export function PlaceholderView({
   };
 
   const handleApplyUpdate = () => {
+    if (isDevMode) return;
     setUpdateStatus('updating');
     setTimeout(() => {
       setDisplayedVersion(newVersion);
@@ -68,69 +79,80 @@ export function PlaceholderView({
           <Badge status={APP_STATUS.COMING_SOON} className="text-xs px-2.5 py-1" />
         </div>
 
-        {/* Khung chức năng Cập nhật phiên bản */}
+        {/* Khung chức năng Cập nhật phiên bản / Môi trường Dev */}
         <div className="w-full pt-4 border-t border-white/10 flex flex-col items-center space-y-3">
-          {updateStatus === 'available' && (
-            <div className="w-full p-3 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-left flex items-start space-x-3">
-              <ArrowDownCircle className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-xs font-semibold text-white">
-                  Có bản cập nhật mới v{newVersion}
-                </p>
-                <p className="text-[11px] text-white/60 mt-0.5">
-                  Đồng bộ nâng cấp với hệ sinh thái Nexus
-                </p>
-              </div>
-            </div>
-          )}
-
-          {updateStatus === 'updated' && (
-            <div className="w-full p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-left flex items-center space-x-2.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <p className="text-xs text-emerald-300 font-medium">
-                Ứng dụng đang ở phiên bản mới nhất (v{displayedVersion})
+          {isDevMode ? (
+            <div className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-center flex items-center justify-center space-x-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <p className="text-xs text-white/70">
+                Đang chạy từ mã nguồn cục bộ (Môi trường phát triển)
               </p>
             </div>
-          )}
+          ) : (
+            <>
+              {updateStatus === 'available' && (
+                <div className="w-full p-3 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-left flex items-start space-x-3">
+                  <ArrowDownCircle className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-white">
+                      Có bản cập nhật mới v{newVersion}
+                    </p>
+                    <p className="text-[11px] text-white/60 mt-0.5">
+                      Đồng bộ nâng cấp với hệ sinh thái Nexus
+                    </p>
+                  </div>
+                </div>
+              )}
 
-          <div className="flex items-center space-x-2 w-full justify-center">
-            {updateStatus === 'available' || updateStatus === 'updating' ? (
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={handleApplyUpdate}
-                disabled={updateStatus === 'updating'}
-                className="w-full text-xs py-2 flex items-center justify-center space-x-1.5 shadow-lg shadow-indigo-500/20"
-              >
-                {updateStatus === 'updating' ? (
-                  <>
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    <span>Đang tải bản cập nhật...</span>
-                  </>
+              {updateStatus === 'updated' && (
+                <div className="w-full p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-left flex items-center space-x-2.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <p className="text-xs text-emerald-300 font-medium">
+                    Ứng dụng đang ở phiên bản mới nhất (v{displayedVersion})
+                  </p>
+                </div>
+              )}
+
+              <div className="flex items-center space-x-2 w-full justify-center">
+                {updateStatus === 'available' || updateStatus === 'updating' ? (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={handleApplyUpdate}
+                    disabled={updateStatus === 'updating'}
+                    className="w-full text-xs py-2 flex items-center justify-center space-x-1.5 shadow-lg shadow-indigo-500/20"
+                  >
+                    {updateStatus === 'updating' ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Đang tải bản cập nhật...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Cập nhật ứng dụng (.dmg)</span>
+                      </>
+                    )}
+                  </Button>
                 ) : (
-                  <>
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Cập nhật ứng dụng (.dmg)</span>
-                  </>
+                  <Button
+                    variant="glass"
+                    size="sm"
+                    onClick={handleCheckUpdate}
+                    disabled={updateStatus === 'checking'}
+                    className="text-xs py-2 px-4 flex items-center space-x-1.5"
+                  >
+                    <RefreshCw
+                      className={`w-3.5 h-3.5 ${updateStatus === 'checking' ? 'animate-spin text-indigo-400' : ''}`}
+                    />
+                    <span>
+                      {updateStatus === 'checking' ? 'Đang kiểm tra...' : 'Kiểm tra phiên bản'}
+                    </span>
+                  </Button>
                 )}
-              </Button>
-            ) : (
-              <Button
-                variant="glass"
-                size="sm"
-                onClick={handleCheckUpdate}
-                disabled={updateStatus === 'checking'}
-                className="text-xs py-2 px-4 flex items-center space-x-1.5"
-              >
-                <RefreshCw
-                  className={`w-3.5 h-3.5 ${updateStatus === 'checking' ? 'animate-spin text-indigo-400' : ''}`}
-                />
-                <span>
-                  {updateStatus === 'checking' ? 'Đang kiểm tra...' : 'Kiểm tra phiên bản'}
-                </span>
-              </Button>
-            )}
-          </div>
+              </div>
+            </>
+          )}
         </div>
       </Card>
     </div>
