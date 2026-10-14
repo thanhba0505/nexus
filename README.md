@@ -83,17 +83,16 @@ Hệ sinh thái Nexus hỗ trợ 2 nhóm lệnh chính:
 #### A. Nhóm DEV (Chạy Cửa Sổ Ứng Dụng macOS)
 
 ```bash
-# Chạy đồng thời dev server toàn bộ hệ sinh thái
+# Khởi động đồng thời cả 3 apps và TỰ ĐỘNG MỞ CỬA SỔ DESKTOP NEXUS
 pnpm dev
 
-# Mở cửa sổ Desktop Nexus Launchpad Hub (Cổng 1420 + Cửa sổ kính mờ macOS)
-pnpm dev:nexus
+# Chạy cả 3 app ở chế độ Web thuần (không mở cửa sổ desktop)
+pnpm dev:web
 
-# Mở cửa sổ Desktop SlackBot (Cổng 1421)
-pnpm dev:slackbot
-
-# Mở cửa sổ Desktop GitHub Report (Cổng 1422)
-pnpm dev:github-report
+# Mở riêng từng cửa sổ Desktop:
+pnpm dev:nexus          # Cửa sổ Nexus Launchpad Hub (Cổng 1420 + Kính mờ)
+pnpm dev:slackbot       # Cửa sổ SlackBot (Cổng 1421)
+pnpm dev:github-report  # Cửa sổ GitHub Report (Cổng 1422)
 ```
 
 ---

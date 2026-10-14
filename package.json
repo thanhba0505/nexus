@@ -5,7 +5,8 @@
   "type": "module",
   "packageManager": "pnpm@12.11.2",
   "scripts": {
-    "dev": "turbo run dev",
+    "dev": "concurrently -n \"nexus,slackbot,github\" -c \"magenta,green,blue\" \"pnpm --filter nexus tauri dev\" \"pnpm --filter slackbot dev\" \"pnpm --filter github-report dev\"",
+    "dev:web": "turbo run dev",
     "dev:nexus": "pnpm --filter nexus tauri dev",
     "dev:slackbot": "pnpm --filter slackbot tauri dev",
     "dev:github-report": "pnpm --filter github-report tauri dev",
@@ -22,6 +23,7 @@
   "devDependencies": {
     "@eslint/js": "^9.21.0",
     "@types/node": "^22.13.9",
+    "concurrently": "^10.0.6",
     "eslint": "^9.21.0",
     "prettier": "^3.5.3",
     "turbo": "^2.4.4",
