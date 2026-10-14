@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Check, Plus, Box } from 'lucide-react';
-import { NexusAppMeta } from '@nexus/shared';
+import { NexusAppMeta, AppId } from '@nexus/shared';
 import { Modal } from './Modal';
 import { clsx } from 'clsx';
 
@@ -8,7 +8,7 @@ export interface AppStoreModalProps {
   isOpen: boolean;
   onClose: () => void;
   availableApps: readonly NexusAppMeta[];
-  installedAppIds: string[];
+  installedAppIds: readonly (string | AppId)[];
   onInstallApp: (app: NexusAppMeta) => Promise<void> | void;
 }
 

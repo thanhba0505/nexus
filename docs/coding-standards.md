@@ -124,22 +124,30 @@ export const app_icon_item = () => { ... }
 - Luôn bắt đầu bằng từ khóa `use` dạng `camelCase` (ví dụ: `useAppLauncher`, `useFrostedVibrancy`).
 - Giá trị trả về phải là một Object được định kiểu rõ ràng hoặc một tuple có `as const`.
 
-### 3.3. Enums vs String Literal Union Types (Quy định bắt buộc)
+### 3.3. Định Danh Ứng Dụng (AppId Enum) & String Literal Union Types
 
-Trong toàn bộ hệ thống Nexus, **KHÔNG sử dụng TypeScript `enum` truyền thống**. Thay vào đó, bắt buộc sử dụng **`as const` Object kết hợp String Literal Union Type**.
+- **Bắt buộc dùng `enum AppId` cho định danh ứng dụng**: Để tránh hoàn toàn việc viết các mảng chuỗi ma thuật (magic strings) như `['slackbot', 'github-report']` rải rác trong mã nguồn, toàn bộ hệ thống Nexus bắt buộc phải sử dụng `enum AppId` tập trung:
 
-#### Lý do kỹ thuật:
+  ```typescript
+  // ✅ ĐÚNG: Định danh app bằng Enum tập trung
+  export enum AppId {
+    NEXUS = 'nexus',
+    SLACKBOT = 'slackbot',
+    GITHUB_REPORT = 'github-report',
+  }
 
-1. **Zero Runtime Overhead**: String union chỉ tồn tại ở thời điểm compile-time của TypeScript; khi chuyển sang JavaScript không sinh ra mã thừa (hỗ trợ Tree-Shaking 100%).
-2. **Bảo toàn an toàn kiểu dữ liệu**: Numeric enum trong TypeScript tiềm ẩn lỗ hổng cho phép gán số bất kỳ mà không bị compiler chặn.
-3. **Tương thích tuyệt đối với Tauri IPC & Serde**: String literal map chính xác 1:1 với Rust `#[serde(rename_all = "kebab-case")] enum` qua JSON IPC payload.
+  // Khai báo mảng mặc định an toàn:
+  export const DEFAULT_INSTALLED_APP_IDS: readonly AppId[] = [AppId.SLACKBOT, AppId.GITHUB_REPORT];
+  ```
+
+- **Đối với Danh mục (Categories) & Trạng thái phân loại (Status)**: Sử dụng `as const` Object kết hợp String Literal Union Type (`AppCategory`, `AppStatus`) để đảm bảo Zero Runtime Overhead và tương thích trực tiếp 1:1 với Rust Serde payload.
 
 ```typescript
 // ✅ ĐÚNG CHUẨN NEXUS:
 export const APP_CATEGORY = {
   ALL: 'all',
-  DEV_TOOLS: 'dev-tools',
-  MESSAGING: 'messaging',
+  DEV: 'dev',
+  CHAT: 'chat',
   GAMES: 'games',
   UTILITIES: 'utilities',
 } as const;
@@ -153,19 +161,13 @@ export const APP_STATUS = {
 } as const;
 
 export type AppStatus = (typeof APP_STATUS)[keyof typeof APP_STATUS];
-
-// ❌ SAI (CẤM SỬ DỤNG):
-export enum AppCategory {
-  ALL,
-  DEV_TOOLS,
-}
 ```
 
 ### 3.4. Biến (Variables), Hàm (Functions) & Quy tắc Tiền Tố Boolean
 
 - Tên biến & hàm: `camelCase`.
 - **Biến Boolean bắt buộc phải có tiền tố thể hiện câu hỏi điều kiện**:
-  - `is*`: `isReady`, `isVisible`, `isHovered`, `isTranslucent`
+  - `is*`: `isReady`, `isVisible`, `isHovered`, `isTranslucent`, `isRunning`, `isUpdating`
   - `has*`: `hasNotification`, `hasUpdate`, `hasError`
   - `can*`: `canLaunch`, `canMinimize`, `canDrag`
   - `should*`: `shouldAutoLaunch`, `shouldCloseOnSelect`
@@ -177,6 +179,46 @@ export enum AppCategory {
 
 - **Hằng số toàn cục** (Global Configuration Constants): `UPPER_SNAKE_CASE` (ví dụ: `DEFAULT_PORT`, `MAX_RECENT_APPS`, `MACOS_BUNDLE_PREFIX`).
 - **Hằng số cục bộ trong hàm**: `camelCase` (ví dụ: `const matchedApps = ...`).
+
+### 3.6. Quy Chuẩn Hạn Chế Tối Đa `useEffect` (You Might Not Need an Effect)
+
+Theo triết lý React hiện đại, `useEffect` là "cửa thoát hiểm" (escape hatch) để đồng bộ với các hệ thống bên ngoài trình duyệt, **KHÔNG PHẢI** công cụ để điều khiển luồng dữ liệu state nội bộ. Việc lạm dụng `useEffect` gây ra lỗi re-render thừa, chớp giật giao diện (layout flicker), và khó debug state.
+
+#### 5 Nguyên Tắc Bắt Buộc Về `useEffect`:
+
+1. **Tuyệt đối KHÔNG dùng `useEffect` để tính toán dữ liệu phái sinh (Derived State)**:
+   - Nếu một giá trị có thể tính toán được từ `props` hoặc `state` hiện có, hãy tính trực tiếp trong quá trình render hoặc dùng `useMemo`.
+   - ❌ **Sai**: Dùng `useEffect` lắng nghe `apps` để tính `filteredApps` rồi `setFilteredApps`.
+   - ✅ **Đúng**: `const filteredApps = useMemo(() => apps.filter(...), [apps, search]);`
+
+2. **Tuyệt đối KHÔNG dùng `useEffect` để xử lý sự kiện người dùng (User Events)**:
+   - Khi người dùng click nút, đóng mở menu, hoặc thao tác chuột, toàn bộ logic cập nhật state và hành động phụ phải nằm ngay trong **Event Handler** (`onClick`, `onSubmit`, `onContextMenu`).
+   - ❌ **Sai**: Bấm nút -> `setIsDeleting(true)` -> `useEffect` lắng nghe `isDeleting` để thực hiện xóa.
+   - ✅ **Đúng**: Bấm nút -> gọi thẳng hàm `handleDeleteApp(appId)`.
+
+3. **Tuyệt đối KHÔNG dùng `useEffect` để đồng bộ State vào Storage (`localStorage` / `tauri-plugin-store`)**:
+   - Việc ghi dữ liệu vào storage phải được thực hiện trực tiếp bên trong hàm updater hoặc event handler gây ra sự thay đổi đó.
+   - ❌ **Sai**: Tạo `useEffect(() => localStorage.setItem('apps', ids), [ids])`.
+   - ✅ **Đúng**: Đóng gói trong hàm updater:
+     ```typescript
+     const updateInstalledAppIds = (updater: (prev: AppId[]) => AppId[]) => {
+       setInstalledAppIds((prev) => {
+         const next = updater(prev);
+         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(next));
+         return next;
+       });
+     };
+     ```
+
+4. **Khởi tạo State dùng Lazy Initializer thay vì `useEffect`**:
+   - Đọc dữ liệu từ `localStorage` hoặc cấu hình ban đầu phải truyền qua hàm callback trong `useState`:
+   - ❌ **Sai**: `const [data, setData] = useState(null); useEffect(() => setData(readFromStorage()), []);` (gây double render và layout shift).
+   - ✅ **Đúng**: `const [data, setData] = useState(() => readFromStorage() || defaultValue);`
+
+5. **Trường hợp DUY NHẤT được phép sử dụng `useEffect`**:
+   - Khi thực sự cần kết nối hoặc đồng bộ với **External Systems** (hệ thống bên ngoài vòng đời React):
+     - Lắng nghe sự kiện toàn cục của window/document (`keydown` cho phím Esc, `mousedown` cho click outside) **bắt buộc phải có cleanup function**.
+     - Thiết lập WebSocket, EventSource, hoặc IPC streaming từ Tauri Rust backend.
 
 ---
 

@@ -1,3 +1,9 @@
+export enum AppId {
+  NEXUS = 'nexus',
+  SLACKBOT = 'slackbot',
+  GITHUB_REPORT = 'github-report',
+}
+
 export const APP_CATEGORY = {
   ALL: 'all',
   DEV: 'dev',
@@ -17,7 +23,7 @@ export const APP_STATUS = {
 export type AppStatus = (typeof APP_STATUS)[keyof typeof APP_STATUS];
 
 export interface NexusAppMeta {
-  id: string;
+  id: AppId;
   name: string;
   description: string;
   bundleId: string;

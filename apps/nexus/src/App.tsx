@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import {
   LaunchpadLayout,
   LaunchpadHeader,
@@ -12,7 +12,15 @@ import {
   DropdownMenuItem,
   ContextMenuItem,
 } from '@nexus/ui';
-import { NEXUS_APPS, NEXUS_CORE_APP, AppCategory, APP_CATEGORY, NexusAppMeta } from '@nexus/shared';
+import {
+  NEXUS_APPS,
+  NEXUS_CORE_APP,
+  DEFAULT_INSTALLED_APP_IDS,
+  AppId,
+  AppCategory,
+  APP_CATEGORY,
+  NexusAppMeta,
+} from '@nexus/shared';
 import { Info, RefreshCw, Trash2, ArrowDownCircle, Play, Square, CheckCircle2 } from 'lucide-react';
 
 const LOCAL_STORAGE_KEY = 'nexus_installed_app_ids';
@@ -22,33 +30,45 @@ export default function App() {
   const [currentCategory, setCurrentCategory] = useState<AppCategory>(APP_CATEGORY.ALL);
   const [selectedApp, setSelectedApp] = useState<NexusAppMeta | null>(null);
 
-  // 1. Quản lý danh sách app hiển thị trên màn hình chính
-  const [installedAppIds, setInstalledAppIds] = useState<string[]>(() => {
+  // 1. Quản lý danh sách app hiển thị trên màn hình chính bằng Enum AppId
+  const [installedAppIds, setInstalledAppIds] = useState<AppId[]>(() => {
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed as AppId[];
+        }
       }
     } catch {
-      // Fallback default
+      // Fallback khi lỗi parse JSON
     }
-    return ['slackbot', 'github-report'];
+    return [...DEFAULT_INSTALLED_APP_IDS];
   });
 
-  // Lưu installedAppIds mỗi khi thay đổi
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(installedAppIds));
-  }, [installedAppIds]);
+  // Helper cập nhật installedAppIds trực tiếp kèm lưu storage (loại bỏ hoàn toàn useEffect watch state)
+  const updateInstalledAppIds = (updater: (prev: AppId[]) => AppId[]) => {
+    setInstalledAppIds((prev) => {
+      const next = updater(prev);
+      try {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(next));
+      } catch {
+        // Safe storage write fallback
+      }
+      return next;
+    });
+  };
 
   // 2. Trạng thái ứng dụng đang chạy (running) và đang cập nhật (updating)
-  const [runningAppIds, setRunningAppIds] = useState<Set<string>>(new Set());
-  const [updatingAppIds, setUpdatingAppIds] = useState<Set<string>>(new Set());
+  const [runningAppIds, setRunningAppIds] = useState<Set<AppId>>(new Set());
+  const [updatingAppIds, setUpdatingAppIds] = useState<Set<AppId>>(new Set());
 
-  // 3. Trạng thái cập nhật của từng mini app (tự động load 1 lần khi mở app)
+  // 3. Trạng thái cập nhật của từng mini app (Khởi tạo sẵn giá trị demo mà không cần useEffect set state sau mount)
   const [appUpdates, setAppUpdates] = useState<
-    Record<string, { hasUpdate: boolean; newVersion: string }>
-  >({});
+    Partial<Record<AppId, { hasUpdate: boolean; newVersion: string }>>
+  >(() => ({
+    [AppId.SLACKBOT]: { hasUpdate: true, newVersion: '0.2.0' },
+  }));
 
   // 4. Trạng thái cập nhật riêng của Nexus (cho menu Settings)
   const [nexusUpdateStatus, setNexusUpdateStatus] = useState<
@@ -71,18 +91,7 @@ export default function App() {
     app: null,
   });
 
-  // Tự động quét cập nhật 1 lần khi Nexus khởi chạy
-  useEffect(() => {
-    const checkTimer = setTimeout(() => {
-      // Giả lập phát hiện bản cập nhật mới cho SlackBot để kiểm thử tính năng
-      setAppUpdates({
-        slackbot: { hasUpdate: true, newVersion: '0.2.0' },
-      });
-    }, 600);
-    return () => clearTimeout(checkTimer);
-  }, []);
-
-  // Tổng hợp dữ liệu hiển thị cho các app đã cài đặt
+  // Tổng hợp dữ liệu hiển thị cho các app đã cài đặt (Derived State qua useMemo)
   const enrichedApps = useMemo(() => {
     return NEXUS_APPS.filter((app) => installedAppIds.includes(app.id)).map((app) => {
       const updateInfo = appUpdates[app.id];
@@ -118,7 +127,7 @@ export default function App() {
   // Xử lý mở/tắt app khi bấm vào icon
   const handleLaunchApp = (app: NexusAppMeta) => {
     setSelectedApp(app);
-    // Bật/tắt trạng thái chạy để dễ dàng kiểm thử tính năng chặn cập nhật
+    // Bật/tắt trạng thái chạy để kiểm thử tính năng chặn cập nhật
     setRunningAppIds((prev) => {
       const next = new Set(prev);
       if (next.has(app.id)) {
@@ -142,7 +151,7 @@ export default function App() {
   };
 
   // Cập nhật mini app
-  const handleUpdateApp = (appId: string) => {
+  const handleUpdateApp = (appId: AppId) => {
     if (runningAppIds.has(appId)) return; // Bị chặn nếu app đang chạy
 
     setUpdatingAppIds((prev) => new Set(prev).add(appId));
@@ -164,8 +173,8 @@ export default function App() {
   };
 
   // Xóa app khỏi màn hình chính (đưa vào kho dấu cộng)
-  const handleDeleteApp = (appId: string) => {
-    setInstalledAppIds((prev) => prev.filter((id) => id !== appId));
+  const handleDeleteApp = (appId: AppId) => {
+    updateInstalledAppIds((prev) => prev.filter((id) => id !== appId));
     setRunningAppIds((prev) => {
       const next = new Set(prev);
       next.delete(appId);
@@ -177,7 +186,7 @@ export default function App() {
   const handleInstallAppFromStore = async (app: NexusAppMeta) => {
     // Mô phỏng thời gian tải
     await new Promise((resolve) => setTimeout(resolve, 800));
-    setInstalledAppIds((prev) => (prev.includes(app.id) ? prev : [...prev, app.id]));
+    updateInstalledAppIds((prev) => (prev.includes(app.id) ? prev : [...prev, app.id]));
   };
 
   // Xử lý kiểm tra cập nhật cho Nexus Launcher trong Settings

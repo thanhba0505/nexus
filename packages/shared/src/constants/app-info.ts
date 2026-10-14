@@ -1,10 +1,16 @@
-import { APP_CATEGORY, APP_STATUS, NexusAppMeta } from '../types/app-registry';
+import { APP_CATEGORY, APP_STATUS, AppId, NexusAppMeta } from '../types/app-registry';
+
+/**
+ * Danh sách ID các mini app mặc định hiển thị trên màn hình chính Launchpad.
+ * Sử dụng Enum AppId thay vì hardcoded string mảng.
+ */
+export const DEFAULT_INSTALLED_APP_IDS: readonly AppId[] = [AppId.SLACKBOT, AppId.GITHUB_REPORT];
 
 /**
  * Nexus Launcher Core App Meta (Host App)
  */
 export const NEXUS_CORE_APP: NexusAppMeta = {
-  id: 'nexus',
+  id: AppId.NEXUS,
   name: 'Nexus',
   description: 'Launchpad trung tâm & quản lý hệ sinh thái macOS',
   bundleId: 'com.thanhba.nexus',
@@ -22,7 +28,7 @@ export const NEXUS_CORE_APP: NexusAppMeta = {
  */
 export const NEXUS_APPS: readonly NexusAppMeta[] = [
   {
-    id: 'slackbot',
+    id: AppId.SLACKBOT,
     name: 'SlackBot',
     description: 'Trợ lý thông báo Slack & webhook tự động',
     bundleId: 'com.thanhba.nexus.slackbot',
@@ -34,7 +40,7 @@ export const NEXUS_APPS: readonly NexusAppMeta[] = [
     accentColor: '#10b981',
   },
   {
-    id: 'github-report',
+    id: AppId.GITHUB_REPORT,
     name: 'GitHub Report',
     description: 'Theo dõi Pull Request & báo cáo commit GitHub',
     bundleId: 'com.thanhba.nexus.githubreport',
