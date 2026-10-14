@@ -1,0 +1,30 @@
+{
+  "name": "nexus-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.11.2",
+  "scripts": {
+    "dev:nexus": "pnpm --filter nexus dev",
+    "dev:slackbot": "pnpm --filter slackbot dev",
+    "dev:github-report": "pnpm --filter github-report dev",
+    "build:nexus": "pnpm --filter nexus build",
+    "build:slackbot": "pnpm --filter slackbot build",
+    "build:github-report": "pnpm --filter github-report build",
+    "build": "turbo run build",
+    "lint": "eslint .",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "clean": "turbo run clean && rm -rf node_modules target"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.21.0",
+    "@types/node": "^22.13.9",
+    "eslint": "^9.21.0",
+    "prettier": "^3.5.3",
+    "turbo": "^2.4.4",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.26.0"
+  }
+}

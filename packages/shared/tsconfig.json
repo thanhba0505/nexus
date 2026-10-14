@@ -1,0 +1,10 @@
+{
+  "extends": "@nexus/config/tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@nexus/shared/*": ["src/*"]
+    }
+  },
+  "include": ["src/**/*"]
+}

@@ -1,0 +1,29 @@
+[workspace]
+resolver = "2"
+members = [
+    "apps/nexus/src-tauri",
+    "apps/slackbot/src-tauri",
+    "apps/github-report/src-tauri",
+]
+
+[workspace.dependencies]
+tauri = { version = "2.0", features = [] }
+tauri-build = { version = "2.0", features = [] }
+tauri-plugin-opener = "2.0"
+tauri-plugin-store = "2.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+window-vibrancy = "0.5"
+keyring = "3.0"
+thiserror = "2.0"
+
+[profile.dev]
+incremental = true
+opt-level = 0
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

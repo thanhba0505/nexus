@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="slack-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="50%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#064e3b" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#000000" flood-opacity="0.4" />
+    </filter>
+  </defs>
+
+  <!-- macOS Squircle Background -->
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="url(#slack-grad)" filter="url(#shadow)" />
+  
+  <!-- Inner Rim Border -->
+  <rect x="68" y="68" width="888" height="888" rx="196" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="8" />
+
+  <!-- SlackBot Logo: Chat Bubble with Robot Face -->
+  <g transform="translate(512, 490)">
+    <!-- Chat Bubble -->
+    <path d="M-220,-160 h440 a60,60 0 0 1 60,60 v220 a60,60 0 0 1 -60,60 h-280 l-120,90 v-90 a60,60 0 0 1 -40,-60 v-220 a60,60 0 0 1 60,-60 Z"
+          fill="white" filter="url(#shadow)" />
+
+    <!-- Robot Eyes -->
+    <circle cx="-90" cy="-20" r="35" fill="#059669" />
+    <circle cx="90" cy="-20" r="35" fill="#059669" />
+
+    <!-- Robot Smile / Sound Wave -->
+    <path d="M-90,65 Q0,110 90,65" fill="none" stroke="#059669" stroke-width="24" stroke-linecap="round" />
+
+    <!-- Antenna -->
+    <line x1="0" y1="-160" x2="0" y2="-230" stroke="white" stroke-width="24" stroke-linecap="round" />
+    <circle cx="0" cy="-240" r="30" fill="#34d399" />
+  </g>
+</svg>

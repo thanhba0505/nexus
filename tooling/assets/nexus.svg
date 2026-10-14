@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="nexus-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="50%" stop-color="#4f46e5" />
+      <stop offset="100%" stop-color="#312e81" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#000000" flood-opacity="0.4" />
+    </filter>
+  </defs>
+
+  <!-- macOS Squircle Background -->
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="url(#nexus-grad)" filter="url(#shadow)" />
+  
+  <!-- Inner Rim Border -->
+  <rect x="68" y="68" width="888" height="888" rx="196" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="8" />
+
+  <!-- Nexus Hub Logo: Central Connected Nodes -->
+  <g transform="translate(512, 512)" stroke="white" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Connecting rings -->
+    <circle cx="0" cy="0" r="160" stroke="rgba(255,255,255,0.3)" stroke-width="24" />
+    <circle cx="0" cy="0" r="70" fill="white" />
+    
+    <!-- Outer Node 1 (Top) -->
+    <line x1="0" y1="-70" x2="0" y2="-220" />
+    <circle cx="0" cy="-220" r="50" fill="#a5b4fc" />
+    
+    <!-- Outer Node 2 (Bottom-Left) -->
+    <line x1="-60" y1="35" x2="-190" y2="110" />
+    <circle cx="-190" cy="110" r="50" fill="#818cf8" />
+    
+    <!-- Outer Node 3 (Bottom-Right) -->
+    <line x1="60" y1="35" x2="190" y2="110" />
+    <circle cx="190" cy="110" r="50" fill="#c7d2fe" />
+  </g>
+</svg>

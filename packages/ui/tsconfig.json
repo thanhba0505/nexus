@@ -1,0 +1,10 @@
+{
+  "extends": "@nexus/config/tsconfig.react.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@nexus/ui/*": ["src/*"]
+    }
+  },
+  "include": ["src/**/*"]
+}
