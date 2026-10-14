@@ -12,7 +12,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { workspace = true }
 
 [dependencies]
-tauri = { workspace = true }
+tauri = { workspace = true, features = ["macos-private-api"] }
 tauri-plugin-opener = { workspace = true }
 tauri-plugin-store = { workspace = true }
 serde = { workspace = true }
