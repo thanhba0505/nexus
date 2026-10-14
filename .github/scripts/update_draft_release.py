@@ -224,6 +224,7 @@ def main() -> None:
                 "release",
                 "edit",
                 draft_tag,
+                "--draft",
                 "--tag",
                 next_tag,
                 "--title",
