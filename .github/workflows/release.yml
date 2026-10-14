@@ -2,6 +2,11 @@ name: Release Ecosystem
 
 on:
   push:
+    branches:
+      - main
+    paths:
+      - 'apps/**'
+      - 'packages/**'
     tags:
       - 'v*'
   workflow_dispatch:
@@ -12,20 +17,24 @@ on:
         type: boolean
         default: true
       tag:
-        description: 'Git Tag (ví dụ: v0.1.0)'
-        required: true
-        default: 'v0.1.0'
+        description: 'Git Tag (để trống nếu muốn tự động tính version)'
+        required: false
+        default: ''
 
 permissions:
   contents: write
 
 jobs:
   build-and-release:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: macos-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js & pnpm
         uses: pnpm/action-setup@v4
@@ -51,7 +60,40 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Determine & Bump Versions
+        id: bump
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "Kích hoạt bằng Git Tag: ${{ github.ref_name }}"
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "draft=false" >> $GITHUB_OUTPUT
+            echo "should_release=true" >> $GITHUB_OUTPUT
+          else
+            echo "Đang kiểm tra thay đổi và tự động tính toán phiên bản..."
+            BUMP_OUT=$(node tooling/scripts/bump-versions.mjs)
+            echo "$BUMP_OUT"
+
+            IS_BUMPED=$(echo "$BUMP_OUT" | node -e "const data = JSON.parse(require('fs').readFileSync(0, 'utf-8')); console.log(data.bumped);")
+
+            if [ "$IS_BUMPED" = "true" ]; then
+              NEW_TAG=$(echo "$BUMP_OUT" | node -e "const data = JSON.parse(require('fs').readFileSync(0, 'utf-8')); console.log(data.tag);")
+              echo "tag=$NEW_TAG" >> $GITHUB_OUTPUT
+              echo "draft=true" >> $GITHUB_OUTPUT
+              echo "should_release=true" >> $GITHUB_OUTPUT
+
+              git config user.name "github-actions[bot]"
+              git config user.email "github-actions[bot]@users.noreply.github.com"
+              git add apps.json apps/*/package.json apps/*/src-tauri/tauri.conf.json
+              git commit -m "chore(release): bump version to $NEW_TAG [skip ci]"
+              git push origin main
+            else
+              echo "Không có thay đổi trong apps/ hoặc packages/, bỏ qua release."
+              echo "should_release=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
       - name: Build All Desktop Apps (.dmg & .app)
+        if: steps.bump.outputs.should_release == 'true'
         run: |
           echo "Biên dịch Nexus Launcher..."
           pnpm desktop:build:nexus
@@ -63,6 +105,7 @@ jobs:
           pnpm desktop:build:github-report
 
       - name: Prepare Release Assets
+        if: steps.bump.outputs.should_release == 'true'
         run: |
           mkdir -p release-artifacts
           for f in target/release/bundle/dmg/*.dmg; do
@@ -74,25 +117,13 @@ jobs:
           echo "Danh sách các file trong release-artifacts:"
           ls -la release-artifacts
 
-      - name: Determine Tag & Draft Status
-        id: meta
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TAG="${{ github.event.inputs.tag }}"
-            DRAFT="${{ github.event.inputs.draft }}"
-          else
-            TAG="${{ github.ref_name }}"
-            DRAFT="false"
-          fi
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-          echo "draft=$DRAFT" >> $GITHUB_OUTPUT
-
-      - name: Publish GitHub Release
+      - name: Publish GitHub Draft Release
+        if: steps.bump.outputs.should_release == 'true'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.meta.outputs.tag }}
-          name: "${{ steps.meta.outputs.tag }} Nexus Ecosystem"
-          draft: ${{ steps.meta.outputs.draft == 'true' }}
+          tag_name: ${{ steps.bump.outputs.tag }}
+          name: "${{ steps.bump.outputs.tag }} Nexus Ecosystem"
+          draft: ${{ steps.bump.outputs.draft == 'true' }}
           prerelease: false
           files: release-artifacts/*
           generate_release_notes: true
