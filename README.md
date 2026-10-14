@@ -78,65 +78,42 @@ pnpm install
 
 ### 4.3. Chạy Chế Độ Phát Triển (Development)
 
-Hệ sinh thái Nexus hỗ trợ 2 chế độ chạy phát triển:
+Hệ sinh thái Nexus hỗ trợ 2 nhóm lệnh chính:
 
-#### A. Chế độ Mở Cửa Sổ Desktop Native macOS (Tauri Desktop Window)
-
-> _Yêu cầu máy đã cài đặt Rust toolchain theo mục 4.1._
+#### A. Nhóm DEV (Chạy Cửa Sổ Ứng Dụng macOS)
 
 ```bash
-# Khởi chạy cửa sổ Desktop Nexus Launchpad Hub (Cổng 1420 + Cửa sổ kính mờ macOS)
-pnpm desktop:nexus
-# Alias tương đương:
-pnpm tauri:nexus
+# Chạy đồng thời dev server toàn bộ hệ sinh thái
+pnpm dev
 
-# Khởi chạy cửa sổ Desktop SlackBot (Cổng 1421)
-pnpm desktop:slackbot
-# Alias tương đương:
-pnpm tauri:slackbot
-
-# Khởi chạy cửa sổ Desktop GitHub Report (Cổng 1422)
-pnpm desktop:github-report
-# Alias tương đương:
-pnpm tauri:github-report
-```
-
-#### B. Chế độ Xem Web Trình Duyệt Nhanh (Frontend Only)
-
-> _Chỉ chạy Vite dev server trên trình duyệt web (không cần biên dịch Rust)._
-
-```bash
-# Khởi chạy webview Nexus trên localhost:1420
+# Mở cửa sổ Desktop Nexus Launchpad Hub (Cổng 1420 + Cửa sổ kính mờ macOS)
 pnpm dev:nexus
 
-# Khởi chạy webview SlackBot trên localhost:1421
+# Mở cửa sổ Desktop SlackBot (Cổng 1421)
 pnpm dev:slackbot
 
-# Khởi chạy webview GitHub Report trên localhost:1422
+# Mở cửa sổ Desktop GitHub Report (Cổng 1422)
 pnpm dev:github-report
 ```
 
 ---
 
-### 4.4. Đóng Gói Ứng Dụng Desktop Native macOS (.app Bundle)
+### 4.4. Nhóm BUILD (Đóng Gói Ứng Dụng Desktop Native .dmg)
 
-Để biên dịch và đóng gói thành các file bundle macOS `.app` độc lập trong thư mục `target/release/bundle/macos/`:
+Để biên dịch và đóng gói thành các file bundle macOS `.dmg` / `.app` độc lập trong thư mục `target/release/bundle/`:
 
 ```bash
-# Đóng gói Nexus.app
-pnpm desktop:build:nexus
-# Alias tương đương:
-pnpm tauri:build:nexus
+# Build toàn bộ monorepo
+pnpm build
 
-# Đóng gói SlackBot.app
-pnpm desktop:build:slackbot
-# Alias tương đương:
-pnpm tauri:build:slackbot
+# Đóng gói bộ cài Nexus (.dmg)
+pnpm build:nexus
 
-# Đóng gói GitHub Report.app
-pnpm desktop:build:github-report
-# Alias tương đương:
-pnpm tauri:build:github-report
+# Đóng gói bộ cài SlackBot (.dmg)
+pnpm build:slackbot
+
+# Đóng gói bộ cài GitHub Report (.dmg)
+pnpm build:github-report
 ```
 
 ---

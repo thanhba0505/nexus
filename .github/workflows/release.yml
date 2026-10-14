@@ -51,13 +51,13 @@ jobs:
       - name: Build All 3 Desktop Apps (.dmg)
         run: |
           echo "Biên dịch Nexus Launcher..."
-          pnpm desktop:build:nexus
+          pnpm build:nexus
 
           echo "Biên dịch SlackBot..."
-          pnpm desktop:build:slackbot
+          pnpm build:slackbot
 
           echo "Biên dịch GitHub Report..."
-          pnpm desktop:build:github-report
+          pnpm build:github-report
 
       - name: Prepare Artifacts
         run: |
