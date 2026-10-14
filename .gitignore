@@ -8,6 +8,8 @@ dist-ssr
 *.local
 build
 target/
+release-artifacts/
+*.dmg
 
 # Turborepo & Cache
 .turbo

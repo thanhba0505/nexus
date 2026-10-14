@@ -1,0 +1,96 @@
+name: Release Ecosystem
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      draft:
+        description: 'Tạo bản Release ở dạng Nháp (Draft)'
+        required: true
+        type: boolean
+        default: true
+      tag:
+        description: 'Git Tag (ví dụ: v0.1.0)'
+        required: true
+        default: 'v0.1.0'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js & pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.11.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+
+      - name: Cache Rust dependencies
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './ -> target'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build All Desktop Apps (.dmg & .app)
+        run: |
+          echo "Biên dịch Nexus Launcher..."
+          pnpm desktop:build:nexus
+
+          echo "Biên dịch SlackBot..."
+          pnpm desktop:build:slackbot
+
+          echo "Biên dịch GitHub Report..."
+          pnpm desktop:build:github-report
+
+      - name: Prepare Release Assets
+        run: |
+          mkdir -p release-artifacts
+          find target/release/bundle/dmg -name "*.dmg" -exec cp {} release-artifacts/ \;
+          cp apps.json release-artifacts/
+          echo "Danh sách các file trong release-artifacts:"
+          ls -la release-artifacts
+
+      - name: Determine Tag & Draft Status
+        id: meta
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+            DRAFT="${{ github.event.inputs.draft }}"
+          else
+            TAG="${{ github.ref_name }}"
+            DRAFT="false"
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "draft=$DRAFT" >> $GITHUB_OUTPUT
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: "Nexus Ecosystem ${{ steps.meta.outputs.tag }}"
+          draft: ${{ steps.meta.outputs.draft == 'true' }}
+          prerelease: false
+          files: release-artifacts/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
