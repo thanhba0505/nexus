@@ -91,22 +91,18 @@ export function runVersionBump({ dryRun = false } = {}) {
 
   const commitLogs = runGit(`git log ${lastTag}..HEAD --oneline`);
 
-  const packagesChanged = changedFiles.some((f) => f.startsWith('packages/'));
-  const nexusChanged =
-    packagesChanged || changedFiles.some((f) => f.startsWith('apps/nexus/'));
-  const slackbotChanged =
-    packagesChanged || changedFiles.some((f) => f.startsWith('apps/slackbot/'));
-  const githubReportChanged =
-    packagesChanged ||
-    changedFiles.some((f) => f.startsWith('apps/github-report/'));
+  const hasRelevantChanges = changedFiles.some(
+    (f) =>
+      f.startsWith('apps/') ||
+      f.startsWith('packages/') ||
+      f.startsWith('tooling/')
+  );
 
-  const anyAppChanged = nexusChanged || slackbotChanged || githubReportChanged;
-
-  if (!anyAppChanged) {
+  if (!hasRelevantChanges) {
     console.log(
       JSON.stringify({
         bumped: false,
-        message: 'Không có thay đổi nào trong apps/ hoặc packages/.',
+        message: 'Không có thay đổi nào trong apps/, packages/ hoặc tooling/.',
       })
     );
     return { bumped: false };
@@ -116,44 +112,21 @@ export function runVersionBump({ dryRun = false } = {}) {
   const newEcosystemVersion = bumpVersion(appsData.version, bumpType);
   const newTag = `v${newEcosystemVersion}`;
 
-  const changedApps = [];
-
-  // 1. Cập nhật Nexus
-  if (nexusChanged) {
-    appsData.nexus.version = bumpVersion(appsData.nexus.version, bumpType);
-    changedApps.push('nexus');
-    if (!dryRun) {
-      updateAppPackageJson('nexus', appsData.nexus.version);
-      updateAppTauriConfig('nexus', appsData.nexus.version);
-    }
-  }
-  appsData.nexus.downloadUrl = `https://github.com/thanhba0505/nexus/releases/download/${newTag}/Nexus_${appsData.nexus.version}_aarch64.dmg`;
-
-  // 2. Cập nhật các mini app trong mảng apps
-  for (const app of appsData.apps) {
-    let hasChanged = false;
-    const appDir = app.id;
-    if (app.id === 'slackbot' && slackbotChanged) {
-      hasChanged = true;
-    } else if (app.id === 'github-report' && githubReportChanged) {
-      hasChanged = true;
-    }
-
-    if (hasChanged) {
-      app.version = bumpVersion(app.version, bumpType);
-      changedApps.push(app.id);
-      if (!dryRun) {
-        updateAppPackageJson(appDir, app.version);
-        updateAppTauriConfig(appDir, app.version);
-      }
-    }
-
-    const dmgName = app.id === 'github-report' ? 'GitHub_Report' : app.name;
-    app.downloadUrl = `https://github.com/thanhba0505/nexus/releases/download/${newTag}/${dmgName}_${app.version}_aarch64.dmg`;
-  }
+  const allAppDirs = ['nexus', 'slackbot', 'github-report'];
 
   appsData.version = newEcosystemVersion;
   appsData.updatedAt = new Date().toISOString();
+
+  // 1. Cập nhật Nexus
+  appsData.nexus.version = newEcosystemVersion;
+  appsData.nexus.downloadUrl = `https://github.com/thanhba0505/nexus/releases/download/${newTag}/Nexus_${newEcosystemVersion}_aarch64.dmg`;
+
+  // 2. Cập nhật các mini apps
+  for (const app of appsData.apps) {
+    app.version = newEcosystemVersion;
+    const dmgName = app.id === 'github-report' ? 'GitHub_Report' : app.name;
+    app.downloadUrl = `https://github.com/thanhba0505/nexus/releases/download/${newTag}/${dmgName}_${newEcosystemVersion}_aarch64.dmg`;
+  }
 
   if (!dryRun) {
     fs.writeFileSync(
@@ -161,6 +134,11 @@ export function runVersionBump({ dryRun = false } = {}) {
       JSON.stringify(appsData, null, 2) + '\n',
       'utf-8'
     );
+
+    for (const appDir of allAppDirs) {
+      updateAppPackageJson(appDir, newEcosystemVersion);
+      updateAppTauriConfig(appDir, newEcosystemVersion);
+    }
   }
 
   const result = {
@@ -168,7 +146,7 @@ export function runVersionBump({ dryRun = false } = {}) {
     ecosystemVersion: newEcosystemVersion,
     tag: newTag,
     bumpType,
-    changedApps,
+    apps: allAppDirs,
   };
 
   console.log(JSON.stringify(result, null, 2));

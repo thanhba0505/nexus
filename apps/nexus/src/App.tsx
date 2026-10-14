@@ -46,7 +46,6 @@ export default function App() {
     return [...DEFAULT_INSTALLED_APP_IDS];
   });
 
-  // Helper cập nhật installedAppIds trực tiếp kèm lưu storage (loại bỏ hoàn toàn useEffect watch state)
   const updateInstalledAppIds = (updater: (prev: AppId[]) => AppId[]) => {
     setInstalledAppIds((prev) => {
       const next = updater(prev);
@@ -63,11 +62,11 @@ export default function App() {
   const [runningAppIds, setRunningAppIds] = useState<Set<AppId>>(new Set());
   const [updatingAppIds, setUpdatingAppIds] = useState<Set<AppId>>(new Set());
 
-  // 3. Trạng thái cập nhật của từng mini app (Khởi tạo sẵn giá trị demo mà không cần useEffect set state sau mount)
+  // 3. Trạng thái cập nhật của từng mini app
   const [appUpdates, setAppUpdates] = useState<
     Partial<Record<AppId, { hasUpdate: boolean; newVersion: string }>>
   >(() => ({
-    [AppId.SLACKBOT]: { hasUpdate: true, newVersion: '0.2.0' },
+    [AppId.SLACKBOT]: { hasUpdate: true, newVersion: '0.3.0' },
   }));
 
   // 4. Trạng thái cập nhật riêng của Nexus (cho menu Settings)
@@ -91,7 +90,6 @@ export default function App() {
     app: null,
   });
 
-  // Tổng hợp dữ liệu hiển thị cho các app đã cài đặt (Derived State qua useMemo)
   const enrichedApps = useMemo(() => {
     return NEXUS_APPS.filter((app) => installedAppIds.includes(app.id)).map((app) => {
       const updateInfo = appUpdates[app.id];
@@ -110,7 +108,6 @@ export default function App() {
     });
   }, [installedAppIds, appUpdates, runningAppIds, updatingAppIds]);
 
-  // Lọc app theo tìm kiếm và danh mục
   const filteredApps = useMemo(() => {
     return enrichedApps.filter((app) => {
       const matchesSearch =
@@ -124,10 +121,8 @@ export default function App() {
     });
   }, [enrichedApps, searchQuery, currentCategory]);
 
-  // Xử lý mở/tắt app khi bấm vào icon
   const handleLaunchApp = (app: NexusAppMeta) => {
     setSelectedApp(app);
-    // Bật/tắt trạng thái chạy để kiểm thử tính năng chặn cập nhật
     setRunningAppIds((prev) => {
       const next = new Set(prev);
       if (next.has(app.id)) {
@@ -139,7 +134,6 @@ export default function App() {
     });
   };
 
-  // Mở menu chuột phải
   const handleContextMenu = (e: React.MouseEvent, app: NexusAppMeta) => {
     e.preventDefault();
     setContextMenu({
@@ -150,20 +144,17 @@ export default function App() {
     });
   };
 
-  // Cập nhật mini app
   const handleUpdateApp = (appId: AppId) => {
-    if (runningAppIds.has(appId)) return; // Bị chặn nếu app đang chạy
+    if (runningAppIds.has(appId)) return;
 
     setUpdatingAppIds((prev) => new Set(prev).add(appId));
 
-    // Mô phỏng tiến trình tải và cập nhật
     setTimeout(() => {
       setUpdatingAppIds((prev) => {
         const next = new Set(prev);
         next.delete(appId);
         return next;
       });
-      // Xóa badge cập nhật sau khi hoàn tất
       setAppUpdates((prev) => {
         const next = { ...prev };
         delete next[appId];
@@ -172,7 +163,6 @@ export default function App() {
     }, 1600);
   };
 
-  // Xóa app khỏi màn hình chính (đưa vào kho dấu cộng)
   const handleDeleteApp = (appId: AppId) => {
     updateInstalledAppIds((prev) => prev.filter((id) => id !== appId));
     setRunningAppIds((prev) => {
@@ -182,14 +172,11 @@ export default function App() {
     });
   };
 
-  // Thêm app từ modal kho ứng dụng (+)
   const handleInstallAppFromStore = async (app: NexusAppMeta) => {
-    // Mô phỏng thời gian tải
     await new Promise((resolve) => setTimeout(resolve, 800));
     updateInstalledAppIds((prev) => (prev.includes(app.id) ? prev : [...prev, app.id]));
   };
 
-  // Xử lý kiểm tra cập nhật cho Nexus Launcher trong Settings
   const handleCheckNexusUpdate = () => {
     setNexusUpdateStatus('checking');
     setTimeout(() => {
@@ -197,24 +184,27 @@ export default function App() {
     }, 1000);
   };
 
-  // Xử lý cập nhật Nexus
+  // Cập nhật toàn bộ hệ sinh thái Nexus và tất cả mini apps
   const handleApplyNexusUpdate = () => {
     setNexusUpdateStatus('updating');
+    setUpdatingAppIds(new Set(installedAppIds));
+
     setTimeout(() => {
       setNexusUpdateStatus('restarting');
+      setUpdatingAppIds(new Set());
+      setAppUpdates({});
       setTimeout(() => {
         setNexusUpdateStatus('idle');
       }, 1500);
     }, 1800);
   };
 
-  // Cấu hình danh sách mục cho Settings Dropdown
   const settingsMenuItems: DropdownMenuItem[] = useMemo(() => {
     if (nexusUpdateStatus === 'available') {
       return [
         {
           id: 'update-nexus',
-          label: 'Cập nhật Nexus lên v0.2.0',
+          label: 'Cập nhật toàn bộ hệ sinh thái (v0.3.0)',
           icon: <ArrowDownCircle className="w-3.5 h-3.5 text-indigo-400" />,
           variant: 'primary',
           badge: 'Bản mới',
@@ -246,7 +236,6 @@ export default function App() {
     ];
   }, [nexusUpdateStatus]);
 
-  // Cấu hình menu chuột phải cho từng mini app
   const contextMenuItems: ContextMenuItem[] = useMemo(() => {
     const app = contextMenu.app;
     if (!app) return [];
@@ -275,7 +264,6 @@ export default function App() {
       },
     ];
 
-    // Chỉ hiển thị mục Cập nhật nếu app có bản mới
     if (hasUpdate) {
       items.push({
         id: 'update-app',
@@ -291,7 +279,6 @@ export default function App() {
       });
     }
 
-    // Nút xóa khỏi màn hình chính
     items.push({
       id: 'delete-app',
       label: 'Xóa khỏi màn hình',
@@ -305,7 +292,6 @@ export default function App() {
 
   return (
     <LaunchpadLayout>
-      {/* Header với thanh tìm kiếm và icon Cài đặt (kèm Dropdown) */}
       <LaunchpadHeader
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -320,7 +306,6 @@ export default function App() {
         }
       />
 
-      {/* Lưới hiển thị các Mini App độc lập và Nút dấu cộng (+) */}
       <main className="w-full flex-1 flex flex-col items-center justify-center overflow-hidden">
         {filteredApps.length > 0 || installedAppIds.length < NEXUS_APPS.length ? (
           <AppGrid
@@ -338,14 +323,12 @@ export default function App() {
         )}
       </main>
 
-      {/* Footer danh mục */}
       <LaunchpadFooter
         currentCategory={currentCategory}
         onSelectCategory={setCurrentCategory}
         onPowerOff={() => console.log('Thoát Launchpad')}
       />
 
-      {/* Menu chuột phải tại vị trí con trỏ */}
       <ContextMenu
         isOpen={contextMenu.isOpen}
         x={contextMenu.x}
@@ -354,14 +337,12 @@ export default function App() {
         items={contextMenuItems}
       />
 
-      {/* In-app Modal: Thông tin ứng dụng (Nexus hoặc Mini App) */}
       <AppInfoModal
         isOpen={infoModalApp !== null}
         onClose={() => setInfoModalApp(null)}
         app={infoModalApp}
       />
 
-      {/* In-app Modal: Kho ứng dụng dấu cộng (+) để tìm kiếm và thêm lại app */}
       <AppStoreModal
         isOpen={isAppStoreOpen}
         onClose={() => setIsAppStoreOpen(false)}
@@ -370,11 +351,10 @@ export default function App() {
         onInstallApp={handleInstallAppFromStore}
       />
 
-      {/* Modal thông báo tiến trình khởi động lại khi cập nhật Nexus */}
       <Modal
         isOpen={nexusUpdateStatus === 'updating' || nexusUpdateStatus === 'restarting'}
         onClose={() => {}}
-        title="Cập nhật Nexus"
+        title="Cập nhật hệ sinh thái Nexus"
         maxWidth="max-w-sm"
       >
         <div className="flex flex-col items-center justify-center p-6 text-center space-y-4">
@@ -388,13 +368,13 @@ export default function App() {
           <div>
             <h4 className="text-sm font-semibold text-white">
               {nexusUpdateStatus === 'updating'
-                ? 'Đang tải bản cập nhật...'
+                ? 'Đang tải bản cập nhật hệ sinh thái...'
                 : 'Đang khởi động lại Nexus...'}
             </h4>
             <p className="text-xs text-white/60 mt-1">
               {nexusUpdateStatus === 'updating'
-                ? 'Đang áp dụng gói nâng cấp hệ sinh thái v0.2.0'
-                : 'Ứng dụng đã sẵn sàng với phiên bản mới!'}
+                ? 'Đang áp dụng gói nâng cấp toàn bộ hệ sinh thái v0.3.0'
+                : 'Hệ sinh thái Nexus đã sẵn sàng với phiên bản mới!'}
             </p>
           </div>
         </div>

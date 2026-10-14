@@ -1,32 +1,20 @@
-name: Release Ecosystem
+name: Build & Publish Release
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'apps/**'
-      - 'packages/**'
-    tags:
-      - 'v*'
+  release:
+    types: [published]
   workflow_dispatch:
     inputs:
-      draft:
-        description: 'Tạo bản Release ở dạng Nháp (Draft)'
-        required: true
-        type: boolean
-        default: true
       tag:
-        description: 'Git Tag (để trống nếu muốn tự động tính version)'
-        required: false
-        default: ''
+        description: 'Tag của Release cần đóng gói (ví dụ: v0.2.0)'
+        required: true
+        default: 'v0.2.0'
 
 permissions:
   contents: write
 
 jobs:
-  build-and-release:
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+  compile-and-publish:
     runs-on: macos-latest
 
     steps:
@@ -34,9 +22,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.release.tag_name || github.event.inputs.tag }}
 
-      - name: Setup Node.js & pnpm
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 12.11.2
@@ -60,40 +48,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Determine & Bump Versions
-        id: bump
-        run: |
-          if [ "${{ github.ref_type }}" = "tag" ]; then
-            echo "Kích hoạt bằng Git Tag: ${{ github.ref_name }}"
-            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-            echo "draft=false" >> $GITHUB_OUTPUT
-            echo "should_release=true" >> $GITHUB_OUTPUT
-          else
-            echo "Đang kiểm tra thay đổi và tự động tính toán phiên bản..."
-            BUMP_OUT=$(node tooling/scripts/bump-versions.mjs)
-            echo "$BUMP_OUT"
-
-            IS_BUMPED=$(echo "$BUMP_OUT" | node -e "const data = JSON.parse(require('fs').readFileSync(0, 'utf-8')); console.log(data.bumped);")
-
-            if [ "$IS_BUMPED" = "true" ]; then
-              NEW_TAG=$(echo "$BUMP_OUT" | node -e "const data = JSON.parse(require('fs').readFileSync(0, 'utf-8')); console.log(data.tag);")
-              echo "tag=$NEW_TAG" >> $GITHUB_OUTPUT
-              echo "draft=true" >> $GITHUB_OUTPUT
-              echo "should_release=true" >> $GITHUB_OUTPUT
-
-              git config user.name "github-actions[bot]"
-              git config user.email "github-actions[bot]@users.noreply.github.com"
-              git add apps.json apps/*/package.json apps/*/src-tauri/tauri.conf.json
-              git commit -m "chore(release): bump version to $NEW_TAG [skip ci]"
-              git push origin main
-            else
-              echo "Không có thay đổi trong apps/ hoặc packages/, bỏ qua release."
-              echo "should_release=false" >> $GITHUB_OUTPUT
-            fi
-          fi
-
-      - name: Build All Desktop Apps (.dmg & .app)
-        if: steps.bump.outputs.should_release == 'true'
+      - name: Build All 3 Desktop Apps (.dmg)
         run: |
           echo "Biên dịch Nexus Launcher..."
           pnpm desktop:build:nexus
@@ -104,8 +59,7 @@ jobs:
           echo "Biên dịch GitHub Report..."
           pnpm desktop:build:github-report
 
-      - name: Prepare Release Assets
-        if: steps.bump.outputs.should_release == 'true'
+      - name: Prepare Artifacts
         run: |
           mkdir -p release-artifacts
           for f in target/release/bundle/dmg/*.dmg; do
@@ -117,15 +71,10 @@ jobs:
           echo "Danh sách các file trong release-artifacts:"
           ls -la release-artifacts
 
-      - name: Publish GitHub Draft Release
-        if: steps.bump.outputs.should_release == 'true'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.bump.outputs.tag }}
-          name: "${{ steps.bump.outputs.tag }} Nexus Ecosystem"
-          draft: ${{ steps.bump.outputs.draft == 'true' }}
-          prerelease: false
-          files: release-artifacts/*
-          generate_release_notes: true
+      - name: Upload Artifacts to Release
+        run: |
+          TAG_NAME="${{ github.event.release.tag_name || github.event.inputs.tag }}"
+          echo "Uploading artifacts to release $TAG_NAME..."
+          gh release upload "$TAG_NAME" release-artifacts/* --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

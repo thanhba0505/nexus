@@ -1,0 +1,72 @@
+name: Draft Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+      - 'tooling/**'
+      - 'apps.json'
+
+permissions:
+  contents: write
+
+jobs:
+  draft-release:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Determine & Bump Ecosystem Version
+        id: bump
+        run: |
+          echo "Đang tính toán phiên bản hệ sinh thái..."
+          BUMP_OUT=$(node tooling/scripts/bump-versions.mjs)
+          echo "$BUMP_OUT"
+
+          IS_BUMPED=$(echo "$BUMP_OUT" | node -e "const data = JSON.parse(require('fs').readFileSync(0, 'utf-8')); console.log(data.bumped);")
+
+          if [ "$IS_BUMPED" = "true" ]; then
+            NEW_TAG=$(echo "$BUMP_OUT" | node -e "const data = JSON.parse(require('fs').readFileSync(0, 'utf-8')); console.log(data.tag);")
+            ECO_VERSION=$(echo "$BUMP_OUT" | node -e "const data = JSON.parse(require('fs').readFileSync(0, 'utf-8')); console.log(data.ecosystemVersion);")
+            echo "tag=$NEW_TAG" >> $GITHUB_OUTPUT
+            echo "version=$ECO_VERSION" >> $GITHUB_OUTPUT
+            echo "should_draft=true" >> $GITHUB_OUTPUT
+
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add apps.json apps/*/package.json apps/*/src-tauri/tauri.conf.json
+            git commit -m "chore(release): bump unified ecosystem to $NEW_TAG [skip ci]"
+            git push origin main
+          else
+            CURRENT_VERSION=$(node -e "const data = JSON.parse(require('fs').readFileSync('apps.json', 'utf-8')); console.log(data.version);")
+            CURRENT_TAG="v$CURRENT_VERSION"
+            echo "tag=$CURRENT_TAG" >> $GITHUB_OUTPUT
+            echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+            echo "should_draft=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create or Update GitHub Draft Release
+        if: steps.bump.outputs.should_draft == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.bump.outputs.tag }}
+          name: "${{ steps.bump.outputs.tag }} Nexus Ecosystem"
+          draft: true
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
