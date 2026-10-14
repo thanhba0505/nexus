@@ -193,7 +193,7 @@ def main() -> None:
     )
     body = "\n".join(body_parts)
 
-    title = f"{next_tag} Nexus Ecosystem"
+    title = f"🪐 {next_tag} Nexus Ecosystem"
 
     # 5. Kiểm tra và cập nhật bản nháp (Draft Release)
     releases_json = run(
