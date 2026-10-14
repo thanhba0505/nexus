@@ -78,31 +78,73 @@ pnpm install
 
 ### 4.3. Chạy Chế Độ Phát Triển (Development)
 
-Mỗi ứng dụng chạy độc lập trên một cổng phát triển riêng biệt:
+Hệ sinh thái Nexus hỗ trợ 2 chế độ chạy phát triển:
+
+#### A. Chế độ Mở Cửa Sổ Desktop Native macOS (Tauri Desktop Window)
+
+> _Yêu cầu máy đã cài đặt Rust toolchain theo mục 4.1._
 
 ```bash
-# Khởi chạy Nexus Launchpad Hub (Port 1420)
+# Khởi chạy cửa sổ Desktop Nexus Launchpad Hub (Cổng 1420 + Cửa sổ kính mờ macOS)
+pnpm desktop:nexus
+# Alias tương đương:
+pnpm tauri:nexus
+
+# Khởi chạy cửa sổ Desktop SlackBot (Cổng 1421)
+pnpm desktop:slackbot
+# Alias tương đương:
+pnpm tauri:slackbot
+
+# Khởi chạy cửa sổ Desktop GitHub Report (Cổng 1422)
+pnpm desktop:github-report
+# Alias tương đương:
+pnpm tauri:github-report
+```
+
+#### B. Chế độ Xem Web Trình Duyệt Nhanh (Frontend Only)
+
+> _Chỉ chạy Vite dev server trên trình duyệt web (không cần biên dịch Rust)._
+
+```bash
+# Khởi chạy webview Nexus trên localhost:1420
 pnpm dev:nexus
 
-# Khởi chạy SlackBot (Port 1421)
+# Khởi chạy webview SlackBot trên localhost:1421
 pnpm dev:slackbot
 
-# Khởi chạy GitHub Report (Port 1422)
+# Khởi chạy webview GitHub Report trên localhost:1422
 pnpm dev:github-report
 ```
 
-Hoặc chạy chế độ Tauri Desktop (yêu cầu đã cài đặt Rust):
+---
+
+### 4.4. Đóng Gói Ứng Dụng Desktop Native macOS (.app Bundle)
+
+Để biên dịch và đóng gói thành các file bundle macOS `.app` độc lập trong thư mục `target/release/bundle/macos/`:
 
 ```bash
-pnpm --filter nexus tauri dev
-pnpm --filter slackbot tauri dev
-pnpm --filter github-report tauri dev
+# Đóng gói Nexus.app
+pnpm desktop:build:nexus
+# Alias tương đương:
+pnpm tauri:build:nexus
+
+# Đóng gói SlackBot.app
+pnpm desktop:build:slackbot
+# Alias tương đương:
+pnpm tauri:build:slackbot
+
+# Đóng gói GitHub Report.app
+pnpm desktop:build:github-report
+# Alias tương đương:
+pnpm tauri:build:github-report
 ```
 
-### 4.4. Kiểm Tra Typecheck, Linter & Format
+---
+
+### 4.5. Kiểm Tra Typecheck, Linter & Format
 
 ```bash
-# Kiểm tra TypeScript toàn bộ monorepo
+# Kiểm tra TypeScript toàn bộ monorepo (Strict Mode)
 pnpm typecheck
 
 # Kiểm tra ESLint
@@ -112,13 +154,15 @@ pnpm lint
 pnpm format
 ```
 
-### 4.5. Build Sản Phẩm
+---
+
+### 4.6. Build Mã Nguồn Frontend & Quản Lý Assets
 
 ```bash
 # Build frontend webview của toàn bộ monorepo qua Turborepo
 pnpm build
 
-# Build riêng từng app
+# Build riêng từng frontend app
 pnpm build:nexus
 pnpm build:slackbot
 pnpm build:github-report
