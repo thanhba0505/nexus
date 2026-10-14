@@ -1,29 +1,29 @@
 {
-  "version": "0.2.0",
-  "updatedAt": "2026-10-14T15:10:26.017Z",
+  "version": "0.3.0",
+  "updatedAt": "2026-10-14T15:14:07.455Z",
   "nexus": {
-    "version": "0.2.0",
+    "version": "0.3.0",
     "bundleId": "com.thanhba.nexus",
     "name": "Nexus",
     "description": "Your personal macOS mini app ecosystem hub",
-    "downloadUrl": "https://github.com/thanhba0505/nexus/releases/download/v0.2.0/Nexus_0.2.0_aarch64.dmg"
+    "downloadUrl": "https://github.com/thanhba0505/nexus/releases/download/v0.3.0/Nexus_0.3.0_aarch64.dmg"
   },
   "apps": [
     {
       "id": "slackbot",
       "name": "SlackBot",
       "bundleId": "com.thanhba.nexus.slackbot",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "description": "Slack automation assistant",
-      "downloadUrl": "https://github.com/thanhba0505/nexus/releases/download/v0.2.0/SlackBot_0.2.0_aarch64.dmg"
+      "downloadUrl": "https://github.com/thanhba0505/nexus/releases/download/v0.3.0/SlackBot_0.3.0_aarch64.dmg"
     },
     {
       "id": "github-report",
       "name": "GitHub Report",
       "bundleId": "com.thanhba.nexus.githubreport",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "description": "GitHub PR and commit monitor",
-      "downloadUrl": "https://github.com/thanhba0505/nexus/releases/download/v0.2.0/GitHub_Report_0.2.0_aarch64.dmg"
+      "downloadUrl": "https://github.com/thanhba0505/nexus/releases/download/v0.3.0/GitHub_Report_0.3.0_aarch64.dmg"
     }
   ]
 }
