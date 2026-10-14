@@ -50,23 +50,31 @@ jobs:
 
       - name: Build All 3 Desktop Apps (.dmg)
         run: |
+          mkdir -p release-artifacts
+
           echo "Biên dịch Nexus Launcher..."
           pnpm build:nexus
+          for f in target/release/bundle/dmg/*.dmg; do
+            [ -f "$f" ] || continue
+            cp "$f" "release-artifacts/$(basename "$f" | tr ' ' '_')"
+          done
 
           echo "Biên dịch SlackBot..."
           pnpm build:slackbot
+          for f in target/release/bundle/dmg/*.dmg; do
+            [ -f "$f" ] || continue
+            cp "$f" "release-artifacts/$(basename "$f" | tr ' ' '_')"
+          done
 
           echo "Biên dịch GitHub Report..."
           pnpm build:github-report
+          for f in target/release/bundle/dmg/*.dmg; do
+            [ -f "$f" ] || continue
+            cp "$f" "release-artifacts/$(basename "$f" | tr ' ' '_')"
+          done
 
       - name: Prepare Artifacts
         run: |
-          mkdir -p release-artifacts
-          for f in target/release/bundle/dmg/*.dmg; do
-            [ -f "$f" ] || continue
-            filename=$(basename "$f" | tr ' ' '_')
-            cp "$f" "release-artifacts/$filename"
-          done
           cp apps.json release-artifacts/
           echo "Danh sách các file trong release-artifacts:"
           ls -la release-artifacts

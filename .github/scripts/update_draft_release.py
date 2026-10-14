@@ -71,6 +71,15 @@ def sync_ecosystem_version(version: str, tag: str) -> bool:
                 json.dump(tconf, f, indent=2)
                 f.write("\n")
 
+    run([
+        "npx",
+        "prettier",
+        "--write",
+        "apps.json",
+        "apps/*/package.json",
+        "apps/*/src-tauri/tauri.conf.json",
+    ])
+
     return True
 
 
