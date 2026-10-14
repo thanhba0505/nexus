@@ -5,12 +5,16 @@ export interface LaunchpadHeaderProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onOpenSettings?: () => void;
+  hasNexusUpdate?: boolean;
+  settingsMenu?: React.ReactNode;
 }
 
 export function LaunchpadHeader({
   searchQuery,
   onSearchChange,
   onOpenSettings,
+  hasNexusUpdate = false,
+  settingsMenu,
 }: LaunchpadHeaderProps) {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onSearchChange(e.target.value);
@@ -43,20 +47,27 @@ export function LaunchpadHeader({
       </div>
 
       {/* Right controls: Folder & Settings */}
-      <div className="flex items-center space-x-2">
+      <div className="relative flex items-center space-x-2">
         <button
           className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all backdrop-blur-lg border border-white/10"
           title="Categories"
         >
           <Folder className="w-4 h-4" />
         </button>
-        <button
-          onClick={onOpenSettings}
-          className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all backdrop-blur-lg border border-white/10"
-          title="Settings"
-        >
-          <Settings className="w-4 h-4" />
-        </button>
+
+        <div className="relative">
+          <button
+            onClick={onOpenSettings}
+            className="relative p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all backdrop-blur-lg border border-white/10"
+            title="Cài đặt & Cập nhật"
+          >
+            <Settings className="w-4 h-4" />
+            {hasNexusUpdate && (
+              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-amber-400 rounded-full border border-slate-900 animate-pulse" />
+            )}
+          </button>
+          {settingsMenu}
+        </div>
       </div>
     </header>
   );

@@ -26,5 +26,11 @@ export interface NexusAppMeta {
   category: AppCategory;
   iconName: string;
   accentColor: string;
-  isCustomPlaceholder?: boolean;
+  version?: string | undefined;
+  hasUpdate?: boolean | undefined;
+  newVersion?: string | undefined;
+  isRunning?: boolean | undefined;
+  isUpdating?: boolean | undefined;
+  isInstalled?: boolean | undefined;
+  isCustomPlaceholder?: boolean | undefined;
 }
