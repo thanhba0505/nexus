@@ -66,7 +66,7 @@ export default function App() {
   const [appUpdates, setAppUpdates] = useState<
     Partial<Record<AppId, { hasUpdate: boolean; newVersion: string }>>
   >(() => ({
-    [AppId.SLACKBOT]: { hasUpdate: true, newVersion: '0.3.0' },
+    [AppId.SLACKBOT]: { hasUpdate: true, newVersion: '0.2.0' },
   }));
 
   // 4. Trạng thái cập nhật riêng của Nexus (cho menu Settings)
@@ -204,7 +204,7 @@ export default function App() {
       return [
         {
           id: 'update-nexus',
-          label: 'Cập nhật toàn bộ hệ sinh thái (v0.3.0)',
+          label: 'Cập nhật toàn bộ hệ sinh thái (v0.2.0)',
           icon: <ArrowDownCircle className="w-3.5 h-3.5 text-indigo-400" />,
           variant: 'primary',
           badge: 'Bản mới',
@@ -373,7 +373,7 @@ export default function App() {
             </h4>
             <p className="text-xs text-white/60 mt-1">
               {nexusUpdateStatus === 'updating'
-                ? 'Đang áp dụng gói nâng cấp toàn bộ hệ sinh thái v0.3.0'
+                ? 'Đang áp dụng gói nâng cấp toàn bộ hệ sinh thái v0.2.0'
                 : 'Hệ sinh thái Nexus đã sẵn sàng với phiên bản mới!'}
             </p>
           </div>

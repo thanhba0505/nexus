@@ -81,7 +81,7 @@ export function runVersionBump({ dryRun = false } = {}) {
 
   let lastTag = runGit('git describe --tags --abbrev=0');
   if (!lastTag) {
-    lastTag = runGit('git rev-list --max-parents=0 HEAD');
+    lastTag = 'v0.1.0';
   }
 
   const changedFiles = runGit(`git diff --name-only ${lastTag}..HEAD`)
@@ -98,34 +98,36 @@ export function runVersionBump({ dryRun = false } = {}) {
       f.startsWith('tooling/')
   );
 
-  if (!hasRelevantChanges) {
-    console.log(
-      JSON.stringify({
-        bumped: false,
-        message: 'Không có thay đổi nào trong apps/, packages/ hoặc tooling/.',
-      })
-    );
-    return { bumped: false };
-  }
-
   const bumpType = determineBumpType(commitLogs);
-  const newEcosystemVersion = bumpVersion(appsData.version, bumpType);
-  const newTag = `v${newEcosystemVersion}`;
+  const baseVersion = lastTag.replace(/^v/, '');
+  const targetVersion = bumpVersion(baseVersion, bumpType);
+  const targetTag = `v${targetVersion}`;
+
+  if (!hasRelevantChanges || appsData.version === targetVersion) {
+    const result = {
+      bumped: false,
+      message: `Hệ sinh thái duy trì phiên bản mục tiêu ${targetVersion} tương ứng với các commit từ ${lastTag}.`,
+      ecosystemVersion: targetVersion,
+      tag: targetTag,
+    };
+    console.log(JSON.stringify(result, null, 2));
+    return result;
+  }
 
   const allAppDirs = ['nexus', 'slackbot', 'github-report'];
 
-  appsData.version = newEcosystemVersion;
+  appsData.version = targetVersion;
   appsData.updatedAt = new Date().toISOString();
 
   // 1. Cập nhật Nexus
-  appsData.nexus.version = newEcosystemVersion;
-  appsData.nexus.downloadUrl = `https://github.com/thanhba0505/nexus/releases/download/${newTag}/Nexus_${newEcosystemVersion}_aarch64.dmg`;
+  appsData.nexus.version = targetVersion;
+  appsData.nexus.downloadUrl = `https://github.com/thanhba0505/nexus/releases/download/${targetTag}/Nexus_${targetVersion}_aarch64.dmg`;
 
   // 2. Cập nhật các mini apps
   for (const app of appsData.apps) {
-    app.version = newEcosystemVersion;
+    app.version = targetVersion;
     const dmgName = app.id === 'github-report' ? 'GitHub_Report' : app.name;
-    app.downloadUrl = `https://github.com/thanhba0505/nexus/releases/download/${newTag}/${dmgName}_${newEcosystemVersion}_aarch64.dmg`;
+    app.downloadUrl = `https://github.com/thanhba0505/nexus/releases/download/${targetTag}/${dmgName}_${targetVersion}_aarch64.dmg`;
   }
 
   if (!dryRun) {
@@ -136,15 +138,15 @@ export function runVersionBump({ dryRun = false } = {}) {
     );
 
     for (const appDir of allAppDirs) {
-      updateAppPackageJson(appDir, newEcosystemVersion);
-      updateAppTauriConfig(appDir, newEcosystemVersion);
+      updateAppPackageJson(appDir, targetVersion);
+      updateAppTauriConfig(appDir, targetVersion);
     }
   }
 
   const result = {
     bumped: true,
-    ecosystemVersion: newEcosystemVersion,
-    tag: newTag,
+    ecosystemVersion: targetVersion,
+    tag: targetTag,
     bumpType,
     apps: allAppDirs,
   };
