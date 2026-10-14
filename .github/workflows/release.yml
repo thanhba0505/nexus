@@ -65,7 +65,11 @@ jobs:
       - name: Prepare Release Assets
         run: |
           mkdir -p release-artifacts
-          find target/release/bundle/dmg -name "*.dmg" -exec cp {} release-artifacts/ \;
+          for f in target/release/bundle/dmg/*.dmg; do
+            [ -f "$f" ] || continue
+            filename=$(basename "$f" | tr ' ' '_')
+            cp "$f" "release-artifacts/$filename"
+          done
           cp apps.json release-artifacts/
           echo "Danh sách các file trong release-artifacts:"
           ls -la release-artifacts
@@ -87,7 +91,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.meta.outputs.tag }}
-          name: "Nexus Ecosystem ${{ steps.meta.outputs.tag }}"
+          name: "${{ steps.meta.outputs.tag }} Nexus Ecosystem"
           draft: ${{ steps.meta.outputs.draft == 'true' }}
           prerelease: false
           files: release-artifacts/*
