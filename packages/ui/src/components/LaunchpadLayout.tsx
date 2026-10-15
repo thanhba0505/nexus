@@ -6,7 +6,7 @@ export interface LaunchpadLayoutProps {
 
 export function LaunchpadLayout({ children }: LaunchpadLayoutProps) {
   return (
-    <div className="relative w-screen h-screen flex flex-col justify-between overflow-hidden rounded-[14px] border border-white/[0.12] bg-slate-950/80 backdrop-blur-2xl text-white select-none">
+    <div className="relative w-screen h-screen flex flex-col justify-between overflow-hidden rounded-[14px] border border-white/[0.12] bg-slate-950/40 backdrop-blur-3xl text-white select-none">
       {/* Background ambient lighting effects */}
       <div className="absolute -top-32 -left-32 w-96 h-96 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
