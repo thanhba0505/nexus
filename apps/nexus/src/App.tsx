@@ -265,10 +265,10 @@ export default function App() {
       });
     }
 
-    // 2. Thông tin ứng dụng (dynamic version từ NEXUS_CORE_APP)
+    // 2. Thông tin ứng dụng
     items.push({
       id: 'nexus-info',
-      label: `Thông tin ứng dụng (v${NEXUS_CORE_APP.version}${isDev ? ' - Dev' : ''})`,
+      label: 'Thông tin ứng dụng',
       icon: <Info className="w-3.5 h-3.5 text-white/70" />,
       onClick: () => setInfoModalApp(NEXUS_CORE_APP),
     });
