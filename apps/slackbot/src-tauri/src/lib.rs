@@ -1,15 +1,31 @@
 use tauri::Manager;
 
+fn get_keychain_service() -> &'static str {
+    if cfg!(debug_assertions) {
+        "nexus-slackbot-dev"
+    } else {
+        "nexus-slackbot"
+    }
+}
+
+fn get_keychain_account() -> &'static str {
+    if cfg!(debug_assertions) {
+        "nexus_user_dev"
+    } else {
+        "nexus_user"
+    }
+}
+
 #[tauri::command]
 fn save_slack_token(token: String) -> Result<(), String> {
-    let entry = keyring::Entry::new("slackbot_token", "nexus_user").map_err(|e| e.to_string())?;
+    let entry = keyring::Entry::new(get_keychain_service(), get_keychain_account()).map_err(|e| e.to_string())?;
     entry.set_password(&token).map_err(|e| e.to_string())?;
     Ok(())
 }
 
 #[tauri::command]
 fn get_slack_token() -> Result<String, String> {
-    let entry = keyring::Entry::new("slackbot_token", "nexus_user").map_err(|e| e.to_string())?;
+    let entry = keyring::Entry::new(get_keychain_service(), get_keychain_account()).map_err(|e| e.to_string())?;
     entry.get_password().map_err(|e| e.to_string())
 }
 

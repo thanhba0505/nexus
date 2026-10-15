@@ -115,7 +115,7 @@ sequenceDiagram
 
 ## 4. Cơ Chế Lưu Trữ Dữ Liệu (Storage Architecture)
 
-Ứng dụng tuân thủ nghiêm ngặt mô hình **Local-First** và phân loại dữ liệu rõ ràng:
+Ứng dụng tuân thủ nghiêm ngặt mô hình **Local-First** và phân loại dữ liệu rõ ràng, đồng thời phân tách độc lập giữa môi trường **Development** và **Production**:
 
 ```
 +---------------------------------------------------------------------------------------+
@@ -131,9 +131,29 @@ sequenceDiagram
 +---------------------------------------------------------------------------------------+
 ```
 
-### 4.1. Cấu Trúc File `settings.json` (`tauri-plugin-store`)
+### 4.1. Quy Chuẩn Phân Tách Môi Trường Dev & Prod (Isolation)
 
-Đường dẫn file: `~/Library/Application Support/com.thanhba.nexus.githubreport/settings.json`
+Để tránh tình trạng cấu hình hoặc token trong lúc dev ghi đè hoặc làm hỏng dữ liệu bản phát hành chính thức:
+
+| Mục                             | Môi trường Dev                                                      | Môi trường Production                                           |
+| :------------------------------ | :------------------------------------------------------------------ | :-------------------------------------------------------------- |
+| **App Bundle ID**               | `com.thanhba.nexus.githubreport.dev`                                | `com.thanhba.nexus.githubreport`                                |
+| **Tên ứng dụng hiển thị**       | `GitHub Report (Dev)`                                               | `GitHub Report`                                                 |
+| **Thư mục Application Support** | `~/Library/Application Support/com.thanhba.nexus.githubreport.dev/` | `~/Library/Application Support/com.thanhba.nexus.githubreport/` |
+| **File cấu hình Store**         | `settings.json` (trong thư mục dev)                                 | `settings.json` (trong thư mục prod)                            |
+| **macOS Keychain Service**      | `nexus-github-report-dev`                                           | `nexus-github-report`                                           |
+| **macOS Keychain Account**      | `nexus_user_dev`                                                    | `nexus_user`                                                    |
+| **Web Fallback (LocalStorage)** | `nexus_github_report_settings_dev`                                  | `nexus_github_report_settings`                                  |
+
+- **Cơ chế Dev**: Khi chạy `pnpm dev:github-report` hoặc `pnpm desktop`, Tauri CLI đọc file `src-tauri/tauri.dev.conf.json` để override `identifier` thành `com.thanhba.nexus.githubreport.dev`.
+- **Cơ chế Rust**: Macro `cfg!(debug_assertions)` tự động chuyển tiếp Keychain sang `nexus-github-report-dev` khi chạy ở chế độ debug/dev.
+
+### 4.2. Cấu Trúc File `settings.json` (`tauri-plugin-store`)
+
+Đường dẫn file:
+
+- Dev: `~/Library/Application Support/com.thanhba.nexus.githubreport.dev/settings.json`
+- Prod: `~/Library/Application Support/com.thanhba.nexus.githubreport/settings.json`
 
 ```json
 {

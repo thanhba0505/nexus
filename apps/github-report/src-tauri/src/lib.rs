@@ -78,6 +78,22 @@ fn find_executable(name: &str) -> Option<std::path::PathBuf> {
     None
 }
 
+fn get_keychain_service() -> &'static str {
+    if cfg!(debug_assertions) {
+        "nexus-github-report-dev"
+    } else {
+        "nexus-github-report"
+    }
+}
+
+fn get_keychain_account() -> &'static str {
+    if cfg!(debug_assertions) {
+        "nexus_user_dev"
+    } else {
+        "nexus_user"
+    }
+}
+
 #[tauri::command]
 fn check_prerequisites() -> Result<PrereqStatus, String> {
     let gh_path = find_executable("gh");
@@ -111,7 +127,7 @@ fn check_prerequisites() -> Result<PrereqStatus, String> {
     let claude_cli_installed = find_executable("claude").is_some();
     let antigravity_cli_installed = find_executable("agy").is_some();
 
-    let has_github_token = keyring::Entry::new("github_report_token", "nexus_user")
+    let has_github_token = keyring::Entry::new(get_keychain_service(), get_keychain_account())
         .map(|e| e.get_password().is_ok())
         .unwrap_or(false);
 
@@ -392,14 +408,14 @@ end tell
 
 #[tauri::command]
 fn save_github_token(token: String) -> Result<(), String> {
-    let entry = keyring::Entry::new("github_report_token", "nexus_user").map_err(|e| e.to_string())?;
+    let entry = keyring::Entry::new(get_keychain_service(), get_keychain_account()).map_err(|e| e.to_string())?;
     entry.set_password(&token).map_err(|e| e.to_string())?;
     Ok(())
 }
 
 #[tauri::command]
 fn get_github_token() -> Result<String, String> {
-    let entry = keyring::Entry::new("github_report_token", "nexus_user").map_err(|e| e.to_string())?;
+    let entry = keyring::Entry::new(get_keychain_service(), get_keychain_account()).map_err(|e| e.to_string())?;
     entry.get_password().map_err(|e| e.to_string())
 }
 

@@ -28,7 +28,9 @@ export const DEFAULT_SETTINGS: AppSettings = {
 };
 
 const store = new LazyStore('settings.json');
-const LOCAL_STORAGE_KEY = 'nexus_github_report_settings';
+const LOCAL_STORAGE_KEY = import.meta.env.DEV
+  ? 'nexus_github_report_settings_dev'
+  : 'nexus_github_report_settings';
 
 export async function loadSettings(): Promise<AppSettings> {
   try {

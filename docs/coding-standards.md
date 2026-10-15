@@ -341,6 +341,68 @@ export const env = envSchema.parse(import.meta.env);
   }
   ```
 
+### 5.4. Quy Chuẩn Phân Tách Môi Trường Dev & Prod (Environment Isolation Standard)
+
+Để đảm bảo môi trường phát triển (Dev) không bao giờ làm bẩn, ghi đè hoặc xung đột dữ liệu cấu hình và token bảo mật với bản chính thức (Production), toàn bộ các ứng dụng trong hệ sinh thái Nexus **BẮT BUỘC** tuân thủ quy chuẩn phân tách 3 tầng:
+
+| Tầng lưu trữ            | Môi trường Dev                                                 | Môi trường Prod                                        | Cơ chế kỹ thuật                                       |
+| :---------------------- | :------------------------------------------------------------- | :----------------------------------------------------- | :---------------------------------------------------- |
+| **App Bundle ID**       | `<bundle-id>.dev` _(vd: `com.thanhba.nexus.githubreport.dev`)_ | `<bundle-id>` _(vd: `com.thanhba.nexus.githubreport`)_ | Tauri CLI override `-c src-tauri/tauri.dev.conf.json` |
+| **Application Support** | `~/Library/Application Support/<bundle-id>.dev/`               | `~/Library/Application Support/<bundle-id>/`           | Tự động phân tách theo Bundle ID của Tauri Store      |
+| **macOS Keychain**      | Service: `<name>-dev`, Account: `nexus_user_dev`               | Service: `<name>`, Account: `nexus_user`               | Rust `cfg!(debug_assertions)` tự động định tuyến      |
+| **Web Fallback**        | Key: `<name>_settings_dev`                                     | Key: `<name>_settings`                                 | Frontend `import.meta.env.DEV`                        |
+
+#### 1. Cấu hình Tauri Bundle ID (`tauri.dev.conf.json`)
+
+Mỗi app tạo thêm file `src-tauri/tauri.dev.conf.json` chỉ chứa thông tin override cho Dev:
+
+```json
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "GitHub Report (Dev)",
+  "identifier": "com.thanhba.nexus.githubreport.dev"
+}
+```
+
+Và cấu hình lệnh chạy dev trong `package.json`:
+
+```json
+"scripts": {
+  "desktop": "tauri dev -c src-tauri/tauri.dev.conf.json",
+  "desktop:build": "tauri build"
+}
+```
+
+#### 2. Định tuyến macOS Keychain trong Rust Backend
+
+Sử dụng macro `cfg!(debug_assertions)` để tự động chuyển Service và Account:
+
+```rust
+fn get_keychain_service(base: &str) -> String {
+    if cfg!(debug_assertions) {
+        format!("{}-dev", base)
+    } else {
+        base.to_string()
+    }
+}
+
+fn get_keychain_account() -> &'static str {
+    if cfg!(debug_assertions) {
+        "nexus_user_dev"
+    } else {
+        "nexus_user"
+    }
+}
+```
+
+#### 3. Phân tách Web Fallback LocalStorage trong Frontend
+
+```typescript
+const LOCAL_STORAGE_KEY = import.meta.env.DEV
+  ? 'nexus_github_report_settings_dev'
+  : 'nexus_github_report_settings';
+```
+
 ---
 
 ## 6. Quy Chuẩn Lập Trình Backend Rust & Tauri v2
@@ -394,6 +456,9 @@ Mọi đóng góp mã nguồn mới bắt buộc phải thỏa mãn checklist sa
 - [ ] Biến môi trường mới (nếu có) đã được cập nhật tương ứng vào `.env.example` và `src/env.ts`.
 - [ ] Token và secret nhạy cảm được lưu qua macOS Keychain (`keyring`), không lưu plain-text trong file json hay localStorage.
 - [ ] Cài đặt người dùng được lưu qua `tauri-plugin-store` tại thư mục chuẩn `~/Library/Application Support/`.
+- [ ] **Tuân thủ phân tách môi trường Dev & Prod**:
+  - Có `tauri.dev.conf.json` định nghĩa bundle ID `.dev`.
+  - Token trong macOS Keychain tự động chuyển sang `<service>-dev` và account `nexus_user_dev` khi chạy ở chế độ debug.
 - [ ] Đặt tên đúng chuẩn (kebab-case cho files, PascalCase cho Components, `is/has/can/should` cho booleans).
 - [ ] Không sử dụng `enum` số; đã dùng `as const` hoặc string literal unions.
 - [ ] Code Rust không chứa `.unwrap()` ở runtime context.

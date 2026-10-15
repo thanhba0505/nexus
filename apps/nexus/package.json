@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "tauri": "tauri",
-    "desktop": "tauri dev",
+    "desktop": "tauri dev -c src-tauri/tauri.dev.conf.json",
     "desktop:build": "tauri build"
   },
   "dependencies": {

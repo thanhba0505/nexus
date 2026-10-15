@@ -27,8 +27,14 @@ pnpm dev
 ## 🛠️ Công Nghệ & Cấu Hình
 
 - **Port Web**: `1422`
-- **Bundle ID**: `com.thanhba.nexus.githubreport`
+- **Bundle ID**:
+  - Dev: `com.thanhba.nexus.githubreport.dev`
+  - Prod: `com.thanhba.nexus.githubreport`
 - **Frontend**: React 19, Tailwind CSS, Lucide Icons, `@tauri-apps/plugin-store`
 - **Backend**: Tauri 2, Rust (`keyring`, `tauri-plugin-store`, `opener`)
-- **Lưu trữ Cài đặt & Prompt**: `~/Library/Application Support/com.thanhba.nexus.githubreport/settings.json`
-- **Lưu trữ Token Bảo mật**: macOS Keychain (`github_report_token`)
+- **Lưu trữ Cài đặt & Prompt**:
+  - Dev: `~/Library/Application Support/com.thanhba.nexus.githubreport.dev/settings.json`
+  - Prod: `~/Library/Application Support/com.thanhba.nexus.githubreport/settings.json`
+- **Lưu trữ Token Bảo mật**:
+  - Dev: macOS Keychain Service `nexus-github-report-dev` (Account: `nexus_user_dev`)
+  - Prod: macOS Keychain Service `nexus-github-report` (Account: `nexus_user`)

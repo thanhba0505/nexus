@@ -196,16 +196,34 @@ fn check_running_apps(apps: Vec<MiniAppCheckMeta>) -> Result<Vec<String>, String
     }
 }
 
+fn get_keychain_service(service: &str) -> String {
+    if cfg!(debug_assertions) {
+        format!("{}-dev", service)
+    } else {
+        service.to_string()
+    }
+}
+
+fn get_keychain_account() -> &'static str {
+    if cfg!(debug_assertions) {
+        "nexus_user_dev"
+    } else {
+        "nexus_user"
+    }
+}
+
 #[tauri::command]
 fn save_secure_secret(service: String, secret: String) -> Result<(), String> {
-    let entry = keyring::Entry::new(&service, "nexus_user").map_err(|e| e.to_string())?;
+    let resolved_service = get_keychain_service(&service);
+    let entry = keyring::Entry::new(&resolved_service, get_keychain_account()).map_err(|e| e.to_string())?;
     entry.set_password(&secret).map_err(|e| e.to_string())?;
     Ok(())
 }
 
 #[tauri::command]
 fn get_secure_secret(service: String) -> Result<String, String> {
-    let entry = keyring::Entry::new(&service, "nexus_user").map_err(|e| e.to_string())?;
+    let resolved_service = get_keychain_service(&service);
+    let entry = keyring::Entry::new(&resolved_service, get_keychain_account()).map_err(|e| e.to_string())?;
     entry.get_password().map_err(|e| e.to_string())
 }
 
