@@ -45,7 +45,9 @@ export function WindowControls({
     };
   }, []);
 
-  const handleClose = () => {
+  const handleClose = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     if (onClose) {
       onClose();
       return;
@@ -53,36 +55,40 @@ export function WindowControls({
     try {
       const appWindow = getCurrentWindow();
       if (closeAction === 'close') {
-        void appWindow.close();
+        await appWindow.close();
       } else {
-        void appWindow.hide();
+        await appWindow.hide();
       }
-    } catch {
-      // Fallback khi chạy ngoài Tauri
+    } catch (err) {
+      console.error('Lỗi khi đóng cửa sổ:', err);
     }
   };
 
-  const handleMinimize = () => {
+  const handleMinimize = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     if (onMinimize) {
       onMinimize();
       return;
     }
     try {
-      void getCurrentWindow().minimize();
-    } catch {
-      // Fallback khi chạy ngoài Tauri
+      await getCurrentWindow().minimize();
+    } catch (err) {
+      console.error('Lỗi khi thu nhỏ cửa sổ:', err);
     }
   };
 
-  const handleMaximize = () => {
+  const handleMaximize = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     if (onMaximize) {
       onMaximize();
       return;
     }
     try {
-      void getCurrentWindow().toggleMaximize();
-    } catch {
-      // Fallback khi chạy ngoài Tauri
+      await getCurrentWindow().toggleMaximize();
+    } catch (err) {
+      console.error('Lỗi khi phóng to cửa sổ:', err);
     }
   };
 
@@ -92,37 +98,54 @@ export function WindowControls({
   return (
     <div
       data-no-drag
+      data-tauri-drag-region="false"
       style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+      onMouseDown={(e) => e.stopPropagation()}
       className={`flex items-center gap-0.5 ${className}`}
     >
       {/* Nút Đóng */}
       <button
+        type="button"
+        data-no-drag
+        data-tauri-drag-region="false"
+        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+        onMouseDown={(e) => e.stopPropagation()}
         onClick={handleClose}
         title="Đóng (⌘W)"
         className={`${baseBtnStyle} hover:bg-rose-500/20 hover:text-rose-300 active:bg-rose-500/30`}
       >
-        <X className="h-3 w-3" />
+        <X className="h-3 w-3 pointer-events-none" />
       </button>
 
       {/* Nút Thu nhỏ */}
       <button
+        type="button"
+        data-no-drag
+        data-tauri-drag-region="false"
+        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+        onMouseDown={(e) => e.stopPropagation()}
         onClick={handleMinimize}
         title="Thu nhỏ (⌘M)"
         className={`${baseBtnStyle} hover:bg-white/[0.08] hover:text-white/80 active:bg-white/[0.12]`}
       >
-        <Minus className="h-3 w-3" />
+        <Minus className="h-3 w-3 pointer-events-none" />
       </button>
 
       {/* Nút Phóng to / Khôi phục kích thước */}
       <button
+        type="button"
+        data-no-drag
+        data-tauri-drag-region="false"
+        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+        onMouseDown={(e) => e.stopPropagation()}
         onClick={handleMaximize}
         title={isMaximized ? 'Khôi phục kích thước' : 'Phóng to'}
         className={`${baseBtnStyle} hover:bg-white/[0.08] hover:text-white/80 active:bg-white/[0.12]`}
       >
         {isMaximized ? (
-          <Minimize2 className="h-2.5 w-2.5" />
+          <Minimize2 className="h-2.5 w-2.5 pointer-events-none" />
         ) : (
-          <Maximize2 className="h-2.5 w-2.5" />
+          <Maximize2 className="h-2.5 w-2.5 pointer-events-none" />
         )}
       </button>
     </div>

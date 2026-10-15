@@ -76,6 +76,8 @@ export function UnifiedHeader({
       centerSlot={
         <div
           data-no-drag
+          data-tauri-drag-region="false"
+          style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
           className="flex h-7 items-center rounded-lg border border-white/[0.08] bg-black/25 p-0.5"
         >
           {DATE_MODES.map(({ mode, label, title }) => (
@@ -97,7 +99,12 @@ export function UnifiedHeader({
         </div>
       }
       rightSlot={
-        <div data-tauri-drag-region className="flex items-center gap-1.5">
+        <div
+          data-no-drag
+          data-tauri-drag-region="false"
+          style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+          className="flex items-center gap-1.5"
+        >
           <button
             onClick={onRefresh}
             disabled={isBusy}

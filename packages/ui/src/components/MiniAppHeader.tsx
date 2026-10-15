@@ -49,8 +49,9 @@ export function MiniAppHeader({
     >
       {/* Vùng bên trái: Window Controls (nếu position = left) + leftSlot */}
       <div
-        data-tauri-drag-region
-        style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+        data-no-drag
+        data-tauri-drag-region="false"
+        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         className="flex items-center space-x-2 shrink-0 h-full"
       >
         {showWindowControls && windowControlsPosition === 'left' && (
@@ -61,12 +62,11 @@ export function MiniAppHeader({
         )}
         {!showWindowControls && leftSafeWidth > 0 && (
           <div
-            data-tauri-drag-region
             style={{ width: `${leftSafeWidth}px` }}
             className="shrink-0 pointer-events-none h-full"
           />
         )}
-        <div data-tauri-drag-region className="flex items-center">
+        <div className="flex items-center">
           {leftSlot}
         </div>
       </div>
@@ -80,6 +80,7 @@ export function MiniAppHeader({
         >
           <div
             data-no-drag
+            data-tauri-drag-region="false"
             style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
             className="shrink-0"
           >
@@ -96,8 +97,9 @@ export function MiniAppHeader({
 
       {/* Vùng bên phải: Các nút hành động + Window Controls (nếu position = right) */}
       <div
-        data-tauri-drag-region
-        style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+        data-no-drag
+        data-tauri-drag-region="false"
+        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         className="flex items-center space-x-1.5 shrink-0 h-full"
       >
         {rightSlot}
