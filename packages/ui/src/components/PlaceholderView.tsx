@@ -63,7 +63,7 @@ export function PlaceholderView({
   };
 
   return (
-    <div className="w-screen h-screen flex flex-col justify-between overflow-hidden rounded-[20px] border border-white/[0.12] bg-slate-950/85 backdrop-blur-3xl select-none shadow-2xl">
+    <div className="w-screen h-screen flex flex-col justify-between overflow-hidden rounded-[14px] border border-white/[0.12] bg-slate-950/85 backdrop-blur-3xl select-none">
       <MiniAppHeader
         leftSlot={
           <div className="flex items-center space-x-2 pl-1">

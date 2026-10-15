@@ -22,7 +22,7 @@ export function AppSplashScreen({
 }: AppSplashScreenProps) {
   return (
     <div
-      className={`fixed inset-0 z-50 flex flex-col select-none transition-all duration-300 ease-out bg-slate-950/95 backdrop-blur-2xl rounded-[20px] overflow-hidden ${
+      className={`fixed inset-0 z-50 flex flex-col select-none transition-all duration-300 ease-out bg-slate-950/95 backdrop-blur-2xl rounded-[14px] overflow-hidden ${
         isExiting ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'
       }`}
     >

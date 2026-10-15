@@ -470,16 +470,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_store::Builder::default().build())
-        .setup(|app| {
-            if let Some(window) = app.get_webview_window("main") {
-                #[cfg(target_os = "macos")]
-                {
-                    use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
-                    if let Err(err) = apply_vibrancy(&window, NSVisualEffectMaterial::FullScreenUI, None, None) {
-                        eprintln!("Warning: Failed to apply macOS vibrancy: {}", err);
-                    }
-                }
-            }
+        .setup(|_app| {
             Ok(())
         })
         .on_window_event(|window, event| {
