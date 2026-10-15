@@ -8,6 +8,8 @@ export interface AISummaryCardProps {
   onUpdateBullets: (newBullets: string[]) => void;
   onCopy: () => void;
   isCopied: boolean;
+  hasPrs?: boolean;
+  onGenerateSummary?: () => void;
 }
 
 export function AISummaryCard({
@@ -17,6 +19,8 @@ export function AISummaryCard({
   onUpdateBullets,
   onCopy,
   isCopied,
+  hasPrs = false,
+  onGenerateSummary,
 }: AISummaryCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState('');
@@ -55,6 +59,17 @@ export function AISummaryCard({
 
         {bullets.length > 0 && !isLoading && (
           <div className="flex items-center space-x-1.5">
+            {onGenerateSummary && (
+              <button
+                onClick={onGenerateSummary}
+                className="flex items-center space-x-1 px-2 py-1 rounded-md bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-[11px] font-medium transition-colors"
+                title="Tóm tắt lại bằng AI (⌘↵)"
+              >
+                <Sparkles className="w-3 h-3 text-sky-400" />
+                <span>Tóm tắt lại</span>
+              </button>
+            )}
+
             <button
               onClick={() => {
                 if (isEditing) {
@@ -139,8 +154,24 @@ export function AISummaryCard({
           ))}
         </div>
       ) : (
-        <div className="py-3 text-center text-xs text-white/40 italic">
-          Bấm "Quét PR" để AI đọc các commit hôm nay và tạo bản tóm tắt tự động 🌱
+        <div className="py-4 flex flex-col items-center justify-center space-y-2.5">
+          <p className="text-xs text-white/50 text-center">
+            {hasPrs
+              ? 'Dữ liệu PR & commits đã sẵn sàng. Nhấn nút bên dưới để tạo bản tóm tắt Daily Standup.'
+              : 'Không có PR hoặc commit nào trong khoảng thời gian này.'}
+          </p>
+          {hasPrs && onGenerateSummary && (
+            <button
+              onClick={onGenerateSummary}
+              className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-medium text-xs shadow-lg shadow-sky-500/25 transition-all cursor-pointer active:scale-95"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Tạo tóm tắt Daily Standup</span>
+              <kbd className="ml-1 px-1.5 py-0.5 rounded bg-black/30 text-[10px] text-white/80 font-mono">
+                ⌘↵
+              </kbd>
+            </button>
+          )}
         </div>
       )}
     </div>

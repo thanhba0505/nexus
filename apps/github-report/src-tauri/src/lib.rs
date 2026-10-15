@@ -94,8 +94,7 @@ fn get_keychain_account() -> &'static str {
     }
 }
 
-#[tauri::command]
-fn check_prerequisites() -> Result<PrereqStatus, String> {
+fn internal_check_prerequisites() -> Result<PrereqStatus, String> {
     let gh_path = find_executable("gh");
     let gh_installed = gh_path.is_some();
     let mut gh_logged_in = false;
@@ -142,7 +141,13 @@ fn check_prerequisites() -> Result<PrereqStatus, String> {
 }
 
 #[tauri::command]
-fn fetch_github_prs(since_iso: Option<String>) -> Result<Vec<PRReportItem>, String> {
+async fn check_prerequisites() -> Result<PrereqStatus, String> {
+    tauri::async_runtime::spawn_blocking(internal_check_prerequisites)
+        .await
+        .map_err(|e| e.to_string())?
+}
+
+fn internal_fetch_github_prs(since_iso: Option<String>) -> Result<Vec<PRReportItem>, String> {
     let gh_path = find_executable("gh").ok_or_else(|| {
         "GitHub CLI (`gh`) không được tìm thấy. Hãy cài đặt `gh` qua Homebrew hoặc cung cấp GitHub Token.".to_string()
     })?;
@@ -257,6 +262,13 @@ fn fetch_github_prs(since_iso: Option<String>) -> Result<Vec<PRReportItem>, Stri
     Ok(result)
 }
 
+#[tauri::command]
+async fn fetch_github_prs(since_iso: Option<String>) -> Result<Vec<PRReportItem>, String> {
+    tauri::async_runtime::spawn_blocking(move || internal_fetch_github_prs(since_iso))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
 fn parse_bullets(text: &str) -> Vec<String> {
     text.lines()
         .map(|line| line.trim())
@@ -273,8 +285,7 @@ fn parse_bullets(text: &str) -> Vec<String> {
         .collect()
 }
 
-#[tauri::command]
-fn generate_ai_summary(
+fn internal_generate_ai_summary(
     prs: Vec<PRReportItem>,
     prompt_template: Option<String>,
     provider_preference: Option<String>,
@@ -371,7 +382,19 @@ fn generate_ai_summary(
 }
 
 #[tauri::command]
-fn reveal_browser_tab(url: String, browser_name: Option<String>) -> Result<(), String> {
+async fn generate_ai_summary(
+    prs: Vec<PRReportItem>,
+    prompt_template: Option<String>,
+    provider_preference: Option<String>,
+) -> Result<AISummaryResult, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        internal_generate_ai_summary(prs, prompt_template, provider_preference)
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+fn internal_reveal_browser_tab(url: String, browser_name: Option<String>) -> Result<(), String> {
     let browser = browser_name.unwrap_or_else(|| "Brave Browser".to_string());
     let domain = if url.contains("parabol.co") {
         "parabol.co"
@@ -420,6 +443,13 @@ end tell
             Ok(())
         }
     }
+}
+
+#[tauri::command]
+async fn reveal_browser_tab(url: String, browser_name: Option<String>) -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(move || internal_reveal_browser_tab(url, browser_name))
+        .await
+        .map_err(|e| e.to_string())?
 }
 
 #[tauri::command]

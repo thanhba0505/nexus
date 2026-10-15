@@ -270,10 +270,8 @@ export default function App() {
 
         if (initialPrs.length > 0) {
           setStatusText(
-            `Tìm thấy ${initialPrs.length} PRs (${initialPrs.reduce((s, p) => s + p.commits.length, 0)} commits)`,
+            `Tìm thấy ${initialPrs.length} PRs (${initialPrs.reduce((s, p) => s + p.commits.length, 0)} commits). Sẵn sàng tạo tóm tắt.`,
           );
-          // Tóm tắt AI với loadedSettings chuẩn (đảm bảo revealBrowser = false)
-          handleGenerateSummary(initialPrs, loadedSettings);
         } else {
           setStatusText('Sẵn sàng. Không có PR mới hôm nay.');
         }
@@ -360,6 +358,10 @@ export default function App() {
         if (e.key === 'r') {
           e.preventDefault();
           handleFetch();
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          const filtered = prs.filter((p) => selectedPrNumbers.has(p.number));
+          handleGenerateSummary(filtered.length > 0 ? filtered : prs);
         } else if (e.key === 'c' && !window.getSelection()?.toString()) {
           e.preventDefault();
           handleCopySummary();
@@ -377,7 +379,14 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleFetch, handleRevealDestination, isSettingsOpen]);
+  }, [
+    handleFetch,
+    handleGenerateSummary,
+    handleRevealDestination,
+    isSettingsOpen,
+    prs,
+    selectedPrNumbers,
+  ]);
 
   const destinationLabel =
     settings.workflow.destination === 'parabol'
@@ -423,6 +432,11 @@ export default function App() {
           onUpdateBullets={setSummaryBullets}
           onCopy={handleCopySummary}
           isCopied={isCopied}
+          hasPrs={prs.length > 0}
+          onGenerateSummary={() => {
+            const filtered = prs.filter((p) => selectedPrNumbers.has(p.number));
+            handleGenerateSummary(filtered.length > 0 ? filtered : prs);
+          }}
         />
 
         {/* Card Danh Sách PR & Commit Timeline */}
