@@ -51,14 +51,19 @@ export function UnifiedHeader({
   return (
     <MiniAppHeader
       leftSlot={
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2">
+        <div data-tauri-drag-region className="flex items-center gap-2">
+          <div data-tauri-drag-region className="flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md border border-sky-500/25 bg-sky-500/15 text-sky-400">
               <GitPullRequest className="h-3.5 w-3.5" />
             </div>
-            <span className="text-xs font-semibold text-white/90">GitHub Report</span>
+            <span data-tauri-drag-region className="text-xs font-semibold text-white/90">
+              GitHub Report
+            </span>
           </div>
-          <div className="hidden h-7 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 text-[11px] text-white/60 sm:flex">
+          <div
+            data-tauri-drag-region
+            className="hidden h-7 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 text-[11px] text-white/60 sm:flex"
+          >
             <span className="font-medium tabular-nums text-sky-300">{prCount ?? '—'}</span> PRs
             <span className="text-white/20">•</span>
             <span className="font-medium tabular-nums text-emerald-300">
@@ -69,7 +74,10 @@ export function UnifiedHeader({
         </div>
       }
       centerSlot={
-        <div className="flex h-7 items-center rounded-lg border border-white/[0.08] bg-black/25 p-0.5">
+        <div
+          data-no-drag
+          className="flex h-7 items-center rounded-lg border border-white/[0.08] bg-black/25 p-0.5"
+        >
           {DATE_MODES.map(({ mode, label, title }) => (
             <button
               key={mode}
@@ -88,7 +96,7 @@ export function UnifiedHeader({
         </div>
       }
       rightSlot={
-        <div className="flex items-center gap-1.5">
+        <div data-tauri-drag-region className="flex items-center gap-1.5">
           <button
             onClick={onRefresh}
             className="flex h-7 items-center gap-1.5 rounded-lg px-2 text-xs font-medium text-white/70 transition-colors hover:bg-white/[0.08] hover:text-white active:bg-white/[0.12]"
