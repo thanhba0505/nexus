@@ -1,15 +1,34 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { UnifiedHeader } from './components/UnifiedHeader';
 import { AISummaryCard } from './components/AISummaryCard';
 import { PRTimelineCard } from './components/PRTimelineCard';
 import { StatusBar } from './components/StatusBar';
 import { SettingsModal } from './components/SettingsModal';
+import { AppSplashScreen, InitStepItem } from './components/AppSplashScreen';
 import { loadSettings, saveSettings, DEFAULT_SETTINGS } from './services/storage';
 import { PRReportItem, AISummaryResult, PrereqStatus, AppSettings, DateMode } from './types';
 
 export default function App() {
+  // Trạng thái màn hình khởi động (Splash Screen)
+  const [isAppReady, setIsAppReady] = useState<boolean>(false);
+  const [isExitingSplash, setIsExitingSplash] = useState<boolean>(false);
+  const [initProgress, setInitProgress] = useState<number>(10);
+  const [initMessage, setInitMessage] = useState<string>('Khởi tạo hệ sinh thái...');
+  const [initSteps, setInitSteps] = useState<InitStepItem[]>([
+    { id: 'settings', label: 'Nạp cấu hình & prompt template', status: 'pending' },
+    { id: 'prereqs', label: 'Kiểm tra CLI (gh, agy) & Keychain', status: 'pending' },
+    { id: 'prs', label: 'Quét Pull Requests & commits', status: 'pending' },
+  ]);
+
+  // Settings & state
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
+  const settingsRef = useRef<AppSettings>(DEFAULT_SETTINGS);
+
+  useEffect(() => {
+    settingsRef.current = settings;
+  }, [settings]);
+
   const [dateMode, setDateMode] = useState<DateMode>('today');
   const [prs, setPrs] = useState<PRReportItem[]>([]);
   const [selectedPrNumbers, setSelectedPrNumbers] = useState<Set<number>>(new Set());
@@ -20,7 +39,7 @@ export default function App() {
   const [isLoadingPrs, setIsLoadingPrs] = useState<boolean>(false);
   const [isSummarizing, setIsSummarizing] = useState<boolean>(false);
 
-  const [statusText, setStatusText] = useState<string>('Đang tải cấu hình...');
+  const [statusText, setStatusText] = useState<string>('Đang khởi tạo...');
   const [isStatusError, setIsStatusError] = useState<boolean>(false);
   const [isCopied, setIsCopied] = useState<boolean>(false);
 
@@ -55,25 +74,6 @@ export default function App() {
     return prs.reduce((acc, p) => acc + p.commits.length, 0);
   }, [prs]);
 
-  // Load settings và kiểm tra công cụ khi mount
-  useEffect(() => {
-    const initApp = async () => {
-      try {
-        const loaded = await loadSettings();
-        setSettings(loaded);
-
-        const prereq = await invoke<PrereqStatus>('check_prerequisites');
-        setPrereqStatus(prereq);
-        setStatusText('Sẵn sàng');
-      } catch (err) {
-        console.warn('Lỗi khởi tạo:', err);
-        setStatusText('Sẵn sàng (Offline)');
-      }
-    };
-
-    initApp();
-  }, []);
-
   // Tự động sao chép vào clipboard
   const copyToClipboard = useCallback((text: string) => {
     try {
@@ -86,29 +86,34 @@ export default function App() {
     }
   }, []);
 
-  // Mở hoặc chuyển tab Parabol / Slack
-  const handleRevealDestination = useCallback(async () => {
+  // Mở hoặc chuyển tab Parabol / Slack theo cấu hình
+  const handleRevealDestinationWithSettings = useCallback(async (targetSettings: AppSettings) => {
     try {
       const url =
-        settings.workflow.destination === 'parabol'
-          ? settings.workflow.parabolUrl || 'https://action.parabol.co'
+        targetSettings.workflow.destination === 'parabol'
+          ? targetSettings.workflow.parabolUrl || 'https://action.parabol.co'
           : 'https://app.slack.com';
 
       await invoke('reveal_browser_tab', {
         url,
-        browserName: settings.workflow.browser,
+        browserName: targetSettings.workflow.browser,
       });
 
-      setStatusText(`✓ Đã kích hoạt tab ${settings.workflow.destination} trên trình duyệt`);
+      setStatusText(`✓ Đã kích hoạt tab ${targetSettings.workflow.destination} trên trình duyệt`);
       setIsStatusError(false);
     } catch (err) {
       console.warn('Lỗi mở trình duyệt:', err);
     }
-  }, [settings]);
+  }, []);
+
+  const handleRevealDestination = useCallback(() => {
+    handleRevealDestinationWithSettings(settingsRef.current);
+  }, [handleRevealDestinationWithSettings]);
 
   // Tóm tắt AI cho các PR được chọn
   const handleGenerateSummary = useCallback(
-    async (itemsToSummarize: PRReportItem[]) => {
+    async (itemsToSummarize: PRReportItem[], overrideSettings?: AppSettings) => {
+      const activeSettings = overrideSettings || settingsRef.current;
       if (itemsToSummarize.length === 0) {
         setSummaryBullets([]);
         setSummaryProvider('');
@@ -122,8 +127,8 @@ export default function App() {
       try {
         const result = await invoke<AISummaryResult>('generate_ai_summary', {
           prs: itemsToSummarize,
-          promptTemplate: settings.ai.promptTemplate || undefined,
-          providerPreference: settings.ai.provider || undefined,
+          promptTemplate: activeSettings.ai.promptTemplate || undefined,
+          providerPreference: activeSettings.ai.provider || undefined,
         });
 
         setSummaryBullets(result.bullets);
@@ -131,12 +136,16 @@ export default function App() {
 
         const formatted = ['Today:', '', ...result.bullets.map((b) => `• ${b}`)].join('\n');
 
-        if (settings.workflow.autoCopy) {
+        if (activeSettings.workflow.autoCopy) {
           copyToClipboard(formatted);
         }
 
-        if (settings.workflow.revealBrowser && settings.workflow.destination !== 'copy_only') {
-          handleRevealDestination();
+        // BẢO ĐẢM TUYỆT ĐỐI: Chỉ tự mở trình duyệt khi người dùng bật revealBrowser = true
+        if (
+          activeSettings.workflow.revealBrowser &&
+          activeSettings.workflow.destination !== 'copy_only'
+        ) {
+          handleRevealDestinationWithSettings(activeSettings);
         }
 
         setStatusText(
@@ -150,7 +159,7 @@ export default function App() {
         setIsSummarizing(false);
       }
     },
-    [settings, copyToClipboard, handleRevealDestination],
+    [copyToClipboard, handleRevealDestinationWithSettings],
   );
 
   // Quét PR & Commit từ GitHub
@@ -172,7 +181,6 @@ export default function App() {
         setStatusText(
           `Tìm thấy ${items.length} PRs (${items.reduce((s, p) => s + p.commits.length, 0)} commits)`,
         );
-        // Tự động tóm tắt luôn
         handleGenerateSummary(items);
       } else {
         setSummaryBullets([]);
@@ -187,10 +195,109 @@ export default function App() {
     }
   }, [sinceIsoString, handleGenerateSummary]);
 
-  // Tự động fetch khi thay đổi khoảng ngày (Hôm nay / Ngày trước)
+  // Luồng nạp toàn diện khi khởi động ứng dụng (Splash sequence)
   useEffect(() => {
+    let isMounted = true;
+
+    const runStartupSequence = async () => {
+      try {
+        // Bước 1: Nạp file cấu hình settings.json & prompt templates
+        setInitSteps((prev) =>
+          prev.map((s) => (s.id === 'settings' ? { ...s, status: 'running' } : s)),
+        );
+        setInitMessage('Đang nạp cấu hình settings.json...');
+        setInitProgress(25);
+
+        const loadedSettings = await loadSettings();
+        if (!isMounted) return;
+        setSettings(loadedSettings);
+        settingsRef.current = loadedSettings;
+        setInitSteps((prev) =>
+          prev.map((s) => (s.id === 'settings' ? { ...s, status: 'done' } : s)),
+        );
+        setInitProgress(45);
+
+        // Bước 2: Kiểm tra công cụ hệ thống (gh CLI, agy/claude CLI, Keychain)
+        setInitSteps((prev) =>
+          prev.map((s) => (s.id === 'prereqs' ? { ...s, status: 'running' } : s)),
+        );
+        setInitMessage('Kiểm tra GitHub CLI & Local AI...');
+        setInitProgress(65);
+
+        const prereq = await invoke<PrereqStatus>('check_prerequisites');
+        if (!isMounted) return;
+        setPrereqStatus(prereq);
+        setInitSteps((prev) =>
+          prev.map((s) => (s.id === 'prereqs' ? { ...s, status: 'done' } : s)),
+        );
+        setInitProgress(80);
+
+        // Bước 3: Quét PRs ban đầu
+        setInitSteps((prev) => prev.map((s) => (s.id === 'prs' ? { ...s, status: 'running' } : s)));
+        setInitMessage('Quét Pull Requests & commits...');
+        setInitProgress(90);
+
+        const now = new Date();
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+        let initialPrs: PRReportItem[] = [];
+
+        try {
+          initialPrs = await invoke<PRReportItem[]>('fetch_github_prs', {
+            sinceIso: todayStart.toISOString(),
+          });
+        } catch (fetchErr) {
+          console.warn('Lỗi quét PR ban đầu:', fetchErr);
+        }
+
+        if (!isMounted) return;
+        setPrs(initialPrs);
+        const allNumbers = new Set(initialPrs.map((p) => p.number));
+        setSelectedPrNumbers(allNumbers);
+
+        setInitSteps((prev) => prev.map((s) => (s.id === 'prs' ? { ...s, status: 'done' } : s)));
+        setInitProgress(100);
+        setInitMessage('Hệ thống đã sẵn sàng!');
+
+        // Đợi 250ms cho người dùng nhìn thấy tiến trình 100%
+        await new Promise((r) => setTimeout(r, 250));
+        if (!isMounted) return;
+        setIsExitingSplash(true);
+
+        // Đợi 400ms fade-out transition kết thúc rồi chuyển sang app chính
+        await new Promise((r) => setTimeout(r, 400));
+        if (!isMounted) return;
+        setIsAppReady(true);
+
+        if (initialPrs.length > 0) {
+          setStatusText(
+            `Tìm thấy ${initialPrs.length} PRs (${initialPrs.reduce((s, p) => s + p.commits.length, 0)} commits)`,
+          );
+          // Tóm tắt AI với loadedSettings chuẩn (đảm bảo revealBrowser = false)
+          handleGenerateSummary(initialPrs, loadedSettings);
+        } else {
+          setStatusText('Sẵn sàng. Không có PR mới hôm nay.');
+        }
+      } catch (err) {
+        console.warn('Lỗi khởi tạo hệ thống:', err);
+        if (!isMounted) return;
+        setIsExitingSplash(true);
+        setTimeout(() => setIsAppReady(true), 400);
+        setStatusText('Sẵn sàng (Offline)');
+      }
+    };
+
+    runStartupSequence();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [handleGenerateSummary]);
+
+  // Khi thay đổi khoảng ngày và app ĐÃ SẴN SÀNG -> Quét lại PRs
+  useEffect(() => {
+    if (!isAppReady) return;
     handleFetch();
-  }, [dateMode, handleFetch]);
+  }, [dateMode, isAppReady, handleFetch]);
 
   // Sao chép tóm tắt
   const handleCopySummary = () => {
@@ -233,6 +340,7 @@ export default function App() {
   // Lưu cài đặt
   const handleSaveSettings = async (newSettings: AppSettings) => {
     setSettings(newSettings);
+    settingsRef.current = newSettings;
     await saveSettings(newSettings);
     setStatusText('✓ Đã lưu cài đặt mới');
     setIsStatusError(false);
@@ -269,7 +377,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleFetch, isSettingsOpen]);
+  }, [handleFetch, handleRevealDestination, isSettingsOpen]);
 
   const destinationLabel =
     settings.workflow.destination === 'parabol'
@@ -279,8 +387,18 @@ export default function App() {
         : 'Copy';
 
   return (
-    <div className="w-screen h-screen flex flex-col bg-slate-950/85 text-white font-sans overflow-hidden select-none">
-      {/* 1. Unified Custom Header (Tích hợp Traffic Lights macOS) */}
+    <div className="w-screen h-screen flex flex-col bg-slate-950/85 text-white font-sans overflow-hidden select-none relative">
+      {/* 1. Màn hình khởi động SplashScreen (Nạp hết code, settings, kiểm tra công cụ) */}
+      {!isAppReady && (
+        <AppSplashScreen
+          progress={initProgress}
+          currentMessage={initMessage}
+          steps={initSteps}
+          isExiting={isExitingSplash}
+        />
+      )}
+
+      {/* 2. Unified Custom Header (Tích hợp Traffic Lights macOS) */}
       <UnifiedHeader
         dateMode={dateMode}
         onDateModeChange={setDateMode}
@@ -295,7 +413,7 @@ export default function App() {
         onOpenSettings={() => setIsSettingsOpen(true)}
       />
 
-      {/* 2. Main Body: 2 Card Tầng (AI Summary + PR Timeline) */}
+      {/* 3. Main Body: 2 Card Tầng (AI Summary + PR Timeline) */}
       <main className="flex-1 min-h-0 flex flex-col p-3.5 gap-3 overflow-hidden">
         {/* Card Tóm Tắt AI */}
         <AISummaryCard
@@ -317,10 +435,10 @@ export default function App() {
         />
       </main>
 
-      {/* 3. Status Bar dưới cùng */}
+      {/* 4. Status Bar dưới cùng */}
       <StatusBar statusText={statusText} isError={isStatusError} prereqStatus={prereqStatus} />
 
-      {/* 4. Settings Modal (⌘,) */}
+      {/* 5. Settings Modal (⌘,) */}
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}

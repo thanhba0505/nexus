@@ -18,7 +18,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
     destination: 'parabol',
     browser: 'Brave Browser',
     autoCopy: true,
-    revealBrowser: true,
+    revealBrowser: false,
     parabolUrl: 'https://action.parabol.co',
   },
   filters: {

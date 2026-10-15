@@ -179,64 +179,80 @@ fn fetch_github_prs(since_iso: Option<String>) -> Result<Vec<PRReportItem>, Stri
         .map_err(|e| format!("Lỗi đọc kết quả JSON từ gh: {}", e))?;
 
     let prs_arr = prs_raw.as_array().ok_or("Dữ liệu PRs không hợp lệ")?;
-    let mut result = Vec::new();
 
-    for pr in prs_arr {
-        let number = pr["number"].as_u64().unwrap_or(0);
-        let title = pr["title"].as_str().unwrap_or("").to_string();
-        let url = pr["url"].as_str().unwrap_or("").to_string();
-        let state = pr["state"].as_str().unwrap_or("OPEN").to_uppercase();
-        let repo = pr["repository"]["nameWithOwner"].as_str().unwrap_or("").to_string();
+    let items_to_fetch: Vec<_> = prs_arr
+        .iter()
+        .filter_map(|pr| {
+            let number = pr["number"].as_u64()?;
+            let title = pr["title"].as_str()?.to_string();
+            let url = pr["url"].as_str()?.to_string();
+            let state = pr["state"].as_str().unwrap_or("OPEN").to_uppercase();
+            let repo = pr["repository"]["nameWithOwner"].as_str()?.to_string();
+            if repo.is_empty() || number == 0 {
+                None
+            } else {
+                Some((number, repo, title, url, state))
+            }
+        })
+        .collect();
 
-        if repo.is_empty() || number == 0 {
-            continue;
-        }
+    let result: Vec<PRReportItem> = std::thread::scope(|s| {
+        let mut handles = Vec::new();
+        for (number, repo, title, url, state) in items_to_fetch {
+            let gh_ref = &gh_path;
+            let since_ref = &since_arg;
+            handles.push(s.spawn(move || {
+                let view_output = std::process::Command::new(gh_ref)
+                    .args([
+                        "pr",
+                        "view",
+                        &number.to_string(),
+                        "--repo",
+                        &repo,
+                        "--json",
+                        "commits",
+                    ])
+                    .env("PATH", get_enhanced_path())
+                    .output();
 
-        let view_output = std::process::Command::new(&gh_path)
-            .args([
-                "pr",
-                "view",
-                &number.to_string(),
-                "--repo",
-                &repo,
-                "--json",
-                "commits",
-            ])
-            .env("PATH", get_enhanced_path())
-            .output();
+                let mut commits = Vec::new();
+                if let Ok(view_res) = view_output {
+                    if view_res.status.success() {
+                        if let Ok(view_json) = serde_json::from_slice::<serde_json::Value>(&view_res.stdout) {
+                            if let Some(c_arr) = view_json["commits"].as_array() {
+                                for c in c_arr {
+                                    let headline = c["messageHeadline"].as_str().unwrap_or("").to_string();
+                                    let date_str = c["committedDate"].as_str().unwrap_or("").to_string();
 
-        let mut commits = Vec::new();
-        if let Ok(view_res) = view_output {
-            if view_res.status.success() {
-                if let Ok(view_json) = serde_json::from_slice::<serde_json::Value>(&view_res.stdout) {
-                    if let Some(c_arr) = view_json["commits"].as_array() {
-                        for c in c_arr {
-                            let headline = c["messageHeadline"].as_str().unwrap_or("").to_string();
-                            let date_str = c["committedDate"].as_str().unwrap_or("").to_string();
-
-                            if date_str >= since_arg {
-                                commits.push(CommitItem {
-                                    headline,
-                                    committed_date: date_str,
-                                });
+                                    if date_str >= *since_ref {
+                                        commits.push(CommitItem {
+                                            headline,
+                                            committed_date: date_str,
+                                        });
+                                    }
+                                }
                             }
                         }
                     }
                 }
-            }
+
+                if !commits.is_empty() {
+                    Some(PRReportItem {
+                        number,
+                        repository: repo,
+                        title,
+                        url,
+                        state,
+                        commits,
+                    })
+                } else {
+                    None
+                }
+            }));
         }
 
-        if !commits.is_empty() {
-            result.push(PRReportItem {
-                number,
-                repository: repo,
-                title,
-                url,
-                state,
-                commits,
-            });
-        }
-    }
+        handles.into_iter().filter_map(|h| h.join().ok().flatten()).collect()
+    });
 
     Ok(result)
 }
