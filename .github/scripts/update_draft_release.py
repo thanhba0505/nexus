@@ -71,6 +71,37 @@ def sync_ecosystem_version(version: str, tag: str) -> bool:
                 json.dump(tconf, f, indent=2)
                 f.write("\n")
 
+        cargo_file = ROOT_DIR / "apps" / app_dir / "src-tauri" / "Cargo.toml"
+        if cargo_file.exists():
+            content = cargo_file.read_text(encoding="utf-8")
+            content = re.sub(r'(?m)^version = "[^"]+"', f'version = "{version}"', content)
+            cargo_file.write_text(content, encoding="utf-8")
+
+    # Đồng bộ packages/shared/src/constants/app-info.ts
+    app_info_file = ROOT_DIR / "packages" / "shared" / "src" / "constants" / "app-info.ts"
+    if app_info_file.exists():
+        content = app_info_file.read_text(encoding="utf-8")
+        content = re.sub(r"version: '[^']+'", f"version: '{version}'", content)
+        app_info_file.write_text(content, encoding="utf-8")
+
+    # Đồng bộ packages/*/package.json
+    for pkg_dir in ["shared", "ui", "config"]:
+        pkg_file = ROOT_DIR / "packages" / pkg_dir / "package.json"
+        if pkg_file.exists():
+            with open(pkg_file, "r", encoding="utf-8") as f:
+                pkg = json.load(f)
+            pkg["version"] = version
+            with open(pkg_file, "w", encoding="utf-8") as f:
+                json.dump(pkg, f, indent=2)
+                f.write("\n")
+
+    # Đồng bộ release-artifacts/apps.json nếu có
+    release_apps_json = ROOT_DIR / "release-artifacts" / "apps.json"
+    if release_apps_json.exists():
+        with open(release_apps_json, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+            f.write("\n")
+
     run([
         "npx",
         "prettier",
@@ -78,6 +109,8 @@ def sync_ecosystem_version(version: str, tag: str) -> bool:
         "apps.json",
         "apps/*/package.json",
         "apps/*/src-tauri/tauri.conf.json",
+        "packages/*/package.json",
+        "packages/shared/src/constants/app-info.ts",
     ])
 
     return True
@@ -161,6 +194,10 @@ def main() -> None:
             "apps.json",
             "apps/*/package.json",
             "apps/*/src-tauri/tauri.conf.json",
+            "apps/*/src-tauri/Cargo.toml",
+            "packages/*/package.json",
+            "packages/shared/src/constants/app-info.ts",
+            "release-artifacts/apps.json",
         ])
         run([
             "git",

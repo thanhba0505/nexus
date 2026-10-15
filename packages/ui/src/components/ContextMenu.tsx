@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 
 export interface ContextMenuItem {
@@ -22,17 +22,14 @@ export interface ContextMenuProps {
 
 export function ContextMenu({ isOpen, x, y, onClose, items }: ContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
-  const [adjustedPos, setAdjustedPos] = useState({ x, y });
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    // Adjust position to stay within window boundaries
+  // Tính toán vị trí đồng bộ ngay lập tức để không bị trễ 1 frame (tránh nhảy từ (0, 0) hay vị trí cũ)
+  const adjustedPos = useMemo(() => {
     const menuWidth = 200;
     const menuHeight = items.length * 36 + 16;
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
+    const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
+    const windowHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
 
     let posX = x;
     let posY = y;
@@ -44,8 +41,41 @@ export function ContextMenu({ isOpen, x, y, onClose, items }: ContextMenuProps) 
       posY = windowHeight - menuHeight - 16;
     }
 
-    setAdjustedPos({ x: Math.max(16, posX), y: Math.max(16, posY) });
-  }, [isOpen, x, y, items.length]);
+    return {
+      x: Math.max(16, posX),
+      y: Math.max(16, posY),
+    };
+  }, [x, y, items.length]);
+
+  // Transform-origin xuất phát từ chính vị trí click chuột
+  const originX = Math.max(0, Math.min(200, x - adjustedPos.x));
+  const originY = Math.max(0, Math.min(items.length * 36 + 16, y - adjustedPos.y));
+
+  // Tinh chỉnh bằng DOM thực tế trước khi paint (nếu menu dài hơn ước tính)
+  useLayoutEffect(() => {
+    if (!isOpen || !menuRef.current) return;
+    const rect = menuRef.current.getBoundingClientRect();
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    let needAdjust = false;
+    let posX = adjustedPos.x;
+    let posY = adjustedPos.y;
+
+    if (rect.right > windowWidth - 16) {
+      posX = Math.max(16, windowWidth - rect.width - 16);
+      needAdjust = true;
+    }
+    if (rect.bottom > windowHeight - 16) {
+      posY = Math.max(16, windowHeight - rect.height - 16);
+      needAdjust = true;
+    }
+
+    if (needAdjust) {
+      menuRef.current.style.left = `${posX}px`;
+      menuRef.current.style.top = `${posY}px`;
+    }
+  }, [isOpen, adjustedPos.x, adjustedPos.y]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -74,11 +104,15 @@ export function ContextMenu({ isOpen, x, y, onClose, items }: ContextMenuProps) 
   return (
     <div
       ref={menuRef}
-      style={{ left: adjustedPos.x, top: adjustedPos.y }}
+      style={{
+        left: adjustedPos.x,
+        top: adjustedPos.y,
+        transformOrigin: `${originX}px ${originY}px`,
+      }}
       className={clsx(
         'fixed z-50 min-w-48 rounded-2xl p-1.5 shadow-2xl',
         'bg-slate-900/90 backdrop-blur-2xl border border-white/15',
-        'animate-in fade-in zoom-in-95 duration-100',
+        'animate-menu-in',
       )}
     >
       <div className="flex flex-col space-y-0.5">
@@ -119,7 +153,7 @@ export function ContextMenu({ isOpen, x, y, onClose, items }: ContextMenuProps) 
 
             {/* Tooltip if disabled and hovered */}
             {item.disabled && item.tooltip && hoveredItemId === item.id && (
-              <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1 bg-amber-500/95 text-slate-950 font-semibold text-[11px] rounded-lg shadow-xl whitespace-nowrap z-50 pointer-events-none animate-in fade-in">
+              <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1 bg-amber-500/95 text-slate-950 font-semibold text-[11px] rounded-lg shadow-xl whitespace-nowrap z-50 pointer-events-none animate-fade-in">
                 {item.tooltip}
               </div>
             )}

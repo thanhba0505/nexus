@@ -64,8 +64,12 @@ export default function App() {
 
   // 3. Trạng thái cập nhật riêng của Nexus (cho menu Settings)
   const [nexusUpdateStatus, setNexusUpdateStatus] = useState<
-    'idle' | 'checking' | 'available' | 'updating' | 'restarting'
+    'idle' | 'checking' | 'available' | 'latest' | 'updating' | 'restarting'
   >('idle');
+  const [latestReleaseInfo, setLatestReleaseInfo] = useState<{
+    version: string;
+    downloadUrl?: string;
+  } | null>(null);
 
   const isDev = import.meta.env.DEV;
 
@@ -148,23 +152,59 @@ export default function App() {
     updateInstalledAppIds((prev) => (prev.includes(app.id) ? prev : [...prev, app.id]));
   };
 
-  const handleCheckNexusUpdate = () => {
-    if (isDev) return;
+  // So sánh phiên bản SemVer (remote > current)
+  const isNewerVersion = (remote: string, current: string): boolean => {
+    const parse = (v: string) =>
+      v
+        .replace(/^v/, '')
+        .split('.')
+        .map((n) => parseInt(n, 10) || 0);
+    const [r1 = 0, r2 = 0, r3 = 0] = parse(remote);
+    const [c1 = 0, c2 = 0, c3 = 0] = parse(current);
+    if (r1 !== c1) return r1 > c1;
+    if (r2 !== c2) return r2 > c2;
+    return r3 > c3;
+  };
+
+  // Kiểm tra phiên bản mới từ GitHub Release / apps.json
+  const handleCheckNexusUpdate = async () => {
     setNexusUpdateStatus('checking');
-    setTimeout(() => {
-      setNexusUpdateStatus('available');
-    }, 1000);
+    try {
+      const res = await fetch(
+        'https://raw.githubusercontent.com/thanhba0505/nexus/main/apps.json',
+        { cache: 'no-store' },
+      );
+      if (res.ok) {
+        const data = await res.json();
+        const remoteVersion = data?.nexus?.version || data?.version;
+        if (remoteVersion && isNewerVersion(remoteVersion, NEXUS_CORE_APP.version || '0.2.1')) {
+          setLatestReleaseInfo({
+            version: remoteVersion,
+            downloadUrl: data?.nexus?.downloadUrl,
+          });
+          setNexusUpdateStatus('available');
+          return;
+        }
+      }
+      setNexusUpdateStatus('latest');
+      setTimeout(() => setNexusUpdateStatus('idle'), 3000);
+    } catch {
+      setNexusUpdateStatus('latest');
+      setTimeout(() => setNexusUpdateStatus('idle'), 3000);
+    }
   };
 
   // Cập nhật toàn bộ hệ sinh thái Nexus và tất cả mini apps
   const handleApplyNexusUpdate = () => {
-    if (isDev) return;
     setNexusUpdateStatus('updating');
     setUpdatingAppIds(new Set(installedAppIds));
 
     setTimeout(() => {
       setNexusUpdateStatus('restarting');
       setUpdatingAppIds(new Set());
+      if (latestReleaseInfo?.downloadUrl) {
+        window.open(latestReleaseInfo.downloadUrl, '_blank');
+      }
       setTimeout(() => {
         setNexusUpdateStatus('idle');
       }, 1500);
@@ -172,59 +212,46 @@ export default function App() {
   };
 
   const settingsMenuItems: DropdownMenuItem[] = useMemo(() => {
-    if (isDev) {
-      return [
-        {
-          id: 'nexus-version-dev',
-          label: 'Phiên bản: v0.2.0 (Môi trường Dev)',
-          icon: <Info className="w-3.5 h-3.5 text-white/50" />,
-          disabled: true,
-          onClick: () => {},
-        },
-        {
-          id: 'nexus-info',
-          label: 'Thông tin ứng dụng',
-          icon: <Info className="w-3.5 h-3.5 text-white/70" />,
-          onClick: () => setInfoModalApp(NEXUS_CORE_APP),
-        },
-      ];
-    }
+    const items: DropdownMenuItem[] = [];
 
+    // 1. Trạng thái kiểm tra & cập nhật phiên bản
     if (nexusUpdateStatus === 'available') {
-      return [
-        {
-          id: 'update-nexus',
-          label: 'Cập nhật toàn bộ hệ sinh thái (v0.2.0)',
-          icon: <ArrowDownCircle className="w-3.5 h-3.5 text-indigo-400" />,
-          variant: 'primary',
-          badge: 'Bản mới',
-          onClick: handleApplyNexusUpdate,
-        },
-        {
-          id: 'nexus-info',
-          label: 'Thông tin ứng dụng',
-          icon: <Info className="w-3.5 h-3.5 text-white/70" />,
-          onClick: () => setInfoModalApp(NEXUS_CORE_APP),
-        },
-      ];
-    }
-
-    return [
-      {
+      items.push({
+        id: 'update-nexus',
+        label: `Cập nhật hệ sinh thái (v${latestReleaseInfo?.version || NEXUS_CORE_APP.version})`,
+        icon: <ArrowDownCircle className="w-3.5 h-3.5 text-indigo-400" />,
+        variant: 'primary',
+        badge: 'Bản mới',
+        onClick: handleApplyNexusUpdate,
+      });
+    } else if (nexusUpdateStatus === 'latest') {
+      items.push({
+        id: 'nexus-latest',
+        label: `Đã là phiên bản mới nhất (v${NEXUS_CORE_APP.version})`,
+        icon: <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />,
+        disabled: true,
+        onClick: () => {},
+      });
+    } else {
+      items.push({
         id: 'check-nexus-update',
         label: nexusUpdateStatus === 'checking' ? 'Đang kiểm tra...' : 'Kiểm tra phiên bản',
         icon: <RefreshCw className="w-3.5 h-3.5 text-white/70" />,
         isLoading: nexusUpdateStatus === 'checking',
         onClick: handleCheckNexusUpdate,
-      },
-      {
-        id: 'nexus-info',
-        label: 'Thông tin ứng dụng',
-        icon: <Info className="w-3.5 h-3.5 text-white/70" />,
-        onClick: () => setInfoModalApp(NEXUS_CORE_APP),
-      },
-    ];
-  }, [isDev, nexusUpdateStatus]);
+      });
+    }
+
+    // 2. Thông tin ứng dụng (dynamic version từ NEXUS_CORE_APP)
+    items.push({
+      id: 'nexus-info',
+      label: `Thông tin ứng dụng (v${NEXUS_CORE_APP.version}${isDev ? ' - Dev' : ''})`,
+      icon: <Info className="w-3.5 h-3.5 text-white/70" />,
+      onClick: () => setInfoModalApp(NEXUS_CORE_APP),
+    });
+
+    return items;
+  }, [isDev, nexusUpdateStatus, latestReleaseInfo]);
 
   const contextMenuItems: ContextMenuItem[] = useMemo(() => {
     const app = contextMenu.app;
@@ -298,13 +325,16 @@ export default function App() {
         onPowerOff={() => console.log('Thoát Launchpad')}
       />
 
-      <ContextMenu
-        isOpen={contextMenu.isOpen}
-        x={contextMenu.x}
-        y={contextMenu.y}
-        onClose={() => setContextMenu((prev) => ({ ...prev, isOpen: false }))}
-        items={contextMenuItems}
-      />
+      {contextMenu.isOpen && (
+        <ContextMenu
+          key={`${contextMenu.x}-${contextMenu.y}`}
+          isOpen={contextMenu.isOpen}
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={() => setContextMenu((prev) => ({ ...prev, isOpen: false }))}
+          items={contextMenuItems}
+        />
+      )}
 
       <AppInfoModal
         isOpen={infoModalApp !== null}

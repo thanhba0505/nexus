@@ -57,7 +57,7 @@ export function DropdownMenu({
       className={clsx(
         'absolute z-50 min-w-56 rounded-2xl p-1.5 shadow-2xl',
         'bg-slate-900/90 backdrop-blur-2xl border border-white/15',
-        'animate-in fade-in zoom-in-95 duration-150',
+        'animate-menu-in origin-top-right',
         className,
       )}
     >

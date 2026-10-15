@@ -140,6 +140,37 @@ export function runVersionBump({ dryRun = false } = {}) {
     for (const appDir of allAppDirs) {
       updateAppPackageJson(appDir, targetVersion);
       updateAppTauriConfig(appDir, targetVersion);
+
+      const cargoPath = path.join(ROOT_DIR, 'apps', appDir, 'src-tauri', 'Cargo.toml');
+      if (fs.existsSync(cargoPath)) {
+        let content = fs.readFileSync(cargoPath, 'utf-8');
+        content = content.replace(/(?m)^version = "[^"]+"/, `version = "${targetVersion}"`);
+        fs.writeFileSync(cargoPath, content, 'utf-8');
+      }
+    }
+
+    // Đồng bộ packages/shared/src/constants/app-info.ts
+    const appInfoPath = path.join(ROOT_DIR, 'packages', 'shared', 'src', 'constants', 'app-info.ts');
+    if (fs.existsSync(appInfoPath)) {
+      let content = fs.readFileSync(appInfoPath, 'utf-8');
+      content = content.replace(/version: '[^']+'/g, `version: '${targetVersion}'`);
+      fs.writeFileSync(appInfoPath, content, 'utf-8');
+    }
+
+    // Đồng bộ packages/*/package.json
+    for (const pkgDir of ['shared', 'ui', 'config']) {
+      const pkgPath = path.join(ROOT_DIR, 'packages', pkgDir, 'package.json');
+      if (fs.existsSync(pkgPath)) {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+        pkg.version = targetVersion;
+        fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n', 'utf-8');
+      }
+    }
+
+    // Đồng bộ release-artifacts/apps.json nếu có
+    const releaseAppsJsonPath = path.join(ROOT_DIR, 'release-artifacts', 'apps.json');
+    if (fs.existsSync(releaseAppsJsonPath)) {
+      fs.writeFileSync(releaseAppsJsonPath, JSON.stringify(appsData, null, 2) + '\n', 'utf-8');
     }
   }
 

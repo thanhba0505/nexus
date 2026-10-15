@@ -34,6 +34,20 @@ export default {
         'squircle-hover': '0 12px 32px -4px rgba(0, 0, 0, 0.45)',
         dock: '0 20px 40px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.2)',
       },
+      keyframes: {
+        'menu-in': {
+          '0%': { opacity: '0', transform: 'scale(0.95)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
+        'fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+      },
+      animation: {
+        'menu-in': 'menu-in 120ms cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        'fade-in': 'fade-in 100ms ease-out forwards',
+      },
     },
   },
   plugins: [],
