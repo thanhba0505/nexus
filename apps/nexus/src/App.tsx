@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   LaunchpadLayout,
   LaunchpadHeader,
@@ -129,28 +129,91 @@ export default function App() {
       return next;
     });
 
-    // Mở ứng dụng macOS qua bundleId bằng native Tauri command
-    if (app.bundleId) {
-      try {
-        await invoke('open_mini_app', { bundleId: app.bundleId });
-      } catch (err) {
-        console.warn(`Không thể mở ứng dụng ${app.name} qua Tauri:`, err);
-      }
+    // Mở ứng dụng macOS qua bundleId và tên ứng dụng bằng native Tauri command
+    try {
+      await invoke('open_mini_app', {
+        bundleId: app.bundleId,
+        appName: app.name,
+      });
+    } catch (err) {
+      console.warn(`Không thể mở ứng dụng ${app.name} qua Tauri:`, err);
+    }
+  };
+
+  const handleCloseApp = async (app: NexusAppMeta) => {
+    setRunningAppIds((prev) => {
+      const next = new Set(prev);
+      next.delete(app.id);
+      return next;
+    });
+
+    try {
+      await invoke('close_mini_app', {
+        bundleId: app.bundleId,
+        appName: app.name,
+      });
+    } catch (err) {
+      console.warn(`Không thể đóng ứng dụng ${app.name} qua Tauri:`, err);
     }
   };
 
   const handleToggleRunningApp = (app: NexusAppMeta) => {
     const isRunning = runningAppIds.has(app.id);
     if (isRunning) {
-      setRunningAppIds((prev) => {
-        const next = new Set(prev);
-        next.delete(app.id);
-        return next;
-      });
+      handleCloseApp(app);
     } else {
       handleLaunchApp(app);
     }
   };
+
+  // Đồng bộ 2 chiều trạng thái thực tế của các mini apps trên macOS
+  useEffect(() => {
+    let isMounted = true;
+
+    const syncRunningApps = async () => {
+      try {
+        const appsToCheck = NEXUS_APPS.map((app) => ({
+          id: app.id,
+          bundleId: app.bundleId,
+          name: app.name,
+        }));
+
+        const runningIds = await invoke<string[]>('check_running_apps', {
+          apps: appsToCheck,
+        });
+
+        if (isMounted && Array.isArray(runningIds)) {
+          setRunningAppIds((prev) => {
+            const nextSet = new Set(runningIds as AppId[]);
+            if (prev.size === nextSet.size && [...prev].every((id) => nextSet.has(id))) {
+              return prev;
+            }
+            return nextSet;
+          });
+        }
+      } catch {
+        // Fallback khi chạy trên browser ngoài môi trường Tauri
+      }
+    };
+
+    // Kiểm tra ngay khi mount
+    syncRunningApps();
+
+    // Định kỳ kiểm tra mỗi 1.5 giây
+    const intervalId = setInterval(syncRunningApps, 1500);
+
+    // Kiểm tra ngay khi Nexus nhận focus (khi user chuyển cửa sổ từ miniapp về Nexus)
+    const handleFocus = () => {
+      syncRunningApps();
+    };
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, []);
 
   const handleContextMenu = (e: React.MouseEvent, app: NexusAppMeta) => {
     e.preventDefault();
@@ -292,7 +355,7 @@ export default function App() {
       },
       {
         id: 'toggle-running',
-        label: isRunning ? 'Đóng ứng dụng (Đang mở)' : 'Chạy thử (Mở app)',
+        label: isRunning ? 'Đóng' : 'Mở',
         icon: isRunning ? (
           <Square className="w-3.5 h-3.5 text-rose-400" />
         ) : (
