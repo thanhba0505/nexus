@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   compile-and-publish:
@@ -58,7 +59,6 @@ jobs:
             [ -f "$f" ] || continue
             dest="release-artifacts/$(basename "$f" | tr ' ' '_')"
             cp "$f" "$dest"
-            cp "$f" "release-artifacts/Nexus.dmg"
           done
 
           echo "Biên dịch SlackBot..."
@@ -92,9 +92,14 @@ jobs:
       - name: Update README.md with Published Release Details
         run: |
           TAG_NAME="${{ github.event.release.tag_name || github.event.inputs.tag }}"
-          VERSION="${TAG_NAME#v}"
-          DMG_NAME="Nexus_${VERSION}_aarch64.dmg"
-          DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/${TAG_NAME}/${DMG_NAME}"
+          BRANCH_NAME="chore/update-readme-${TAG_NAME}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Fetch nhánh main mới nhất để cập nhật tài liệu trên commit mới nhất
+          git fetch origin main
+          git checkout -B "$BRANCH_NAME" origin/main
 
           python3 -c "
           import re, os
@@ -104,10 +109,14 @@ jobs:
           if not readme.exists():
               exit(0)
 
-          tag = os.environ.get('TAG_NAME', '')
-          dmg = os.environ.get('DMG_NAME', '')
-          url = os.environ.get('DOWNLOAD_URL', '')
+          tag = os.environ.get('TAG_NAME', '').strip()
+          if not tag:
+              exit(0)
+
+          version = tag.lstrip('v')
+          dmg = f'Nexus_{version}_aarch64.dmg'
           repo = os.environ.get('GITHUB_REPOSITORY', 'thanhba0505/nexus')
+          url = f'https://github.com/{repo}/releases/download/{tag}/{dmg}'
 
           content = readme.read_text(encoding='utf-8')
           new_section = (
@@ -131,15 +140,31 @@ jobs:
               content,
           )
           readme.write_text(content, encoding='utf-8')
+          print(f'✅ Đã cập nhật README.md cho phiên bản {tag} với tệp {dmg}')
           "
 
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add README.md
           if ! git diff --staged --quiet; then
             git commit -m "chore(release): update README download link to $TAG_NAME [skip ci]"
-            git push origin HEAD:main || echo "Không thể push commit README lên main, bỏ qua."
+
+            echo "🚀 Đang thử push trực tiếp lên main..."
+            if git push origin "HEAD:main"; then
+              echo "✅ Đã push trực tiếp lên main thành công!"
+            else
+              echo "⚠️ Push trực tiếp lên main bị chặn bởi Branch Protection. Tự động tạo Pull Request..."
+              git push origin "$BRANCH_NAME" --force
+              PR_URL=$(gh pr create \
+                --title "chore(release): update README download link to ${TAG_NAME}" \
+                --body "Tự động cập nhật link tải và thông tin phiên bản trong README.md cho ${TAG_NAME}." \
+                --base main \
+                --head "$BRANCH_NAME" || true)
+              echo "📋 PR đã được tạo: $PR_URL"
+              gh pr merge "$BRANCH_NAME" --auto --squash || true
+            fi
+          else
+            echo "ℹ️ README.md đã ở trạng thái mới nhất, không cần cập nhật."
           fi
         env:
           TAG_NAME: ${{ github.event.release.tag_name || github.event.inputs.tag }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
