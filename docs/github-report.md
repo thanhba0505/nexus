@@ -17,37 +17,52 @@ Mỗi buổi sáng họp **Daily Standup** hoặc viết cập nhật trên **Pa
 
 ---
 
-## 2. Kiến Trúc Giao Diện (UI/UX Architecture)
+## 2. Kiến Trúc Giao Diện & Hooks (UI & State Architecture)
 
-### 2.1. Cơ Chế Custom Unified Header (Traffic Lights Overlay)
+### 2.1. Tái Sử Dụng Thành Phần Chuẩn Từ `@nexus/ui`
 
-Để giữ nguyên 3 nút gốc macOS nhưng vẫn đặt được các nút tính năng lên Header, ứng dụng sử dụng cấu hình **Overlay Titlebar** của Tauri 2:
+Để đảm bảo tính nhất quán trên toàn bộ hệ sinh thái Nexus, `github-report` kế thừa trực tiếp các thành phần cốt lõi từ thư viện `@nexus/ui`:
 
-```json
-// apps/github-report/src-tauri/tauri.conf.json
-"app": {
-  "macOSPrivateApi": true,
-  "windows": [
-    {
-      "label": "main",
-      "title": "GitHub Report",
-      "width": 900,
-      "height": 640,
-      "minWidth": 720,
-      "minHeight": 500,
-      "titleBarStyle": "Overlay",
-      "hiddenTitle": true,
-      "transparent": true
-    }
-  ]
-}
+1. **`MiniAppHeader`**:
+   - Tự động tích hợp khoảng trống an toàn 76px (`leftSafeWidth={76}`) cho 3 nút Traffic Lights gốc macOS.
+   - Hỗ trợ kéo di chuyển cửa sổ thông qua `data-tauri-drag-region` và phân lập các nút bấm bằng `data-no-drag`.
+   - Chia 3 vùng rõ ràng: `leftSlot` (Logo, Title, Bộ chọn ngày), `centerSlot`, `rightSlot` (Fetch ⌘R, Copy, Parabol, Settings ⌘,).
+2. **`AppSplashScreen`**:
+   - Màn hình khởi động tối giản gồm Glowing App Icon, Title, Version badge và thanh tiến trình (Progress bar).
+   - Chỉ đảm nhiệm nạp `settings.json` và kiểm tra môi trường hệ thống trong ~300ms rồi transition mượt mà vào giao diện chính.
+
+### 2.2. Kiến Trúc Phân Rã Custom Hooks
+
+Thay vì dồn toàn bộ state vào `App.tsx`, ứng dụng được phân tách thành 3 hooks chuyên biệt theo Single Responsibility Principle:
+
+```text
+apps/github-report/src/
+├── hooks/
+│   ├── use-splash-screen.ts    # Quản lý tiến trình splash, nạp settings.json & check CLI
+│   ├── use-github-report.ts    # Quản lý fetch PRs, filter commits, AI summary, clipboard & browser reveal
+│   └── use-global-shortcuts.ts # Quản lý toàn bộ phím tắt macOS (⌘R, ⌘C, ⌘P, ⌘,, ⌘Enter, Esc)
+├── components/
+│   ├── UnifiedHeader.tsx       # Bọc MiniAppHeader từ @nexus/ui
+│   ├── AISummaryCard.tsx       # Hiển thị AI Summary, inline edit & loading spinner
+│   ├── PRTimelineCard.tsx      # Danh sách PR/Commit checkboxes & skeleton pulse loading
+│   ├── SettingsModal.tsx       # Modal cấu hình prompt, AI provider, Keychain PAT
+│   └── StatusBar.tsx           # Thanh trạng thái tối giản dưới chân trang
+└── App.tsx                     # Component điều phối gọn nhẹ (<150 dòng)
 ```
 
-- **Góc trái (`w-20` / `pl-20`)**: Chừa khoảng trống an toàn ~80px cho 3 nút Traffic Lights của macOS.
-- **Vùng kéo cửa sổ (`data-tauri-drag-region`)**: Toàn bộ khoảng trống trên Header cho phép click kéo di chuyển cửa sổ.
-- **Vùng nút chức năng**: Đặt `data-no-drag` để thao tác click không bị xung đột với sự kiện kéo cửa sổ.
+- **`useSplashScreen`**:
+  - Tải cấu hình từ `settings.json` qua `tauri-plugin-store`.
+  - Kiểm tra điều kiện tiên quyết (GitHub CLI, Antigravity CLI, Keychain).
+  - Trả về `isSplashActive`, `settings`, `updateSettings`.
+- **`useGitHubReport`**:
+  - Tiếp nhận `settings` sau khi splash hoàn tất.
+  - Tự động kích hoạt quét PRs bất đồng bộ khi vào app.
+  - Khi PRs nạp xong, tự động trigger AI tóm tắt ngầm ở background thread.
+  - Cung cấp trạng thái loading cục bộ: `isLoadingPRs`, `isGeneratingSummary`.
+- **`useGlobalShortcuts`**:
+  - Đăng ký listeners phím tắt macOS chuẩn xác, tự động dọn dẹp (cleanup) khi unmount.
 
-### 2.2. Wireframe Bố Cục Ứng Dụng
+### 2.3. Wireframe Bố Cục Ứng Dụng
 
 ```text
 ┌───────────────────────────────────────────────────────────────────────────────────┐
@@ -68,6 +83,7 @@ Mỗi buổi sáng họp **Daily Standup** hoặc viết cập nhật trên **Pa
 │  │                                                                             │  │
 │  │  [☑] 🔀 [PR-report] fix: update draft release workflow (PR #15)            │  │
 │  │      └── [☑] fix(ci): remove ignored release-artifacts pathspec             │  │
+│  │                                 (Hiển thị Skeleton Pulse khi đang tải)      │  │
 │  └─────────────────────────────────────────────────────────────────────────────┘  │
 │                                                                                   │
 │  Trạng thái: ✓ Đã sao chép vào Clipboard • Đã kích hoạt tab Parabol • 09:30       │ <- Minimal Status Footer (32px)
@@ -76,39 +92,50 @@ Mỗi buổi sáng họp **Daily Standup** hoặc viết cập nhật trên **Pa
 
 ---
 
-## 3. Luồng Nghiệp Vụ & Dữ Liệu (Data Flow)
+## 3. Luồng Nghiệp Vụ & Nạp Dữ Liệu Bất Đồng Bộ (Web-Like Async Flow)
+
+Quy trình nạp dữ liệu được thiết kế hoàn toàn bất đồng bộ (non-blocking). Mọi lệnh nặng trong Rust đều chạy qua `tauri::async_runtime::spawn_blocking`, đảm bảo không bao giờ khóa luồng giao diện hay gây hiện tượng con trỏ xoay 7 màu (beachball):
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Dev as Lập trình viên
+    participant Splash as AppSplashScreen
     participant UI as GitHub Report (React)
-    participant Rust as Backend (Tauri Native)
+    participant Rust as Backend (Tauri Native Async)
     participant GH as GitHub CLI (`gh`)
     participant AI as Local AI (`claude` / `agy`)
     participant OS as macOS (Clipboard / AppleScript)
 
-    Dev->>UI: Mở app hoặc bấm ⌘R (Fetch)
-    UI->>Rust: invoke("fetch_github_prs", { sinceDate })
-    Rust->>GH: gh search prs --author=@me & gh pr view
-    GH-->>Rust: Trả về danh sách PRs & commits
-    Rust-->>UI: Hiển thị Timeline commits
+    Dev->>Splash: Mở ứng dụng
+    Splash->>Rust: Nạp settings.json & check prerequisites (~300ms)
+    Splash-->>UI: Fade-out transition -> Vào ngay giao diện chính!
 
-    UI->>Rust: invoke("generate_ai_summary", { prs, promptTemplate })
-    alt Có Claude Code CLI (`claude`)
-        Rust->>AI: claude -p <prompt> (stdin: pr_data)
-    else Fallback Antigravity CLI (`agy`)
-        Rust->>AI: agy -p "<prompt>\n\n<pr_data>"
-    else Fallback Cloud API Key
-        Rust->>AI: Gọi trực tiếp Claude/OpenAI API
+    Note over UI: Người dùng tự do bấm Settings (⌘,), cuộn xem, v.v.
+
+    par Bất đồng bộ 1: Quét PRs
+        UI->>UI: PRTimelineCard hiển thị Skeleton Loading Pulse
+        UI->>Rust: invoke("fetch_github_prs", { sinceDate }) (spawn_blocking)
+        Rust->>GH: gh search prs & gh pr view (song song std::thread::scope)
+        GH-->>Rust: Trả về PRs & commits
+        Rust-->>UI: Cập nhật danh sách PRs (Tắt skeleton)
     end
-    AI-->>Rust: Trả về 3-4 dòng tóm tắt bullet
-    Rust-->>UI: Cập nhật Card AI Summary
 
-    UI->>OS: Ghi text vào Clipboard (⌘V sẵn sàng)
-    UI->>Rust: invoke("reveal_browser_tab", { target: "parabol" })
-    Rust->>OS: Chạy AppleScript kích hoạt tab browser đang mở
-    OS-->>Dev: Chuyển thẳng tới tab Parabol để dán
+    par Bất đồng bộ 2: Tự động tóm tắt AI
+        UI->>UI: AISummaryCard hiển thị Spinner Loading
+        UI->>Rust: invoke("generate_ai_summary", { prs, prompt }) (spawn_blocking)
+        alt Có Claude Code CLI (`claude`)
+            Rust->>AI: claude -p <prompt>
+        else Fallback Antigravity CLI (`agy`)
+            Rust->>AI: agy -p "<prompt>"
+        end
+        AI-->>Rust: Trả về kết quả tóm tắt
+        Rust-->>UI: Cập nhật Card AI Summary (Tắt spinner)
+    end
+
+    opt Nếu bật autoCopy / revealBrowser
+        UI->>OS: Tự động sao chép Clipboard & kích hoạt tab Parabol
+    end
 ```
 
 ---
@@ -223,8 +250,12 @@ Các lệnh được đăng ký trong `tauri::generate_handler!`:
 
 ## 8. Lộ Trình Phát Triển (Roadmap)
 
-- [ ] **Giai đoạn 1**: Cấu hình Tauri 2 `titleBarStyle: "Overlay"`, tích hợp macOS Vibrancy, hoàn thiện component `UnifiedHeader`.
-- [ ] **Giai đoạn 2**: Xây dựng các Rust commands: `check_prerequisites`, `fetch_github_prs`, `generate_ai_summary`, `reveal_browser_tab`.
-- [ ] **Giai đoạn 3**: Hoàn thiện UI Glassmorphism: Card AI Summary (hỗ trợ Inline Edit), Timeline PR & Commits (hỗ trợ Checkbox exclusion).
-- [ ] **Giai đoạn 4**: Xây dựng Modal Settings (`⌘,`): Quản lý Prompt templates qua `tauri-plugin-store`, quản lý Token qua Keychain, cấu hình Browser.
-- [ ] **Giai đoạn 5**: Viết unit test, format, typecheck và đóng gói bundle `.dmg`.
+- [x] **Giai đoạn 1**: Cấu hình Tauri 2 `titleBarStyle: "Overlay"`, tích hợp macOS Vibrancy, chuẩn hóa `MiniAppHeader` trong `@nexus/ui`.
+- [x] **Giai đoạn 2**: Xây dựng Rust async commands non-blocking: `check_prerequisites`, `fetch_github_prs`, `generate_ai_summary`, `reveal_browser_tab`.
+- [x] **Giai đoạn 3**: Hoàn thiện UI Glassmorphism: Card AI Summary (hỗ trợ Inline Edit & trigger lại), Timeline PR & Commits (hỗ trợ Checkbox exclusion & skeleton pulse loading).
+- [x] **Giai đoạn 4**: Xây dựng Modal Settings (`⌘,`): Quản lý Prompt templates qua `tauri-plugin-store`, quản lý Token qua Keychain, cấu hình Browser.
+- [x] **Giai đoạn 5 (Refactor Chuẩn Monorepo)**:
+  - Tách `MiniAppHeader` & `AppSplashScreen` vào package dùng chung `@nexus/ui`.
+  - Phân rã hooks (`useSplashScreen`, `useGitHubReport`, `useGlobalShortcuts`), thu gọn `App.tsx` dưới 150 dòng.
+  - Chuyển toàn bộ tác vụ Rust sang Non-blocking Async (`spawn_blocking`) triệt tiêu hoàn toàn hiện tượng Beachball Cursor.
+- [ ] **Giai đoạn 6**: Viết test hồi quy, bổ sung caching PRs cục bộ và đóng gói bundle `.dmg` cho Production.

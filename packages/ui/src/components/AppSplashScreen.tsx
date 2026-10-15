@@ -1,12 +1,24 @@
-import { GitPullRequest, Sparkles } from 'lucide-react';
+import React from 'react';
 
 export interface AppSplashScreenProps {
+  /** Icon chính của ứng dụng */
+  icon: React.ReactNode;
+  /** Tên hiển thị của ứng dụng */
+  title: string;
+  /** Phiên bản ứng dụng (tùy chọn) */
+  version?: string;
+  /** Tiến trình nạp 0 - 100 */
   progress: number;
+  /** Thông điệp trạng thái đang nạp */
   message?: string;
+  /** Hiệu ứng fade-out thoát khi hoàn tất */
   isExiting: boolean;
 }
 
 export function AppSplashScreen({
+  icon,
+  title,
+  version,
   progress,
   message = 'Đang khởi động...',
   isExiting,
@@ -22,23 +34,22 @@ export function AppSplashScreen({
 
       {/* Nội dung trung tâm: Icon app & thanh tiến trình */}
       <div className="flex-1 flex flex-col items-center justify-center p-6 -mt-8">
-        {/* Glowing App Icon */}
+        {/* Glowing Logo Card */}
         <div className="relative mb-6">
           <div className="absolute -inset-3 bg-gradient-to-r from-sky-500 to-indigo-600 rounded-3xl blur-2xl opacity-50 animate-pulse" />
           <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-white/15 shadow-2xl flex items-center justify-center">
-            <GitPullRequest className="w-10 h-10 text-sky-400" />
-            <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center">
-              <Sparkles
-                className="w-3.5 h-3.5 text-indigo-300 animate-spin"
-                style={{ animationDuration: '4s' }}
-              />
-            </div>
+            {icon}
           </div>
         </div>
 
-        {/* Tên ứng dụng */}
+        {/* Tiêu đề ứng dụng */}
         <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2 mb-6">
-          GitHub Report
+          <span>{title}</span>
+          {version && (
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/70 border border-white/10 font-mono">
+              {version}
+            </span>
+          )}
         </h1>
 
         {/* Thanh tiến trình (Progress Bar) */}

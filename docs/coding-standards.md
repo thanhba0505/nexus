@@ -403,8 +403,6 @@ const LOCAL_STORAGE_KEY = import.meta.env.DEV
   : 'nexus_github_report_settings';
 ```
 
----
-
 ## 6. Quy Chuẩn Lập Trình Backend Rust & Tauri v2
 
 ### 6.1. Naming Conventions trong Rust
@@ -444,14 +442,110 @@ pub fn launch_mini_app(bundle_id: String) -> Result<String, String> {
 - Không bao giờ cấp quyền wildcard (`"*"`) trong file `capabilities/default.json`.
 - Chỉ khai báo chính xác các lệnh IPC được phép gọi từ frontend webview tương ứng.
 
+### 6.4. Bắt Buộc Sử Dụng Asynchronous IPC Commands Để Tránh Treo UI & Beachball Cursor (Chuột 7 Màu)
+
+Khi thực thi các tác vụ tốn thời gian trong Rust backend (chạy process CLI ngoài qua `Command`, gọi AppleScript `osascript`, truy vấn I/O ổ đĩa hoặc HTTP network):
+
+- **NGHIÊM CẤM** chạy các lệnh đồng bộ (`std::process::Command::output()`, `thread::sleep`, v.v.) trực tiếp trong luồng chính của Tauri command.
+- **HẬU QUẢ NẾU LÀM SAI**: Tauri Command chạy trên luồng IPC xử lý sự kiện. Nếu luồng này bị chặn quá 2 giây, macOS WindowServer sẽ nhận định ứng dụng "Not Responding" và lập tức biến con trỏ chuột thành **con trỏ xoay 7 màu (Spinning Beachball Cursor)**, gây đóng băng toàn bộ cửa sổ ứng dụng.
+- **QUY TẮC BẮT BUỘC**:
+  1. Hàm command phải là `pub async fn`.
+  2. Bọc toàn bộ các tác vụ blocking bên trong `tauri::async_runtime::spawn_blocking(...)`.
+  3. Xử lý song song bằng luồng worker nếu có nhiều tác vụ I/O độc lập (ví dụ `std::thread::scope`).
+
+```rust
+// ✅ ĐÚNG CHUẨN: Non-blocking Async Command
+#[tauri::command]
+pub async fn fetch_github_prs(since_iso: String) -> Result<Vec<PRReportItem>, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        // Thực thi shell Command::new("gh") an toàn ở background thread
+        internal_fetch_prs(&since_iso)
+    })
+    .await
+    .map_err(|e| format!("Task execution failed: {}", e))?
+}
+
+// ❌ SAI LẦM: Chặn luồng IPC làm đơ giao diện và hiện chuột xoay 7 màu
+#[tauri::command]
+pub fn fetch_github_prs(since_iso: String) -> Result<Vec<PRReportItem>, String> {
+    // Luồng IPC bị treo cho đến khi lệnh `gh` chạy xong!
+    std::process::Command::new("gh").arg("search").output()
+}
+```
+
 ---
 
-## 7. Tiêu Chí Kiểm Duyệt Pull Request (PR Review Checklist)
+## 7. Chuẩn Hóa Giao Diện & Vòng Đời Mini App (Mini App Architecture Standards)
+
+Tất cả các mini apps phát triển trong monorepo Nexus (như `apps/github-report`, `apps/slackbot`, v.v.) phải kế thừa các component dùng chung từ `@nexus/ui` và tuân theo nguyên tắc trải nghiệm người dùng tương tự Web Dashboard hiện đại:
+
+### 7.1. Chuẩn Hóa Header Cửa Sổ (`MiniAppHeader` từ `@nexus/ui`)
+
+Cửa sổ mini app trên macOS luôn sử dụng chế độ `titleBarStyle: "Overlay"` kết hợp với component `MiniAppHeader`:
+
+1. **Khoảng cách an toàn Traffic Lights**: Header tự động chừa biên an toàn 76px (`leftSafeWidth={76}`) ở góc trên bên trái để 3 nút 🔴 🟡 🟢 của macOS không bị các nút tính năng đè lên.
+2. **Kéo cửa sổ (Window Dragging)**:
+   - Các vùng nền trống trên header được gắn `data-tauri-drag-region` để người dùng có thể nhấp chuột kéo cửa sổ linh hoạt.
+   - Các nút bấm, icon, dropdown, input trên header bắt buộc phải có thuộc tính `data-no-drag` hoặc class `no-drag` để sự kiện click không bị nuốt bởi trình quản lý cửa sổ Tauri.
+3. **Cấu trúc 3 vùng linh hoạt**:
+   - `leftSlot`: Chứa App Icon, tiêu đề ứng dụng, filter dropdown hoặc status badge.
+   - `centerSlot`: Chứa thanh tìm kiếm, tabs điều hướng hoặc thông tin tiến trình.
+   - `rightSlot`: Chứa các nút thao tác chính (Refresh, Copy, Settings `⌘,`, v.v.).
+
+```tsx
+import { MiniAppHeader } from '@nexus/ui';
+
+export function AppHeader() {
+  return (
+    <MiniAppHeader
+      leftSafeWidth={76}
+      leftSlot={<span className="text-xs font-semibold text-sky-400">GitHub Report</span>}
+      rightSlot={
+        <div className="flex items-center gap-1.5" data-no-drag>
+          <button onClick={handleRefresh}>Làm mới (⌘R)</button>
+        </div>
+      }
+    />
+  );
+}
+```
+
+### 7.2. Màn Hình Khởi Động Tối Giản (`AppSplashScreen` từ `@nexus/ui`)
+
+- Màn hình khởi động chỉ xuất hiện trong tích tắc (~200ms đến 400ms) để tải các cấu hình nền tảng quan trọng (`settings.json`, kiểm tra CLI/Keychain).
+- **Thiết kế tối giản**: Chỉ gồm Icon ứng dụng phát sáng (Glowing App Icon), tên app, số phiên bản và thanh tiến trình mượt mà (Progress bar).
+- **Tuyệt đối KHÔNG chạy các tác vụ nặng** (như kéo commit, gọi mạng, sinh văn bản AI) trong màn hình khởi động vì sẽ làm người dùng có cảm giác ứng dụng khởi động chậm chạp.
+- Chuyển tiếp mượt mà vào giao diện chính bằng animation fade-out (`opacity-0 pointer-events-none`).
+
+### 7.3. Triết Lý Trải Nghiệm Bất Đồng Bộ Non-Blocking (Web-Dashboard Pattern)
+
+Luồng hoạt động chuẩn của mọi mini app khi mở:
+
+```mermaid
+flowchart TD
+    A["Mở App"] --> B["AppSplashScreen\n(Nạp settings.json ~300ms)"]
+    B --> C["Vào Ngay Giao Diện Chính\n(Render Shell & Header)"]
+    C --> D["Bất đồng bộ 1: Quét Dữ Liệu\n(PRTimeline hiển thị Skeleton Pulse)"]
+    D --> E["Quét dữ liệu hoàn tất\n(Render danh sách dữ liệu)"]
+    E --> F["Bất đồng bộ 2: Tự động kích hoạt AI\n(AISummary hiển thị Loading Spinner)"]
+    F --> G["Hoàn tất: Báo cáo sẵn sàng\n(Tự động chép clipboard nếu bật)"]
+
+    C -.->|"Người dùng tự do thao tác"| H["Mở Cài đặt (⌘,) / Cuộn xem / Hủy"]
+```
+
+1. **Hiển thị tức thì (Instant Interface)**: Người dùng phải nhìn thấy cấu trúc giao diện làm việc ngay lập tức, không để màn hình trắng hoặc màn hình splash đơ cứng.
+2. **Skeleton Loading cục bộ**: Khu vực nào đang tải dữ liệu thì hiển thị Skeleton/Spinner cục bộ ở đúng khu vực đó (ví dụ Skeleton tại PR Timeline, Spinner tại AI Summary Card).
+3. **Không khóa tương tác**: Trong khi hệ thống đang quét dữ liệu hoặc AI đang suy nghĩ, người dùng vẫn hoàn toàn tự do bấm mở Modal Cài đặt (`⌘,`), xem danh sách, chỉnh sửa cấu hình mà không gặp bất kỳ hiện tượng giật lag hay khóa chuột nào.
+
+---
+
+## 8. Tiêu Chí Kiểm Duyệt Pull Request (PR Review Checklist)
 
 Mọi đóng góp mã nguồn mới bắt buộc phải thỏa mãn checklist sau trước khi được merge:
 
 - [ ] Chạy `pnpm typecheck` thành công với 0 lỗi.
 - [ ] Chạy `pnpm lint` thành công với 0 cảnh báo nghiêm trọng.
+- [ ] Chạy `pnpm format` không có file bị sai quy chuẩn.
 - [ ] Không có file `.env`, token, secret hoặc file rác trong commit.
 - [ ] Biến môi trường mới (nếu có) đã được cập nhật tương ứng vào `.env.example` và `src/env.ts`.
 - [ ] Token và secret nhạy cảm được lưu qua macOS Keychain (`keyring`), không lưu plain-text trong file json hay localStorage.
@@ -462,3 +556,5 @@ Mọi đóng góp mã nguồn mới bắt buộc phải thỏa mãn checklist sa
 - [ ] Đặt tên đúng chuẩn (kebab-case cho files, PascalCase cho Components, `is/has/can/should` cho booleans).
 - [ ] Không sử dụng `enum` số; đã dùng `as const` hoặc string literal unions.
 - [ ] Code Rust không chứa `.unwrap()` ở runtime context.
+- [ ] **Tác vụ nặng trong Rust (CLI, Network, AppleScript) bắt buộc dùng `async fn` + `tauri::async_runtime::spawn_blocking` để không gây đơ chuột 7 màu (beachball cursor)**.
+- [ ] **Mini Apps kế thừa `MiniAppHeader` và `AppSplashScreen` từ `@nexus/ui`, tuân thủ trải nghiệm tải dữ liệu bất đồng bộ non-blocking**.

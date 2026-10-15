@@ -7,7 +7,21 @@
 ## 📖 Tài Liệu Chi Tiết
 
 Xem đầy đủ kiến trúc, cơ chế Unified Titlebar, lưu trữ `tauri-plugin-store` & macOS Keychain tại:
-👉 **[Tài Liệu Đặc Tả GitHub Report](../../docs/github-report.md)**
+👉 **[Tài Liệu Đặc Tả GitHub Report](../../docs/github-report.md)**  
+👉 **[Quy Chuẩn Lập Trình Monorepo](../../docs/coding-standards.md)**
+
+---
+
+## 🏛️ Kiến Trúc & Cấu Trúc Mã Nguồn
+
+Ứng dụng tuân theo chuẩn kiến trúc Web-Dashboard bất đồng bộ non-blocking:
+
+- **UI Components Dùng Chung**: Kế thừa `MiniAppHeader` (Traffic lights 76px safe margin) và `AppSplashScreen` từ gói `@nexus/ui`.
+- **Phân Rã Hooks Chuyên Biệt**:
+  - `src/hooks/use-splash-screen.ts`: Quản lý nạp cấu hình `settings.json` và kiểm tra môi trường trong ~300ms rồi transition vào main view.
+  - `src/hooks/use-github-report.ts`: Quét PRs/commits bất đồng bộ, tự động kích hoạt Local AI tóm tắt ngầm ở background thread.
+  - `src/hooks/use-global-shortcuts.ts`: Quản lý phím tắt macOS toàn cục (`⌘R`, `⌘C`, `⌘P`, `⌘,`, `⌘Enter`, `Esc`).
+- **Rust Backend Async**: Mọi lệnh shell (`gh`, `claude`, `agy`, AppleScript) chạy qua `tauri::async_runtime::spawn_blocking`, tuyệt đối không khóa luồng IPC hay gây hiện tượng chuột xoay 7 màu (beachball).
 
 ---
 
@@ -30,7 +44,7 @@ pnpm dev
 - **Bundle ID**:
   - Dev: `com.thanhba.nexus.githubreport.dev`
   - Prod: `com.thanhba.nexus.githubreport`
-- **Frontend**: React 19, Tailwind CSS, Lucide Icons, `@tauri-apps/plugin-store`
+- **Frontend**: React 19, Tailwind CSS, Lucide Icons, `@nexus/ui`, `@tauri-apps/plugin-store`
 - **Backend**: Tauri 2, Rust (`keyring`, `tauri-plugin-store`, `opener`)
 - **Lưu trữ Cài đặt & Prompt**:
   - Dev: `~/Library/Application Support/com.thanhba.nexus.githubreport.dev/settings.json`
