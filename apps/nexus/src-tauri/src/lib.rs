@@ -15,7 +15,15 @@ fn open_mini_app(bundle_id: String, app_name: Option<String>) -> Result<String, 
     {
         use std::process::Command;
 
-        // 1. Thử mở qua standard macOS bundle ID
+        // 1. Thử mở qua dev bundle ID trước nếu đang chạy dev (ví dụ: com.thanhba.nexus.githubreport.dev)
+        let dev_bundle = format!("{}.dev", bundle_id);
+        if let Ok(res) = Command::new("open").arg("-b").arg(&dev_bundle).output() {
+            if res.status.success() {
+                return Ok(format!("Opened application: {}", dev_bundle));
+            }
+        }
+
+        // 2. Thử mở qua standard macOS bundle ID (/Applications hoặc đã cài)
         if !bundle_id.is_empty() {
             let output = Command::new("open")
                 .arg("-b")
@@ -29,9 +37,26 @@ fn open_mini_app(bundle_id: String, app_name: Option<String>) -> Result<String, 
             }
         }
 
-        // 2. Dự phòng trong môi trường dev / local build nếu chưa đăng ký LaunchServices
+        // 3. Dự phòng trong môi trường dev / local build
         if let Some(ref name) = app_name {
             let app_bundle_name = format!("{}.app", name);
+            let binary_slug = name.to_lowercase().replace(' ', "-");
+
+            // Ưu tiên chạy binary trong target/debug nếu có
+            let bin_candidates = [
+                format!("./target/debug/{}", binary_slug),
+                format!("../../target/debug/{}", binary_slug),
+                format!("./target/release/{}", binary_slug),
+                format!("../../target/release/{}", binary_slug),
+            ];
+            for path in bin_candidates {
+                if std::path::Path::new(&path).exists() {
+                    if let Ok(_) = Command::new(&path).spawn() {
+                        return Ok(format!("Spawned binary: {}", path));
+                    }
+                }
+            }
+
             let candidate_paths = [
                 format!("/Applications/{}", app_bundle_name),
                 format!("./target/release/bundle/macos/{}", app_bundle_name),
@@ -47,21 +72,6 @@ fn open_mini_app(bundle_id: String, app_name: Option<String>) -> Result<String, 
                         if res.status.success() {
                             return Ok(format!("Opened application: {}", path));
                         }
-                    }
-                }
-            }
-
-            let binary_slug = name.to_lowercase().replace(' ', "-");
-            let bin_candidates = [
-                format!("./target/debug/{}", binary_slug),
-                format!("./target/release/{}", binary_slug),
-                format!("../../target/debug/{}", binary_slug),
-                format!("../../target/release/{}", binary_slug),
-            ];
-            for path in bin_candidates {
-                if std::path::Path::new(&path).exists() {
-                    if let Ok(_) = Command::new(&path).spawn() {
-                        return Ok(format!("Spawned binary: {}", path));
                     }
                 }
             }
@@ -82,8 +92,12 @@ fn close_mini_app(bundle_id: String, app_name: Option<String>) -> Result<String,
     {
         use std::process::Command;
 
-        // 1. Thoát nhẹ nhàng bằng AppleScript qua bundle identifier
+        // 1. Thoát nhẹ nhàng bằng AppleScript qua bundle identifier (cả dev lẫn prod)
         if !bundle_id.is_empty() {
+            let _ = Command::new("osascript")
+                .arg("-e")
+                .arg(format!("tell application id \"{}.dev\" to quit", bundle_id))
+                .output();
             let _ = Command::new("osascript")
                 .arg("-e")
                 .arg(format!("tell application id \"{}\" to quit", bundle_id))
@@ -131,17 +145,21 @@ fn check_running_apps(apps: Vec<MiniAppCheckMeta>) -> Result<Vec<String>, String
         for app in apps {
             let mut is_running = false;
 
-            // 1. Kiểm tra qua lsappinfo (nhanh nhất trên macOS, không cần quyền AppleScript)
+            // 1. Kiểm tra qua lsappinfo (hỗ trợ cả bundle dev và prod)
             if !app.bundle_id.is_empty() {
-                if let Ok(output) = Command::new("lsappinfo")
-                    .arg("info")
-                    .arg("-bundleid")
-                    .arg(&app.bundle_id)
-                    .output()
-                {
-                    let stdout = String::from_utf8_lossy(&output.stdout);
-                    if stdout.contains("bundleID=") || stdout.contains("ASN:") {
-                        is_running = true;
+                let dev_id = format!("{}.dev", app.bundle_id);
+                for bid in [&dev_id, &app.bundle_id] {
+                    if let Ok(output) = Command::new("lsappinfo")
+                        .arg("info")
+                        .arg("-bundleid")
+                        .arg(bid)
+                        .output()
+                    {
+                        let stdout = String::from_utf8_lossy(&output.stdout);
+                        if stdout.contains("bundleID=") || stdout.contains("ASN:") {
+                            is_running = true;
+                            break;
+                        }
                     }
                 }
             }
@@ -169,15 +187,19 @@ fn check_running_apps(apps: Vec<MiniAppCheckMeta>) -> Result<Vec<String>, String
                 }
             }
 
-            // 3. Dự phòng: AppleScript check
+            // 3. Dự phòng: AppleScript check (hỗ trợ cả bundle dev và prod)
             if !is_running && !app.bundle_id.is_empty() {
-                if let Ok(output) = Command::new("osascript")
-                    .arg("-e")
-                    .arg(format!("application id \"{}\" is running", app.bundle_id))
-                    .output()
-                {
-                    if String::from_utf8_lossy(&output.stdout).trim() == "true" {
-                        is_running = true;
+                let dev_id = format!("{}.dev", app.bundle_id);
+                for bid in [&dev_id, &app.bundle_id] {
+                    if let Ok(output) = Command::new("osascript")
+                        .arg("-e")
+                        .arg(format!("application id \"{}\" is running", bid))
+                        .output()
+                    {
+                        if String::from_utf8_lossy(&output.stdout).trim() == "true" {
+                            is_running = true;
+                            break;
+                        }
                     }
                 }
             }

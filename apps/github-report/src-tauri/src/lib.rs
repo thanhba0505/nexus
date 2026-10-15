@@ -483,8 +483,9 @@ pub fn run() {
             Ok(())
         })
         .on_window_event(|window, event| {
-            if let tauri::WindowEvent::CloseRequested { .. } = event {
-                window.app_handle().exit(0);
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                api.prevent_close();
+                let _ = window.hide();
             }
         })
         .invoke_handler(tauri::generate_handler![
@@ -495,6 +496,16 @@ pub fn run() {
             save_github_token,
             get_github_token
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running github-report application");
+        .build(tauri::generate_context!())
+        .expect("error while building github-report application")
+        .run(|app_handle, event| {
+            if let tauri::RunEvent::Reopen { has_visible_windows, .. } = event {
+                if !has_visible_windows {
+                    if let Some(w) = app_handle.get_webview_window("main") {
+                        let _ = w.show();
+                        let _ = w.set_focus();
+                    }
+                }
+            }
+        });
 }
