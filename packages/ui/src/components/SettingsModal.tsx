@@ -12,6 +12,7 @@ import {
   Sparkles,
   Layers,
   Download,
+  Check,
 } from 'lucide-react';
 import { Modal } from './Modal';
 import { clsx } from 'clsx';
@@ -201,7 +202,7 @@ export function SettingsModal({
                 </div>
               ) : (
                 <div className="flex items-center justify-between pt-1">
-                  <span className="text-xs text-white/60">
+                  <span className="flex-1 min-w-0 pr-3 text-xs text-white/60">
                     {updateStatus === 'latest'
                       ? 'Hệ sinh thái Nexus đã ở phiên bản mới nhất.'
                       : 'Kênh cập nhật: github.com/thanhba0505/nexus'}
@@ -210,7 +211,7 @@ export function SettingsModal({
                     type="button"
                     disabled={isChecking}
                     onClick={onCheckUpdate}
-                    className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium rounded-xl bg-white/10 hover:bg-white/15 active:bg-white/20 text-white border border-white/10 transition-all disabled:opacity-50 cursor-pointer"
+                    className="shrink-0 whitespace-nowrap flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium rounded-xl bg-white/10 hover:bg-white/15 active:bg-white/20 text-white border border-white/10 transition-all disabled:opacity-50 cursor-pointer"
                   >
                     <RefreshCw className={clsx('w-3.5 h-3.5', isChecking && 'animate-spin')} />
                     <span>{isChecking ? 'Đang kiểm tra...' : 'Kiểm tra cập nhật'}</span>
@@ -226,7 +227,7 @@ export function SettingsModal({
           <div className="space-y-3.5 animate-in fade-in duration-200">
             {/* Auto hide preference */}
             <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
-              <div>
+              <div className="flex-1 min-w-0 pr-4">
                 <h5 className="text-xs font-semibold text-white/90">
                   Tự động ẩn sau khi mở ứng dụng
                 </h5>
@@ -238,7 +239,7 @@ export function SettingsModal({
                 type="button"
                 onClick={onToggleAutoHide}
                 className={clsx(
-                  'w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ease-in-out cursor-pointer',
+                  'shrink-0 w-11 h-6 flex items-center rounded-full p-1 transition-colors duration-200 ease-in-out cursor-pointer',
                   autoHideOnLaunch ? 'bg-sky-500' : 'bg-white/20',
                 )}
               >
@@ -253,7 +254,7 @@ export function SettingsModal({
 
             {/* Reset apps */}
             <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
-              <div>
+              <div className="flex-1 min-w-0 pr-4">
                 <h5 className="text-xs font-semibold text-white/90">
                   Khôi phục danh sách mặc định
                 </h5>
@@ -264,10 +265,24 @@ export function SettingsModal({
               <button
                 type="button"
                 onClick={handleResetApps}
-                className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium rounded-xl bg-white/10 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/30 text-white/80 border border-white/10 transition-all cursor-pointer"
+                className={clsx(
+                  'shrink-0 whitespace-nowrap flex items-center space-x-1.5 px-3.5 py-1.5 text-xs font-medium rounded-xl transition-all cursor-pointer border active:scale-95 shadow-sm',
+                  resetSuccess
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                    : 'bg-white/10 hover:bg-white/15 active:bg-white/20 text-white/90 hover:text-white border-white/10 hover:border-white/20',
+                )}
               >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>{resetSuccess ? 'Đã khôi phục!' : 'Khôi phục'}</span>
+                {resetSuccess ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Đã khôi phục</span>
+                  </>
+                ) : (
+                  <>
+                    <RotateCcw className="w-3.5 h-3.5 text-white/60" />
+                    <span>Khôi phục</span>
+                  </>
+                )}
               </button>
             </div>
 
