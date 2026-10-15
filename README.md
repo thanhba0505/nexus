@@ -242,6 +242,7 @@ Dự án tích hợp sẵn hệ thống CI/CD GitHub Actions tự động hóa:
 
 ## 📖 Tài Liệu Tham Khảo
 
+- 👉 **[Chỉ Dẫn Cho AI Coding Agent](AGENT.md)**: Chỉ dẫn vận hành, bản đồ đọc tài liệu `docs/` và quy trình 5 bước cho Agent.
 - 👉 **[Hướng Dẫn Kiến Trúc Mini App](docs/mini-app-guide.md)**: Hướng dẫn chi tiết cách tạo một mini app mới theo chuẩn Nexus.
 - 👉 **[Nexus UI/UX Design System](docs/ui-ux-design-system.md)**: Quy chuẩn thiết kế giao diện macOS, bảng màu, typography, khoảng cách, và quy tắc công thái học.
 - 👉 **[Đặc Tả Kỹ Thuật GitHub Report](docs/github-report.md)**: Kiến trúc, Unified Titlebar và Local AI.
