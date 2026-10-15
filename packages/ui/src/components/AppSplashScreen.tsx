@@ -5,8 +5,6 @@ export interface AppSplashScreenProps {
   icon: React.ReactNode;
   /** Tên hiển thị của ứng dụng */
   title: string;
-  /** Phiên bản ứng dụng (tùy chọn) */
-  version?: string;
   /** Tiến trình nạp 0 - 100 */
   progress: number;
   /** Thông điệp trạng thái đang nạp */
@@ -18,7 +16,6 @@ export interface AppSplashScreenProps {
 export function AppSplashScreen({
   icon,
   title,
-  version,
   progress,
   message = 'Đang khởi động...',
   isExiting,
@@ -43,14 +40,7 @@ export function AppSplashScreen({
         </div>
 
         {/* Tiêu đề ứng dụng */}
-        <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2 mb-6">
-          <span>{title}</span>
-          {version && (
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/70 border border-white/10 font-mono">
-              {version}
-            </span>
-          )}
-        </h1>
+        <h1 className="text-xl font-bold text-white tracking-tight mb-6">{title}</h1>
 
         {/* Thanh tiến trình (Progress Bar) */}
         <div className="w-64 max-w-xs space-y-2">

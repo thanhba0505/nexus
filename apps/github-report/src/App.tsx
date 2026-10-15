@@ -18,8 +18,6 @@ import { githubReportApi } from './services/github-report-api';
 import { getDestinationLabel } from './lib/report-utils';
 import type { DateMode, PrereqStatus } from './types';
 
-const APP_VERSION = 'v0.4.0';
-
 /**
  * Luồng UI (xem docs/mini-app-guide.md):
  * 1. Splash: nạp settings + kiểm tra môi trường (useAppBootstrap, chạy đúng 1 lần).
@@ -108,7 +106,6 @@ export default function App() {
               </div>
             }
             title="GitHub Report"
-            version={APP_VERSION}
             progress={boot.progress}
             message={boot.message}
             isExiting={boot.phase === 'exiting'}
