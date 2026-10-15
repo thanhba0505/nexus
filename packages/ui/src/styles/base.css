@@ -46,7 +46,7 @@ body {
   animation: fadeIn 100ms ease-out forwards;
 }
 
-[data-tauri-drag-region]:not([data-tauri-drag-region="false"]) {
+[data-tauri-drag-region]:not([data-tauri-drag-region='false']) {
   -webkit-app-region: drag;
 }
 
@@ -55,7 +55,7 @@ input,
 select,
 textarea,
 [data-no-drag],
-[data-tauri-drag-region="false"] {
+[data-tauri-drag-region='false'] {
   -webkit-app-region: no-drag;
 }
 

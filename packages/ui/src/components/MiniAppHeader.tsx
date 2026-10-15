@@ -70,9 +70,7 @@ export function MiniAppHeader({
             className="shrink-0 pointer-events-none h-full"
           />
         )}
-        <div className="flex items-center">
-          {leftSlot}
-        </div>
+        <div className="flex items-center">{leftSlot}</div>
       </div>
 
       {/* Vùng ở giữa: Tiêu đề hoặc widget trung tâm, toàn bộ diện tích trống xung quanh đều kéo được */}
