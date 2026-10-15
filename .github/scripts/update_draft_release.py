@@ -197,15 +197,16 @@ def main() -> None:
             "apps/*/src-tauri/Cargo.toml",
             "packages/*/package.json",
             "packages/shared/src/constants/app-info.ts",
-            "release-artifacts/apps.json",
         ])
-        run([
-            "git",
-            "commit",
-            "-m",
-            f"chore(release): bump unified ecosystem to {next_tag} [skip ci]",
-        ])
-        run(["git", "push", "origin", "main"])
+        diff_res = subprocess.run(["git", "diff", "--staged", "--quiet"], cwd=ROOT_DIR)
+        if diff_res.returncode != 0:
+            run([
+                "git",
+                "commit",
+                "-m",
+                f"chore(release): bump unified ecosystem to {next_tag} [skip ci]",
+            ])
+            run(["git", "push", "origin", "main"])
 
     # 4. Phân nhóm thay đổi
     features = []
