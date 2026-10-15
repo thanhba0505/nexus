@@ -13,6 +13,7 @@ import { PRReportItem } from '../types';
 export interface PRTimelineCardProps {
   prs: PRReportItem[];
   selectedPrNumbers: Set<number>;
+  isLoading?: boolean;
   onTogglePr: (prNumber: number) => void;
   onSelectAll: () => void;
   onDeselectAll: () => void;
@@ -21,6 +22,7 @@ export interface PRTimelineCardProps {
 export function PRTimelineCard({
   prs,
   selectedPrNumbers,
+  isLoading = false,
   onTogglePr,
   onSelectAll,
   onDeselectAll,
@@ -112,94 +114,121 @@ export function PRTimelineCard({
       </div>
 
       {/* Danh sách cuộn */}
-      <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-        {prs.map((pr) => {
-          const isSelected = selectedPrNumbers.has(pr.number);
-          const isCollapsed = collapsedPrs.has(pr.number);
-
-          return (
+      {isLoading ? (
+        <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+          {[1, 2, 3].map((i) => (
             <div
-              key={pr.number}
-              className={`rounded-xl border transition-all ${
-                isSelected ? 'bg-white/5 border-white/15' : 'bg-black/20 border-white/5 opacity-60'
-              }`}
+              key={i}
+              className="rounded-xl border border-white/5 bg-white/[0.03] p-3 space-y-2.5 animate-pulse"
             >
-              {/* Header của từng PR */}
+              <div className="flex items-center space-x-2.5">
+                <div className="w-3.5 h-3.5 rounded bg-white/10" />
+                <div className="w-10 h-3 rounded bg-sky-400/20" />
+                <div className="w-28 h-3 rounded bg-white/10" />
+                <div className="w-12 h-3 rounded bg-white/10" />
+              </div>
+              <div className="w-4/5 h-3.5 rounded bg-white/10 ml-6" />
+              <div className="w-1/2 h-3 rounded bg-white/5 ml-6" />
+            </div>
+          ))}
+        </div>
+      ) : prs.length === 0 ? (
+        <div className="flex-1 flex flex-col items-center justify-center text-center p-6 text-white/40 space-y-2">
+          <GitPullRequest className="w-8 h-8 opacity-40" />
+          <p className="text-xs">Không tìm thấy PR hoặc commit nào trong khoảng thời gian này.</p>
+        </div>
+      ) : (
+        <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+          {prs.map((pr) => {
+            const isSelected = selectedPrNumbers.has(pr.number);
+            const isCollapsed = collapsedPrs.has(pr.number);
+
+            return (
               <div
-                onClick={() => toggleCollapse(pr.number)}
-                className="p-3 flex items-start space-x-2.5 cursor-pointer hover:bg-white/5 rounded-t-xl transition-colors"
+                key={pr.number}
+                className={`rounded-xl border transition-all ${
+                  isSelected
+                    ? 'bg-white/5 border-white/15'
+                    : 'bg-black/20 border-white/5 opacity-60'
+                }`}
               >
-                {/* Checkbox chọn/bỏ chọn */}
-                <input
-                  type="checkbox"
-                  checked={isSelected}
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    onTogglePr(pr.number);
-                  }}
-                  className="mt-0.5 w-3.5 h-3.5 rounded border-white/30 text-sky-500 focus:ring-0 focus:ring-offset-0 bg-black/40 cursor-pointer"
-                />
-
-                {/* Nút collapse/expand */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleCollapse(pr.number);
-                  }}
-                  className="mt-0.5 text-white/50 hover:text-white"
+                {/* Header của từng PR */}
+                <div
+                  onClick={() => toggleCollapse(pr.number)}
+                  className="p-3 flex items-start space-x-2.5 cursor-pointer hover:bg-white/5 rounded-t-xl transition-colors"
                 >
-                  {isCollapsed ? (
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  ) : (
-                    <ChevronDown className="w-3.5 h-3.5" />
-                  )}
-                </button>
+                  {/* Checkbox chọn/bỏ chọn */}
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      onTogglePr(pr.number);
+                    }}
+                    className="mt-0.5 w-3.5 h-3.5 rounded border-white/30 text-sky-500 focus:ring-0 focus:ring-offset-0 bg-black/40 cursor-pointer"
+                  />
 
-                {/* Thông tin PR */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center space-x-2 flex-wrap gap-y-1">
-                    <span className="text-[11px] font-mono font-medium text-sky-400 shrink-0">
-                      #{pr.number}
-                    </span>
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-white/70 truncate max-w-[180px]">
-                      {pr.repository}
-                    </span>
-                    {getStatusBadge(pr.state)}
+                  {/* Nút collapse/expand */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleCollapse(pr.number);
+                    }}
+                    className="mt-0.5 text-white/50 hover:text-white"
+                  >
+                    {isCollapsed ? (
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    ) : (
+                      <ChevronDown className="w-3.5 h-3.5" />
+                    )}
+                  </button>
+
+                  {/* Thông tin PR */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center space-x-2 flex-wrap gap-y-1">
+                      <span className="text-[11px] font-mono font-medium text-sky-400 shrink-0">
+                        #{pr.number}
+                      </span>
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-white/70 truncate max-w-[180px]">
+                        {pr.repository}
+                      </span>
+                      {getStatusBadge(pr.state)}
+                    </div>
+
+                    <p className="text-xs font-medium text-white/95 mt-1 leading-snug line-clamp-2">
+                      {pr.title}
+                    </p>
                   </div>
 
-                  <p className="text-xs font-medium text-white/95 mt-1 leading-snug line-clamp-2">
-                    {pr.title}
-                  </p>
+                  {/* Link mở GitHub */}
+                  <button
+                    onClick={(e) => handleOpenLink(pr.url, e)}
+                    className="p-1 rounded text-white/40 hover:text-white hover:bg-white/10 transition-colors shrink-0"
+                    title="Mở Pull Request trên GitHub"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </button>
                 </div>
 
-                {/* Link mở GitHub */}
-                <button
-                  onClick={(e) => handleOpenLink(pr.url, e)}
-                  className="p-1 rounded text-white/40 hover:text-white hover:bg-white/10 transition-colors shrink-0"
-                  title="Mở Pull Request trên GitHub"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </button>
+                {/* Danh sách commits của PR này */}
+                {!isCollapsed && pr.commits.length > 0 && (
+                  <div className="px-3 pb-3 pt-1 border-t border-white/5 space-y-1.5">
+                    {pr.commits.map((commit, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-start space-x-2 text-[11px] text-white/70 pl-6"
+                      >
+                        <GitCommit className="w-3 h-3 text-sky-400/80 mt-0.5 shrink-0" />
+                        <span className="flex-1 leading-tight font-sans">{commit.headline}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-
-              {/* Danh sách commits của PR này */}
-              {!isCollapsed && pr.commits.length > 0 && (
-                <div className="px-3 pb-3 pt-1 border-t border-white/5 space-y-1.5">
-                  {pr.commits.map((commit, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-start space-x-2 text-[11px] text-white/70 pl-6"
-                    >
-                      <GitCommit className="w-3 h-3 text-sky-400/80 mt-0.5 shrink-0" />
-                      <span className="flex-1 leading-tight font-sans">{commit.headline}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

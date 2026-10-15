@@ -5,23 +5,18 @@ import { AISummaryCard } from './components/AISummaryCard';
 import { PRTimelineCard } from './components/PRTimelineCard';
 import { StatusBar } from './components/StatusBar';
 import { SettingsModal } from './components/SettingsModal';
-import { AppSplashScreen, InitStepItem } from './components/AppSplashScreen';
+import { AppSplashScreen } from './components/AppSplashScreen';
 import { loadSettings, saveSettings, DEFAULT_SETTINGS } from './services/storage';
 import { PRReportItem, AISummaryResult, PrereqStatus, AppSettings, DateMode } from './types';
 
 export default function App() {
-  // Trạng thái màn hình khởi động (Splash Screen)
+  // Trạng thái màn hình khởi động (Splash Screen: chỉ Icon + Progress bar)
   const [isAppReady, setIsAppReady] = useState<boolean>(false);
   const [isExitingSplash, setIsExitingSplash] = useState<boolean>(false);
-  const [initProgress, setInitProgress] = useState<number>(10);
-  const [initMessage, setInitMessage] = useState<string>('Khởi tạo hệ sinh thái...');
-  const [initSteps, setInitSteps] = useState<InitStepItem[]>([
-    { id: 'settings', label: 'Nạp cấu hình & prompt template', status: 'pending' },
-    { id: 'prereqs', label: 'Kiểm tra CLI (gh, agy) & Keychain', status: 'pending' },
-    { id: 'prs', label: 'Quét Pull Requests & commits', status: 'pending' },
-  ]);
+  const [initProgress, setInitProgress] = useState<number>(15);
+  const [initMessage, setInitMessage] = useState<string>('Đang nạp cấu hình...');
 
-  // Settings & state
+  // Settings & ref
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
   const settingsRef = useRef<AppSettings>(DEFAULT_SETTINGS);
 
@@ -39,7 +34,7 @@ export default function App() {
   const [isLoadingPrs, setIsLoadingPrs] = useState<boolean>(false);
   const [isSummarizing, setIsSummarizing] = useState<boolean>(false);
 
-  const [statusText, setStatusText] = useState<string>('Đang khởi tạo...');
+  const [statusText, setStatusText] = useState<string>('Sẵn sàng');
   const [isStatusError, setIsStatusError] = useState<boolean>(false);
   const [isCopied, setIsCopied] = useState<boolean>(false);
 
@@ -110,7 +105,7 @@ export default function App() {
     handleRevealDestinationWithSettings(settingsRef.current);
   }, [handleRevealDestinationWithSettings]);
 
-  // Tóm tắt AI cho các PR được chọn
+  // Tóm tắt AI cho các PR được chọn (Chạy bất đồng bộ ngầm)
   const handleGenerateSummary = useCallback(
     async (itemsToSummarize: PRReportItem[], overrideSettings?: AppSettings) => {
       const activeSettings = overrideSettings || settingsRef.current;
@@ -140,7 +135,7 @@ export default function App() {
           copyToClipboard(formatted);
         }
 
-        // BẢO ĐẢM TUYỆT ĐỐI: Chỉ tự mở trình duyệt khi người dùng bật revealBrowser = true
+        // BẢO ĐẢM: Chỉ mở trình duyệt khi người dùng chủ động cấu hình revealBrowser = true
         if (
           activeSettings.workflow.revealBrowser &&
           activeSettings.workflow.destination !== 'copy_only'
@@ -162,7 +157,102 @@ export default function App() {
     [copyToClipboard, handleRevealDestinationWithSettings],
   );
 
-  // Quét PR & Commit từ GitHub
+  // 1. Luồng khởi động (Splash Screen): Nạp cấu hình & kiểm tra môi trường nhanh gọn
+  useEffect(() => {
+    let isMounted = true;
+
+    const runStartup = async () => {
+      try {
+        setInitMessage('Nạp cấu hình hệ thống...');
+        setInitProgress(30);
+
+        const loadedSettings = await loadSettings();
+        if (!isMounted) return;
+        setSettings(loadedSettings);
+        settingsRef.current = loadedSettings;
+        setInitProgress(65);
+
+        setInitMessage('Kiểm tra môi trường CLI & Keychain...');
+        const prereq = await invoke<PrereqStatus>('check_prerequisites');
+        if (!isMounted) return;
+        setPrereqStatus(prereq);
+        setInitProgress(100);
+        setInitMessage('Sẵn sàng!');
+
+        // Đợi 200ms để hiệu ứng mượt
+        await new Promise((r) => setTimeout(r, 200));
+        if (!isMounted) return;
+        setIsExitingSplash(true);
+
+        // Sau 300ms fade-out, chính thức vào app
+        await new Promise((r) => setTimeout(r, 300));
+        if (!isMounted) return;
+        setIsAppReady(true);
+      } catch (err) {
+        console.warn('Lỗi khởi tạo hệ thống:', err);
+        if (!isMounted) return;
+        setIsExitingSplash(true);
+        setTimeout(() => setIsAppReady(true), 300);
+      }
+    };
+
+    runStartup();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // 2. Sau khi vào app chính (hoặc khi đổi ngày):
+  // Load commits bất đồng bộ -> Load xong thì tự động trigger AI tóm tắt
+  useEffect(() => {
+    if (!isAppReady) return;
+
+    let isCancelled = false;
+
+    const loadDataAndAutoSummarize = async () => {
+      setIsLoadingPrs(true);
+      setStatusText('Đang quét PR & commits từ GitHub...');
+      setIsStatusError(false);
+
+      try {
+        const items = await invoke<PRReportItem[]>('fetch_github_prs', {
+          sinceIso: sinceIsoString,
+        });
+
+        if (isCancelled) return;
+        setPrs(items);
+        const allNumbers = new Set(items.map((p) => p.number));
+        setSelectedPrNumbers(allNumbers);
+        setIsLoadingPrs(false);
+
+        if (items.length > 0) {
+          setStatusText(
+            `Tìm thấy ${items.length} PRs (${items.reduce((s, p) => s + p.commits.length, 0)} commits). Đang tóm tắt bằng AI...`,
+          );
+          // Tự động trigger AI tóm tắt (hoàn toàn bất đồng bộ, không khóa giao diện)
+          handleGenerateSummary(items, settingsRef.current);
+        } else {
+          setSummaryBullets([]);
+          setStatusText('Không có PR hoặc commit nào trong khoảng thời gian này.');
+        }
+      } catch (err) {
+        if (isCancelled) return;
+        console.warn('Lỗi quét PR:', err);
+        setStatusText(`Lỗi GitHub CLI: ${String(err)}`);
+        setIsStatusError(true);
+        setIsLoadingPrs(false);
+      }
+    };
+
+    loadDataAndAutoSummarize();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isAppReady, sinceIsoString, handleGenerateSummary]);
+
+  // Quét thủ công lại (Ví dụ bấm nút Refresh ⌘R)
   const handleFetch = useCallback(async () => {
     setIsLoadingPrs(true);
     setStatusText('Đang quét PR & commits từ GitHub...');
@@ -176,12 +266,13 @@ export default function App() {
       setPrs(items);
       const allNumbers = new Set(items.map((p) => p.number));
       setSelectedPrNumbers(allNumbers);
+      setIsLoadingPrs(false);
 
       if (items.length > 0) {
         setStatusText(
           `Tìm thấy ${items.length} PRs (${items.reduce((s, p) => s + p.commits.length, 0)} commits)`,
         );
-        handleGenerateSummary(items);
+        handleGenerateSummary(items, settingsRef.current);
       } else {
         setSummaryBullets([]);
         setStatusText('Không có PR hoặc commit nào trong khoảng thời gian này.');
@@ -190,112 +281,9 @@ export default function App() {
       console.warn('Lỗi quét PR:', err);
       setStatusText(`Lỗi GitHub CLI: ${String(err)}`);
       setIsStatusError(true);
-    } finally {
       setIsLoadingPrs(false);
     }
   }, [sinceIsoString, handleGenerateSummary]);
-
-  // Luồng nạp toàn diện khi khởi động ứng dụng (Splash sequence)
-  useEffect(() => {
-    let isMounted = true;
-
-    const runStartupSequence = async () => {
-      try {
-        // Bước 1: Nạp file cấu hình settings.json & prompt templates
-        setInitSteps((prev) =>
-          prev.map((s) => (s.id === 'settings' ? { ...s, status: 'running' } : s)),
-        );
-        setInitMessage('Đang nạp cấu hình settings.json...');
-        setInitProgress(25);
-
-        const loadedSettings = await loadSettings();
-        if (!isMounted) return;
-        setSettings(loadedSettings);
-        settingsRef.current = loadedSettings;
-        setInitSteps((prev) =>
-          prev.map((s) => (s.id === 'settings' ? { ...s, status: 'done' } : s)),
-        );
-        setInitProgress(45);
-
-        // Bước 2: Kiểm tra công cụ hệ thống (gh CLI, agy/claude CLI, Keychain)
-        setInitSteps((prev) =>
-          prev.map((s) => (s.id === 'prereqs' ? { ...s, status: 'running' } : s)),
-        );
-        setInitMessage('Kiểm tra GitHub CLI & Local AI...');
-        setInitProgress(65);
-
-        const prereq = await invoke<PrereqStatus>('check_prerequisites');
-        if (!isMounted) return;
-        setPrereqStatus(prereq);
-        setInitSteps((prev) =>
-          prev.map((s) => (s.id === 'prereqs' ? { ...s, status: 'done' } : s)),
-        );
-        setInitProgress(80);
-
-        // Bước 3: Quét PRs ban đầu
-        setInitSteps((prev) => prev.map((s) => (s.id === 'prs' ? { ...s, status: 'running' } : s)));
-        setInitMessage('Quét Pull Requests & commits...');
-        setInitProgress(90);
-
-        const now = new Date();
-        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-        let initialPrs: PRReportItem[] = [];
-
-        try {
-          initialPrs = await invoke<PRReportItem[]>('fetch_github_prs', {
-            sinceIso: todayStart.toISOString(),
-          });
-        } catch (fetchErr) {
-          console.warn('Lỗi quét PR ban đầu:', fetchErr);
-        }
-
-        if (!isMounted) return;
-        setPrs(initialPrs);
-        const allNumbers = new Set(initialPrs.map((p) => p.number));
-        setSelectedPrNumbers(allNumbers);
-
-        setInitSteps((prev) => prev.map((s) => (s.id === 'prs' ? { ...s, status: 'done' } : s)));
-        setInitProgress(100);
-        setInitMessage('Hệ thống đã sẵn sàng!');
-
-        // Đợi 250ms cho người dùng nhìn thấy tiến trình 100%
-        await new Promise((r) => setTimeout(r, 250));
-        if (!isMounted) return;
-        setIsExitingSplash(true);
-
-        // Đợi 400ms fade-out transition kết thúc rồi chuyển sang app chính
-        await new Promise((r) => setTimeout(r, 400));
-        if (!isMounted) return;
-        setIsAppReady(true);
-
-        if (initialPrs.length > 0) {
-          setStatusText(
-            `Tìm thấy ${initialPrs.length} PRs (${initialPrs.reduce((s, p) => s + p.commits.length, 0)} commits). Sẵn sàng tạo tóm tắt.`,
-          );
-        } else {
-          setStatusText('Sẵn sàng. Không có PR mới hôm nay.');
-        }
-      } catch (err) {
-        console.warn('Lỗi khởi tạo hệ thống:', err);
-        if (!isMounted) return;
-        setIsExitingSplash(true);
-        setTimeout(() => setIsAppReady(true), 400);
-        setStatusText('Sẵn sàng (Offline)');
-      }
-    };
-
-    runStartupSequence();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [handleGenerateSummary]);
-
-  // Khi thay đổi khoảng ngày và app ĐÃ SẴN SÀNG -> Quét lại PRs
-  useEffect(() => {
-    if (!isAppReady) return;
-    handleFetch();
-  }, [dateMode, isAppReady, handleFetch]);
 
   // Sao chép tóm tắt
   const handleCopySummary = () => {
@@ -397,12 +385,11 @@ export default function App() {
 
   return (
     <div className="w-screen h-screen flex flex-col bg-slate-950/85 text-white font-sans overflow-hidden select-none relative">
-      {/* 1. Màn hình khởi động SplashScreen (Nạp hết code, settings, kiểm tra công cụ) */}
+      {/* 1. Màn hình khởi động SplashScreen (Chỉ Icon app và Thanh tiến trình) */}
       {!isAppReady && (
         <AppSplashScreen
           progress={initProgress}
-          currentMessage={initMessage}
-          steps={initSteps}
+          message={initMessage}
           isExiting={isExitingSplash}
         />
       )}
@@ -424,7 +411,7 @@ export default function App() {
 
       {/* 3. Main Body: 2 Card Tầng (AI Summary + PR Timeline) */}
       <main className="flex-1 min-h-0 flex flex-col p-3.5 gap-3 overflow-hidden">
-        {/* Card Tóm Tắt AI */}
+        {/* Card Tóm Tắt AI (Hiển thị loading khi isSummarizing = true) */}
         <AISummaryCard
           bullets={summaryBullets}
           provider={summaryProvider}
@@ -439,10 +426,11 @@ export default function App() {
           }}
         />
 
-        {/* Card Danh Sách PR & Commit Timeline */}
+        {/* Card Danh Sách PR & Commit Timeline (Hiển thị skeleton loading khi isLoadingPrs = true) */}
         <PRTimelineCard
           prs={prs}
           selectedPrNumbers={selectedPrNumbers}
+          isLoading={isLoadingPrs}
           onTogglePr={handleTogglePr}
           onSelectAll={handleSelectAll}
           onDeselectAll={handleDeselectAll}
@@ -452,7 +440,7 @@ export default function App() {
       {/* 4. Status Bar dưới cùng */}
       <StatusBar statusText={statusText} isError={isStatusError} prereqStatus={prereqStatus} />
 
-      {/* 5. Settings Modal (⌘,) */}
+      {/* 5. Settings Modal (⌘,) - Người dùng tự do mở bất kỳ lúc nào */}
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
