@@ -51,17 +51,17 @@ export function UnifiedHeader({
   return (
     <MiniAppHeader
       leftSlot={
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-lg border border-sky-500/30 bg-sky-500/20 text-sky-400">
+            <div className="flex h-6 w-6 items-center justify-center rounded-md border border-sky-500/25 bg-sky-500/15 text-sky-400">
               <GitPullRequest className="h-3.5 w-3.5" />
             </div>
-            <span className="text-xs font-semibold tracking-wide text-white">GitHub Report</span>
+            <span className="text-xs font-semibold text-white/90">GitHub Report</span>
           </div>
-          <div className="hidden items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] text-white/70 sm:flex">
-            <span className="font-medium tabular-nums text-sky-400">{prCount ?? '—'}</span> PRs
-            <span className="text-white/30">•</span>
-            <span className="font-medium tabular-nums text-emerald-400">
+          <div className="hidden h-7 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 text-[11px] text-white/60 sm:flex">
+            <span className="font-medium tabular-nums text-sky-300">{prCount ?? '—'}</span> PRs
+            <span className="text-white/20">•</span>
+            <span className="font-medium tabular-nums text-emerald-300">
               {prCount === undefined ? '—' : commitCount}
             </span>{' '}
             commits
@@ -69,29 +69,29 @@ export function UnifiedHeader({
         </div>
       }
       centerSlot={
-        <div className="flex items-center rounded-lg border border-white/10 bg-white/5 p-0.5">
+        <div className="flex h-7 items-center rounded-lg border border-white/[0.08] bg-black/25 p-0.5">
           {DATE_MODES.map(({ mode, label, title }) => (
             <button
               key={mode}
               onClick={() => onDateModeChange(mode)}
               title={title}
-              className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors ${
+              className={`flex h-6 items-center gap-1 rounded-md px-2.5 text-[11px] font-medium transition-all ${
                 dateMode === mode
-                  ? 'bg-sky-500 font-semibold text-white'
-                  : 'text-white/60 hover:bg-white/5 hover:text-white'
+                  ? 'bg-sky-500/90 font-medium text-white shadow-xs'
+                  : 'text-white/60 hover:bg-white/[0.06] hover:text-white'
               }`}
             >
-              {mode === 'today' && <Calendar className="h-3 w-3" />}
+              {mode === 'today' && <Calendar className="h-3 w-3 opacity-80" />}
               {label}
             </button>
           ))}
         </div>
       }
       rightSlot={
-        <>
+        <div className="flex items-center gap-1.5">
           <button
             onClick={onRefresh}
-            className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+            className="flex h-7 items-center gap-1.5 rounded-lg px-2 text-xs font-medium text-white/70 transition-colors hover:bg-white/[0.08] hover:text-white active:bg-white/[0.12]"
             title="Quét lại PR & tóm tắt (⌘R)"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isBusy ? 'animate-spin text-sky-400' : ''}`} />
@@ -101,18 +101,22 @@ export function UnifiedHeader({
           <button
             onClick={onCopySummary}
             disabled={!canCopy}
-            className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/10 px-2.5 py-1 text-xs font-medium text-white transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
+            className={`flex h-7 items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium transition-all disabled:cursor-not-allowed disabled:opacity-30 ${
+              isCopied
+                ? 'border border-emerald-500/30 bg-emerald-500/15 text-emerald-300'
+                : 'border border-white/10 bg-white/[0.06] text-white/90 hover:bg-white/[0.12] hover:text-white'
+            }`}
             title="Sao chép tóm tắt (⌘C)"
           >
             {isCopied ? (
               <>
                 <Check className="h-3.5 w-3.5 text-emerald-400" />
-                <span className="font-semibold text-emerald-400">Đã chép</span>
+                <span className="font-semibold text-emerald-300">Đã chép</span>
               </>
             ) : (
               <>
                 <Copy className="h-3.5 w-3.5 text-sky-400" />
-                Sao chép
+                <span>Sao chép</span>
               </>
             )}
           </button>
@@ -120,22 +124,22 @@ export function UnifiedHeader({
           {canReveal && (
             <button
               onClick={onRevealDestination}
-              className="flex items-center gap-1 rounded-lg border border-sky-500/30 bg-sky-500/20 px-2.5 py-1 text-xs font-medium text-sky-300 transition-colors hover:bg-sky-500/30 hover:text-white"
+              className="flex h-7 items-center gap-1.5 rounded-lg border border-sky-500/25 bg-sky-500/15 px-2.5 text-xs font-medium text-sky-300 transition-colors hover:bg-sky-500/25 hover:text-sky-200"
               title={`Chuyển tới ${destinationLabel} trên trình duyệt (⌘P)`}
             >
               <ExternalLink className="h-3.5 w-3.5" />
-              {destinationLabel}
+              <span>{destinationLabel}</span>
             </button>
           )}
 
           <button
             onClick={onOpenSettings}
-            className="rounded-lg p-1.5 text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-white/60 transition-colors hover:bg-white/[0.08] hover:text-white active:bg-white/[0.12]"
             title="Cài đặt (⌘,)"
           >
             <Settings className="h-3.5 w-3.5" />
           </button>
-        </>
+        </div>
       }
     />
   );

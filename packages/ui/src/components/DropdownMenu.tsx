@@ -55,8 +55,8 @@ export function DropdownMenu({
     <div
       ref={menuRef}
       className={clsx(
-        'absolute z-50 min-w-56 rounded-2xl p-1.5 shadow-2xl',
-        'bg-slate-900/90 backdrop-blur-2xl border border-white/15',
+        'absolute z-50 min-w-56 rounded-xl p-1 shadow-2xl shadow-black/60',
+        'bg-slate-900/95 backdrop-blur-2xl border border-white/10',
         'animate-menu-in origin-top-right',
         className,
       )}
@@ -72,7 +72,7 @@ export function DropdownMenu({
             }}
             disabled={item.disabled || item.isLoading}
             className={clsx(
-              'flex items-center justify-between w-full px-3 py-2 text-xs font-medium rounded-xl transition-all',
+              'flex items-center justify-between w-full px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all',
               item.disabled
                 ? 'opacity-40 cursor-not-allowed text-white/50'
                 : item.variant === 'danger'

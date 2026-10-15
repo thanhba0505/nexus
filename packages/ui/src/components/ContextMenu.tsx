@@ -110,8 +110,8 @@ export function ContextMenu({ isOpen, x, y, onClose, items }: ContextMenuProps) 
         transformOrigin: `${originX}px ${originY}px`,
       }}
       className={clsx(
-        'fixed z-50 min-w-48 rounded-2xl p-1.5 shadow-2xl',
-        'bg-slate-900/90 backdrop-blur-2xl border border-white/15',
+        'fixed z-50 min-w-48 rounded-xl p-1 shadow-2xl shadow-black/60',
+        'bg-slate-900/95 backdrop-blur-2xl border border-white/10',
         'animate-menu-in',
       )}
     >
@@ -131,14 +131,14 @@ export function ContextMenu({ isOpen, x, y, onClose, items }: ContextMenuProps) 
               }}
               disabled={item.disabled || item.isLoading}
               className={clsx(
-                'flex items-center space-x-2.5 w-full px-3 py-2 text-xs font-medium rounded-xl transition-all',
+                'flex items-center space-x-2 w-full px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all',
                 item.disabled
                   ? 'opacity-40 cursor-not-allowed text-white/40'
                   : item.variant === 'danger'
                     ? 'text-rose-400 hover:bg-rose-500/20 active:bg-rose-500/30'
                     : item.variant === 'primary'
-                      ? 'text-indigo-300 hover:bg-indigo-500/20 active:bg-indigo-500/30 font-semibold'
-                      : 'text-white/80 hover:text-white hover:bg-white/10 active:bg-white/15',
+                      ? 'text-sky-300 hover:bg-sky-500/20 active:bg-sky-500/30 font-medium'
+                      : 'text-white/80 hover:text-white hover:bg-white/[0.08] active:bg-white/[0.12]',
               )}
             >
               {item.isLoading ? (

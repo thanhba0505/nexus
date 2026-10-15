@@ -133,7 +133,7 @@ export default function App() {
           />
         )
       }
-      mainClassName="gap-3 overflow-hidden p-3.5"
+      mainClassName="gap-2.5 overflow-hidden p-3"
     >
       <AISummaryCard
         summary={summaryTask.data}
