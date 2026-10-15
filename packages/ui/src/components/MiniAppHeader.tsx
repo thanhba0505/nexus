@@ -8,6 +8,8 @@ export interface MiniAppHeaderProps {
   windowControlsPosition?: 'left' | 'right';
   /** Tùy chọn đóng: 'hide' (ẩn) hoặc 'close' (tắt tiến trình) */
   closeAction?: 'hide' | 'close';
+  /** Kiểu giao diện nút điều khiển: 'tinted' (mặc định) hoặc 'subtle' */
+  windowControlsVariant?: 'tinted' | 'subtle';
   /** Khoảng trống an toàn bên trái khi dùng Traffic Lights gốc của macOS (mặc định 0 khi dùng showWindowControls) */
   leftSafeWidth?: number;
   /** Vùng chứa các nút điều khiển bên trái (ví dụ logo, tiêu đề, filter) */
@@ -25,6 +27,7 @@ export interface MiniAppHeaderProps {
 export function MiniAppHeader({
   showWindowControls = true,
   windowControlsPosition = 'left',
+  windowControlsVariant = 'tinted',
   closeAction = 'hide',
   leftSafeWidth = 0,
   leftSlot,
@@ -36,6 +39,7 @@ export function MiniAppHeader({
   const controls = (
     <WindowControls
       closeAction={closeAction}
+      variant={windowControlsVariant}
       className={windowControlsPosition === 'left' ? 'mr-1' : 'ml-1.5'}
     />
   );

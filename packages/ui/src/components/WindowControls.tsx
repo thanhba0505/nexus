@@ -5,6 +5,8 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 export interface WindowControlsProps {
   /** Hành động khi bấm nút đóng: 'hide' (ẩn ngầm, mặc định) hoặc 'close' (tắt tiến trình) */
   closeAction?: 'hide' | 'close';
+  /** Kiểu giao diện nút: 'tinted' (Đỏ/Vàng/Xanh chuẩn glass, mặc định) hoặc 'subtle' (kính tối trung tính) */
+  variant?: 'tinted' | 'subtle';
   /** Callback tùy biến khi bấm nút đóng */
   onClose?: () => void;
   /** Callback tùy biến khi bấm nút thu nhỏ */
@@ -17,6 +19,7 @@ export interface WindowControlsProps {
 
 export function WindowControls({
   closeAction = 'hide',
+  variant = 'tinted',
   onClose,
   onMinimize,
   onMaximize,
@@ -93,7 +96,26 @@ export function WindowControls({
   };
 
   const baseBtnStyle =
-    'flex h-5 w-5 items-center justify-center rounded-md text-white/40 transition-colors active:scale-95 cursor-pointer';
+    'flex h-5 w-5 items-center justify-center rounded-md border transition-all active:scale-95 cursor-pointer';
+
+  const styles =
+    variant === 'tinted'
+      ? {
+          close:
+            'border-rose-500/25 bg-rose-500/15 text-rose-300 hover:bg-rose-500/25 hover:border-rose-500/40 hover:text-rose-200 active:bg-rose-500/35',
+          minimize:
+            'border-amber-500/25 bg-amber-500/15 text-amber-300 hover:bg-amber-500/25 hover:border-amber-500/40 hover:text-amber-200 active:bg-amber-500/35',
+          maximize:
+            'border-emerald-500/25 bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 hover:border-emerald-500/40 hover:text-emerald-200 active:bg-emerald-500/35',
+        }
+      : {
+          close:
+            'border-white/[0.08] bg-white/[0.04] text-white/50 hover:bg-rose-500/20 hover:border-rose-500/30 hover:text-rose-300 active:bg-rose-500/30',
+          minimize:
+            'border-white/[0.08] bg-white/[0.04] text-white/50 hover:bg-white/[0.1] hover:border-white/20 hover:text-white active:bg-white/[0.14]',
+          maximize:
+            'border-white/[0.08] bg-white/[0.04] text-white/50 hover:bg-white/[0.1] hover:border-white/20 hover:text-white active:bg-white/[0.14]',
+        };
 
   return (
     <div
@@ -101,7 +123,7 @@ export function WindowControls({
       data-tauri-drag-region="false"
       style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       onMouseDown={(e) => e.stopPropagation()}
-      className={`flex items-center gap-0.5 ${className}`}
+      className={`flex items-center gap-1.5 ${className}`}
     >
       {/* Nút Đóng */}
       <button
@@ -112,7 +134,7 @@ export function WindowControls({
         onMouseDown={(e) => e.stopPropagation()}
         onClick={handleClose}
         title="Đóng (⌘W)"
-        className={`${baseBtnStyle} hover:bg-rose-500/20 hover:text-rose-300 active:bg-rose-500/30`}
+        className={`${baseBtnStyle} ${styles.close}`}
       >
         <X className="h-3 w-3 pointer-events-none" />
       </button>
@@ -126,7 +148,7 @@ export function WindowControls({
         onMouseDown={(e) => e.stopPropagation()}
         onClick={handleMinimize}
         title="Thu nhỏ (⌘M)"
-        className={`${baseBtnStyle} hover:bg-white/[0.08] hover:text-white/80 active:bg-white/[0.12]`}
+        className={`${baseBtnStyle} ${styles.minimize}`}
       >
         <Minus className="h-3 w-3 pointer-events-none" />
       </button>
@@ -140,7 +162,7 @@ export function WindowControls({
         onMouseDown={(e) => e.stopPropagation()}
         onClick={handleMaximize}
         title={isMaximized ? 'Khôi phục kích thước' : 'Phóng to'}
-        className={`${baseBtnStyle} hover:bg-white/[0.08] hover:text-white/80 active:bg-white/[0.12]`}
+        className={`${baseBtnStyle} ${styles.maximize}`}
       >
         {isMaximized ? (
           <Minimize2 className="h-2.5 w-2.5 pointer-events-none" />
