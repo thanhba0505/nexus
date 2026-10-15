@@ -5,6 +5,7 @@ import { AppIconItem } from './AppIconItem';
 export interface AppGridProps {
   apps: readonly NexusAppMeta[];
   selectedAppId?: string | undefined;
+  onSelectApp?: ((app: NexusAppMeta) => void) | undefined;
   onLaunchApp: (app: NexusAppMeta) => void;
   onContextMenu?: ((e: React.MouseEvent, app: NexusAppMeta) => void) | undefined;
   onOpenAppStore?: (() => void) | undefined;
@@ -13,6 +14,7 @@ export interface AppGridProps {
 export function AppGrid({
   apps,
   selectedAppId,
+  onSelectApp,
   onLaunchApp,
   onContextMenu,
   onOpenAppStore,
@@ -25,6 +27,7 @@ export function AppGrid({
             key={app.id}
             app={app}
             isSelected={selectedAppId === app.id}
+            onSelect={onSelectApp}
             onLaunch={onLaunchApp}
             onContextMenu={onContextMenu}
           />

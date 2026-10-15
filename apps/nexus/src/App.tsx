@@ -115,17 +115,40 @@ export default function App() {
     });
   }, [enrichedApps, searchQuery, currentCategory]);
 
-  const handleLaunchApp = (app: NexusAppMeta) => {
+  const handleSelectApp = (app: NexusAppMeta) => {
+    setSelectedApp(app);
+  };
+
+  const handleLaunchApp = async (app: NexusAppMeta) => {
     setSelectedApp(app);
     setRunningAppIds((prev) => {
       const next = new Set(prev);
-      if (next.has(app.id)) {
-        next.delete(app.id);
-      } else {
-        next.add(app.id);
-      }
+      next.add(app.id);
       return next;
     });
+
+    // Mở ứng dụng macOS qua bundleId bằng native Tauri command
+    if (app.bundleId) {
+      try {
+        const { invoke } = await import('@tauri-apps/api/core');
+        await invoke('open_mini_app', { bundleId: app.bundleId });
+      } catch (err) {
+        console.warn(`Không thể mở ứng dụng ${app.name} qua Tauri:`, err);
+      }
+    }
+  };
+
+  const handleToggleRunningApp = (app: NexusAppMeta) => {
+    const isRunning = runningAppIds.has(app.id);
+    if (isRunning) {
+      setRunningAppIds((prev) => {
+        const next = new Set(prev);
+        next.delete(app.id);
+        return next;
+      });
+    } else {
+      handleLaunchApp(app);
+    }
   };
 
   const handleContextMenu = (e: React.MouseEvent, app: NexusAppMeta) => {
@@ -274,7 +297,7 @@ export default function App() {
         ) : (
           <Play className="w-3.5 h-3.5 text-emerald-400" />
         ),
-        onClick: () => handleLaunchApp(app),
+        onClick: () => handleToggleRunningApp(app),
       },
       {
         id: 'delete-app',
@@ -302,11 +325,15 @@ export default function App() {
         }
       />
 
-      <main className="w-full flex-1 flex flex-col items-center justify-center overflow-hidden">
+      <main
+        onClick={() => setSelectedApp(null)}
+        className="w-full flex-1 flex flex-col items-center justify-center overflow-hidden"
+      >
         {filteredApps.length > 0 || installedAppIds.length < NEXUS_APPS.length ? (
           <AppGrid
             apps={filteredApps}
             selectedAppId={selectedApp?.id}
+            onSelectApp={handleSelectApp}
             onLaunchApp={handleLaunchApp}
             onContextMenu={handleContextMenu}
             onOpenAppStore={() => setIsAppStoreOpen(true)}

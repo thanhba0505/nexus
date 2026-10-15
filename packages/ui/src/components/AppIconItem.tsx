@@ -40,6 +40,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 export interface AppIconItemProps {
   app?: NexusAppMeta | undefined;
   isSelected?: boolean | undefined;
+  onSelect?: ((app: NexusAppMeta) => void) | undefined;
   onLaunch?: ((app: NexusAppMeta) => void) | undefined;
   onContextMenu?: ((e: React.MouseEvent, app: NexusAppMeta) => void) | undefined;
   isAddButton?: boolean | undefined;
@@ -49,6 +50,7 @@ export interface AppIconItemProps {
 export function AppIconItem({
   app,
   isSelected = false,
+  onSelect,
   onLaunch,
   onContextMenu,
   isAddButton = false,
@@ -84,7 +86,13 @@ export function AppIconItem({
 
   const IconComponent = ICON_MAP[app.iconName] || Box;
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onSelect) onSelect(app);
+  };
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (onLaunch) onLaunch(app);
   };
 
@@ -96,7 +104,9 @@ export function AppIconItem({
   return (
     <button
       onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
       onContextMenu={handleContextMenu}
+      title={`${app.name} (Nhấp đúp để mở)`}
       className="group relative flex flex-col items-center justify-center p-2 rounded-2xl outline-none focus:outline-none transition-all duration-200"
     >
       {/* macOS Squircle Icon Container */}
