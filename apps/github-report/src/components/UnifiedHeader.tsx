@@ -82,8 +82,9 @@ export function UnifiedHeader({
             <button
               key={mode}
               onClick={() => onDateModeChange(mode)}
-              title={title}
-              className={`flex h-6 items-center gap-1 rounded-md px-2.5 text-[11px] font-medium transition-all ${
+              disabled={isBusy}
+              title={isBusy ? 'Đang thực hiện tác vụ…' : title}
+              className={`flex h-6 items-center gap-1 rounded-md px-2.5 text-[11px] font-medium transition-all disabled:cursor-not-allowed disabled:opacity-40 ${
                 dateMode === mode
                   ? 'bg-sky-500/90 font-medium text-white shadow-xs'
                   : 'text-white/60 hover:bg-white/[0.06] hover:text-white'
@@ -99,8 +100,9 @@ export function UnifiedHeader({
         <div data-tauri-drag-region className="flex items-center gap-1.5">
           <button
             onClick={onRefresh}
-            className="flex h-7 items-center gap-1.5 rounded-lg px-2 text-xs font-medium text-white/70 transition-colors hover:bg-white/[0.08] hover:text-white active:bg-white/[0.12]"
-            title="Quét lại PR & tóm tắt (⌘R)"
+            disabled={isBusy}
+            className="flex h-7 items-center gap-1.5 rounded-lg px-2 text-xs font-medium text-white/70 transition-colors hover:bg-white/[0.08] hover:text-white active:bg-white/[0.12] disabled:cursor-not-allowed disabled:opacity-40"
+            title={isBusy ? 'Đang quét PR & tóm tắt…' : 'Quét lại PR & tóm tắt (⌘R)'}
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isBusy ? 'animate-spin text-sky-400' : ''}`} />
             <span className="hidden md:inline">Quét PR</span>
@@ -108,7 +110,7 @@ export function UnifiedHeader({
 
           <button
             onClick={onCopySummary}
-            disabled={!canCopy}
+            disabled={!canCopy || isBusy}
             className={`flex h-7 items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium transition-all disabled:cursor-not-allowed disabled:opacity-30 ${
               isCopied
                 ? 'border border-emerald-500/30 bg-emerald-500/15 text-emerald-300'
@@ -132,7 +134,8 @@ export function UnifiedHeader({
           {canReveal && (
             <button
               onClick={onRevealDestination}
-              className="flex h-7 items-center gap-1.5 rounded-lg border border-sky-500/25 bg-sky-500/15 px-2.5 text-xs font-medium text-sky-300 transition-colors hover:bg-sky-500/25 hover:text-sky-200"
+              disabled={isBusy}
+              className="flex h-7 items-center gap-1.5 rounded-lg border border-sky-500/25 bg-sky-500/15 px-2.5 text-xs font-medium text-sky-300 transition-colors hover:bg-sky-500/25 hover:text-sky-200 disabled:cursor-not-allowed disabled:opacity-40"
               title={`Chuyển tới ${destinationLabel} trên trình duyệt (⌘P)`}
             >
               <ExternalLink className="h-3.5 w-3.5" />

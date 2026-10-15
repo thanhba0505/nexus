@@ -49,11 +49,18 @@ export default function App() {
   });
 
   const { prsTask, summaryTask } = report;
+  const isBusy = prsTask.isRunning || summaryTask.isRunning;
+  const hasPrs = (report.prs?.length ?? 0) > 0;
+  const canCopy = (summaryTask.data?.bullets.length ?? 0) > 0;
+  const canReveal = settings.workflow.destination !== 'copy_only';
 
-  const refresh = () => void report.loadReport(dateMode);
+  const refresh = () => {
+    if (isBusy) return;
+    void report.loadReport(dateMode);
+  };
 
   const changeDateMode = (mode: DateMode) => {
-    if (mode === dateMode) return;
+    if (isBusy || mode === dateMode) return;
     setDateMode(mode);
     void report.loadReport(mode);
   };
@@ -65,21 +72,27 @@ export default function App() {
 
   useHotkeys(
     {
-      'mod+r': refresh,
-      'mod+enter': () => void report.regenerateSummary(),
+      'mod+r': () => {
+        if (isBusy) return;
+        refresh();
+      },
+      'mod+enter': () => {
+        if (isBusy || !hasPrs) return;
+        void report.regenerateSummary();
+      },
       'mod+c': () => {
-        if (window.getSelection()?.toString()) return false; // giữ copy mặc định khi bôi đen
+        if (window.getSelection()?.toString() || isBusy || !canCopy) return false; // giữ copy mặc định khi bôi đen
         void report.copySummary();
       },
-      'mod+p': () => void report.revealDestination(),
+      'mod+p': () => {
+        if (isBusy || !canReveal) return;
+        void report.revealDestination();
+      },
       'mod+,': () => setIsSettingsOpen((open) => !open),
       escape: isSettingsOpen && (() => setIsSettingsOpen(false)),
     },
     { enabled: boot.isReady, enableInInputs: ['escape', 'mod+r', 'mod+,'] },
   );
-
-  const hasPrs = (report.prs?.length ?? 0) > 0;
-  const isSummaryPending = summaryTask.isRunning || prsTask.isRunning;
 
   return (
     <MiniAppShell
@@ -108,11 +121,11 @@ export default function App() {
           onDateModeChange={changeDateMode}
           prCount={report.prs?.length}
           commitCount={report.totalCommits}
-          isBusy={prsTask.isRunning || summaryTask.isRunning}
-          canCopy={(summaryTask.data?.bullets.length ?? 0) > 0}
+          isBusy={isBusy}
+          canCopy={canCopy}
           isCopied={report.isCopied}
           destinationLabel={getDestinationLabel(settings)}
-          canReveal={settings.workflow.destination !== 'copy_only'}
+          canReveal={canReveal}
           onRefresh={refresh}
           onCopySummary={() => void report.copySummary()}
           onRevealDestination={() => void report.revealDestination()}
@@ -137,7 +150,7 @@ export default function App() {
     >
       <AISummaryCard
         summary={summaryTask.data}
-        isLoading={isSummaryPending}
+        isLoading={isBusy}
         loadingLabel={
           prsTask.isRunning ? 'Đang chờ dữ liệu PR & commits…' : 'Đang tóm tắt bằng Local AI…'
         }
@@ -152,6 +165,7 @@ export default function App() {
       <PRTimelineCard
         prs={report.prs}
         isLoading={prsTask.isRunning}
+        isBusy={isBusy}
         error={prsTask.error}
         selectedPrNumbers={report.selectedPrNumbers}
         onTogglePr={report.togglePr}

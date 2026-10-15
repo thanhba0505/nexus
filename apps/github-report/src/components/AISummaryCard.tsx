@@ -103,7 +103,7 @@ export function AISummaryCard({
           </button>
           <button
             onClick={onCopy}
-            disabled={!hasSummary}
+            disabled={isLoading || !hasSummary}
             className={`${ACTION_BUTTON} border border-sky-500/25 bg-sky-500/15 text-sky-300 hover:bg-sky-500/25 hover:text-sky-200`}
             title="Sao chép (⌘C)"
           >
@@ -138,7 +138,8 @@ export function AISummaryCard({
             {canGenerate && (
               <button
                 onClick={onGenerate}
-                className="flex h-7 items-center gap-1.5 rounded-lg border border-sky-500/30 bg-sky-500/20 px-3 text-xs font-medium text-sky-200 transition-colors hover:bg-sky-500/30 hover:text-white active:scale-95"
+                disabled={isLoading}
+                className="flex h-7 items-center gap-1.5 rounded-lg border border-sky-500/30 bg-sky-500/20 px-3 text-xs font-medium text-sky-200 transition-colors hover:bg-sky-500/30 hover:text-white active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <Sparkles className="h-3 w-3 text-sky-400" />
                 <span>Tạo tóm tắt Daily Standup</span>

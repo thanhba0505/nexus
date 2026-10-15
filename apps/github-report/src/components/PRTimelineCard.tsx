@@ -14,6 +14,7 @@ import type { PRReportItem } from '../types';
 export interface PRTimelineCardProps {
   prs: PRReportItem[] | undefined;
   isLoading: boolean;
+  isBusy?: boolean;
   error: string | null;
   selectedPrNumbers: Set<number>;
   onTogglePr: (prNumber: number) => void;
@@ -80,6 +81,7 @@ function TimelineEmpty() {
 export function PRTimelineCard({
   prs,
   isLoading,
+  isBusy = false,
   error,
   selectedPrNumbers,
   onTogglePr,
@@ -116,8 +118,8 @@ export function PRTimelineCard({
         </div>
         <button
           onClick={() => onSetAllSelected(!isAllSelected)}
-          disabled={!hasItems}
-          className="text-[11px] font-medium text-sky-400/80 transition-colors hover:text-sky-300 disabled:opacity-30"
+          disabled={!hasItems || isLoading || isBusy}
+          className="text-[11px] font-medium text-sky-400/80 transition-colors hover:text-sky-300 disabled:cursor-not-allowed disabled:opacity-30"
         >
           {isAllSelected ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
         </button>
@@ -152,9 +154,10 @@ export function PRTimelineCard({
                   <input
                     type="checkbox"
                     checked={isSelected}
+                    disabled={isLoading || isBusy}
                     onClick={(e) => e.stopPropagation()}
                     onChange={() => onTogglePr(pr.number)}
-                    className="mt-0.5 h-3.5 w-3.5 cursor-pointer rounded border-white/30 bg-black/40 text-sky-500 focus:ring-0 focus:ring-offset-0"
+                    className="mt-0.5 h-3.5 w-3.5 cursor-pointer rounded border-white/30 bg-black/40 text-sky-500 focus:ring-0 focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-40"
                   />
                   <span className="mt-0.5 text-white/40 transition-colors group-hover:text-white/70">
                     {isCollapsed ? (
