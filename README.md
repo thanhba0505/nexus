@@ -27,22 +27,20 @@ Bạn chỉ cần tải ứng dụng **Nexus Hub** duy nhất. Nexus đóng vai 
 ### 📥 Tải Bản Phát Hành Mới Nhất
 
 <!-- NEXUS_DOWNLOAD_SECTION_START -->
-
 > 💡 **Bấm trực tiếp vào nút bên dưới để tải ngay file cài đặt `.dmg` về máy (Direct Download)**:
 
 <p align="center">
-  <a href="https://github.com/thanhba0505/nexus/releases/download/v0.4.0/Nexus_0.4.0_aarch64.dmg">
+  <a href="https://github.com/thanhba0505/nexus/releases/download/v0.5.0/Nexus_0.5.0_aarch64.dmg">
     <img src="https://img.shields.io/badge/⬇️_Tải_Ngay_Nexus_cho_macOS-(Apple_Silicon_.dmg)-0ea5e9?style=for-the-badge&logo=apple&logoColor=white" height="42" alt="Tải Ngay Nexus cho macOS" />
   </a>
 </p>
 
-| Thông Tin Phát Hành               | Chi Tiết                                                                                                           |
-| :-------------------------------- | :----------------------------------------------------------------------------------------------------------------- |
-| 🏷️ **Phiên Bản Hiện Tại**         | `v0.4.0`                                                                                                           |
-| 📦 **Tệp Cài Đặt Khuyên Dùng**    | [`Nexus_0.4.0_aarch64.dmg`](https://github.com/thanhba0505/nexus/releases/download/v0.4.0/Nexus_0.4.0_aarch64.dmg) |
-| ⚡ **Cách Thức Tải**              | **Tải Trực Tiếp (Direct Download)** — Trình duyệt tự tải file về, không cần qua trang trung gian                   |
-| 📋 **Xem Chi Tiết Bản Phát Hành** | [📦 Xem GitHub Releases & Changelog](https://github.com/thanhba0505/nexus/releases/latest)                         |
-
+| Thông Tin Phát Hành | Chi Tiết |
+| :--- | :--- |
+| 🏷️ **Phiên Bản Hiện Tại** | `v0.5.0` |
+| 📦 **Tệp Cài Đặt Khuyên Dùng** | [`Nexus_0.5.0_aarch64.dmg`](https://github.com/thanhba0505/nexus/releases/download/v0.5.0/Nexus_0.5.0_aarch64.dmg) |
+| ⚡ **Cách Thức Tải** | **Tải Trực Tiếp (Direct Download)** — Trình duyệt tự tải file về, không cần qua trang trung gian |
+| 📋 **Xem Chi Tiết Bản Phát Hành** | [📦 Xem GitHub Releases & Changelog](https://github.com/thanhba0505/nexus/releases/latest) |
 <!-- NEXUS_DOWNLOAD_SECTION_END -->
 
 ---
