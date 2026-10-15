@@ -13,6 +13,7 @@ export * from './components/ContextMenu';
 export * from './components/Tooltip';
 export * from './components/AppInfoModal';
 export * from './components/AppStoreModal';
+export * from './components/SettingsModal';
 export * from './components/MiniAppHeader';
 export * from './components/AppSplashScreen';
 export * from './components/MiniAppShell';

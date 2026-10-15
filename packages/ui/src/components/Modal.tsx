@@ -6,9 +6,9 @@ export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  subtitle?: string;
+  subtitle?: string | undefined;
   children: React.ReactNode;
-  maxWidth?: string;
+  maxWidth?: string | undefined;
 }
 
 export function Modal({

@@ -4,12 +4,11 @@ import {
   LaunchpadHeader,
   AppGrid,
   LaunchpadFooter,
-  DropdownMenu,
   ContextMenu,
   AppInfoModal,
   AppStoreModal,
+  SettingsModal,
   Modal,
-  DropdownMenuItem,
   ContextMenuItem,
 } from '@nexus/ui';
 import {
@@ -21,7 +20,7 @@ import {
   APP_CATEGORY,
   NexusAppMeta,
 } from '@nexus/shared';
-import { Info, RefreshCw, Trash2, ArrowDownCircle, Play, Square, CheckCircle2 } from 'lucide-react';
+import { Info, Trash2, Play, Square, CheckCircle2 } from 'lucide-react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { invoke } from '@tauri-apps/api/core';
 
@@ -91,6 +90,37 @@ export default function App() {
     app: null,
   });
 
+  // 5. Cấu hình tuỳ chọn tiện ích
+  const [autoHideOnLaunch, setAutoHideOnLaunch] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('nexus_auto_hide_on_launch');
+      return saved !== null ? saved === 'true' : true;
+    } catch {
+      return true;
+    }
+  });
+
+  const handleToggleAutoHide = () => {
+    setAutoHideOnLaunch((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('nexus_auto_hide_on_launch', String(next));
+      } catch {
+        // Safe storage write fallback
+      }
+      return next;
+    });
+  };
+
+  const handleResetDefaultApps = () => {
+    setInstalledAppIds([...DEFAULT_INSTALLED_APP_IDS]);
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(DEFAULT_INSTALLED_APP_IDS));
+    } catch {
+      // Safe storage write fallback
+    }
+  };
+
   const enrichedApps = useMemo(() => {
     return NEXUS_APPS.filter((app) => installedAppIds.includes(app.id)).map((app) => {
       const isRunning = runningAppIds.has(app.id);
@@ -135,6 +165,14 @@ export default function App() {
         bundleId: app.bundleId,
         appName: app.name,
       });
+
+      if (autoHideOnLaunch) {
+        try {
+          getCurrentWindow().hide();
+        } catch {
+          // Bỏ qua khi chạy ngoài môi trường desktop
+        }
+      }
     } catch (err) {
       console.warn(`Không thể mở ứng dụng ${app.name} qua Tauri:`, err);
     }
@@ -298,48 +336,6 @@ export default function App() {
     }, 1800);
   };
 
-  const settingsMenuItems: DropdownMenuItem[] = useMemo(() => {
-    const items: DropdownMenuItem[] = [];
-
-    // 1. Trạng thái kiểm tra & cập nhật phiên bản
-    if (nexusUpdateStatus === 'available') {
-      items.push({
-        id: 'update-nexus',
-        label: `Cập nhật hệ sinh thái (v${latestReleaseInfo?.version || NEXUS_CORE_APP.version})`,
-        icon: <ArrowDownCircle className="w-3.5 h-3.5 text-indigo-400" />,
-        variant: 'primary',
-        badge: 'Bản mới',
-        onClick: handleApplyNexusUpdate,
-      });
-    } else if (nexusUpdateStatus === 'latest') {
-      items.push({
-        id: 'nexus-latest',
-        label: `Đã là phiên bản mới nhất (v${NEXUS_CORE_APP.version})`,
-        icon: <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />,
-        disabled: true,
-        onClick: () => {},
-      });
-    } else {
-      items.push({
-        id: 'check-nexus-update',
-        label: nexusUpdateStatus === 'checking' ? 'Đang kiểm tra...' : 'Kiểm tra phiên bản',
-        icon: <RefreshCw className="w-3.5 h-3.5 text-white/70" />,
-        isLoading: nexusUpdateStatus === 'checking',
-        onClick: handleCheckNexusUpdate,
-      });
-    }
-
-    // 2. Thông tin ứng dụng
-    items.push({
-      id: 'nexus-info',
-      label: 'Thông tin ứng dụng',
-      icon: <Info className="w-3.5 h-3.5 text-white/70" />,
-      onClick: () => setInfoModalApp(NEXUS_CORE_APP),
-    });
-
-    return items;
-  }, [isDev, nexusUpdateStatus, latestReleaseInfo]);
-
   const contextMenuItems: ContextMenuItem[] = useMemo(() => {
     const app = contextMenu.app;
     if (!app) return [];
@@ -391,7 +387,7 @@ export default function App() {
       <LaunchpadHeader
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        onOpenSettings={() => setIsSettingsOpen((prev) => !prev)}
+        onOpenSettings={() => setIsSettingsOpen(true)}
         hasNexusUpdate={!isDev && nexusUpdateStatus === 'available'}
         onMouseDown={handleHeaderMouseDown}
         showWindowControls={true}
@@ -402,13 +398,6 @@ export default function App() {
             // fallback
           }
         }}
-        settingsMenu={
-          <DropdownMenu
-            isOpen={isSettingsOpen}
-            onClose={() => setIsSettingsOpen(false)}
-            items={settingsMenuItems}
-          />
-        }
       />
 
       <main
@@ -459,6 +448,19 @@ export default function App() {
         onInstallApp={handleInstallAppFromStore}
       />
 
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        currentVersion={NEXUS_CORE_APP.version}
+        updateStatus={nexusUpdateStatus}
+        latestReleaseInfo={latestReleaseInfo}
+        onCheckUpdate={handleCheckNexusUpdate}
+        onApplyUpdate={handleApplyNexusUpdate}
+        autoHideOnLaunch={autoHideOnLaunch}
+        onToggleAutoHide={handleToggleAutoHide}
+        onResetDefaultApps={handleResetDefaultApps}
+      />
+
       <Modal
         isOpen={!isDev && (nexusUpdateStatus === 'updating' || nexusUpdateStatus === 'restarting')}
         onClose={() => {}}
@@ -481,7 +483,7 @@ export default function App() {
             </h4>
             <p className="text-xs text-white/60 mt-1">
               {nexusUpdateStatus === 'updating'
-                ? 'Đang áp dụng gói nâng cấp toàn bộ hệ sinh thái v0.2.0'
+                ? `Đang áp dụng gói nâng cấp toàn bộ hệ sinh thái v${latestReleaseInfo?.version || NEXUS_CORE_APP.version}`
                 : 'Hệ sinh thái Nexus đã sẵn sàng với phiên bản mới!'}
             </p>
           </div>
