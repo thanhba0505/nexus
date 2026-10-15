@@ -24,6 +24,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.release.tag_name || github.event.inputs.tag }}
+          token: ${{ secrets.ADMIN_PAT || secrets.GITHUB_TOKEN }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -94,8 +95,8 @@ jobs:
           TAG_NAME="${{ github.event.release.tag_name || github.event.inputs.tag }}"
           BRANCH_NAME="chore/update-readme-${TAG_NAME}"
 
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "thanhba0505"
+          git config user.email "lethanhba0505@gmail.com"
 
           # Fetch nhánh main mới nhất để cập nhật tài liệu trên commit mới nhất
           git fetch origin main
@@ -166,5 +167,5 @@ jobs:
           fi
         env:
           TAG_NAME: ${{ github.event.release.tag_name || github.event.inputs.tag }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ADMIN_PAT || secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ADMIN_PAT || secrets.GITHUB_TOKEN }}
