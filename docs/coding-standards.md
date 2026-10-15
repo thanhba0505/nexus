@@ -477,7 +477,8 @@ pub fn fetch_github_prs(since_iso: String) -> Result<Vec<PRReportItem>, String> 
 
 ## 7. Chuẩn Hóa Giao Diện & Vòng Đời Mini App (Mini App Architecture Standards)
 
-> 📖 **Xem hướng dẫn chi tiết & checklist thực thi tại**: [`docs/mini-app-guide.md`](file:///Users/lethanhba/workspace/app/nexus/docs/mini-app-guide.md)
+> 📖 **Xem hướng dẫn chi tiết & checklist thực thi tại**: [`docs/mini-app-guide.md`](file:///Users/lethanhba/workspace/app/nexus/docs/mini-app-guide.md)  
+> 🎨 **Quy chuẩn thiết kế giao diện & công thái học**: [`docs/ui-ux-design-system.md`](file:///Users/lethanhba/workspace/app/nexus/docs/ui-ux-design-system.md)
 
 Tất cả các mini apps phát triển trong monorepo Nexus (như `apps/github-report`, `apps/slackbot`, v.v.) phải kế thừa các component dùng chung từ `@nexus/ui` và tuân theo nguyên tắc trải nghiệm người dùng tương tự Web Dashboard hiện đại:
 

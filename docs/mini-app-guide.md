@@ -3,6 +3,7 @@
 > **Tài liệu**: Quy chuẩn & Hướng dẫn xây dựng Mini App (Desktop Mini-App Architecture Guide)  
 > **Áp dụng cho**: Toàn bộ ứng dụng độc lập trong thư mục `apps/` (`github-report`, `slackbot`, v.v.)  
 > **Thư viện dùng chung**: `@nexus/ui`, `@nexus/shared`, `@nexus/config`  
+> **Quy chuẩn thiết kế UI/UX**: 👉 [`docs/ui-ux-design-system.md`](file:///Users/lethanhba/workspace/app/nexus/docs/ui-ux-design-system.md)  
 > **Mục tiêu**: Trải nghiệm macOS mượt mà chuẩn native, luồng dữ liệu hướng sự kiện nhất quán (Event-Driven), hiển thị chuyển tiếp ổn định (Stale-While-Revalidate), và tối ưu hóa xử lý nền bất đồng bộ (Non-blocking IPC).
 
 ---

@@ -243,6 +243,7 @@ Dự án tích hợp sẵn hệ thống CI/CD GitHub Actions tự động hóa:
 ## 📖 Tài Liệu Tham Khảo
 
 - 👉 **[Hướng Dẫn Kiến Trúc Mini App](docs/mini-app-guide.md)**: Hướng dẫn chi tiết cách tạo một mini app mới theo chuẩn Nexus.
+- 👉 **[Nexus UI/UX Design System](docs/ui-ux-design-system.md)**: Quy chuẩn thiết kế giao diện macOS, bảng màu, typography, khoảng cách, và quy tắc công thái học.
 - 👉 **[Đặc Tả Kỹ Thuật GitHub Report](docs/github-report.md)**: Kiến trúc, Unified Titlebar và Local AI.
 - 👉 **[Quy Chuẩn Lập Trình Monorepo](docs/coding-standards.md)**: Coding standards, Naming conventions và Keychain Security.
 - 👉 **[Kiến Trúc Tổng Thể](docs/architecture.md)**: Phân tích kiến trúc monorepo và mô hình đa ứng dụng.
