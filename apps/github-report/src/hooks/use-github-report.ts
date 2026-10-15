@@ -1,280 +1,200 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { invoke } from '@tauri-apps/api/core';
-import { PRReportItem, AISummaryResult, AppSettings, DateMode } from '../types';
+import { useCallback, useMemo, useRef, useState, type RefObject } from 'react';
+import { useAsyncTask, useLatestRef, useTransientValue, type StatusTone } from '@nexus/ui';
+import { githubReportApi } from '../services/github-report-api';
+import { formatSummaryText, formatTime, getDestinationUrl, getSinceIso } from '../lib/report-utils';
+import type { AppSettings, DateMode, PRReportItem } from '../types';
 
-export interface UseGithubReportOptions {
-  isAppReady: boolean;
-  dateMode: DateMode;
-  settings: AppSettings;
+export interface ReportStatus {
+  message: string;
+  tone: StatusTone;
 }
 
-export function useGithubReport({ isAppReady, dateMode, settings }: UseGithubReportOptions) {
-  const settingsRef = useRef(settings);
-  useEffect(() => {
-    settingsRef.current = settings;
-  }, [settings]);
+export interface UseGithubReportOptions {
+  /** Ref cấu hình mới nhất — đọc tại thời điểm chạy, không gây re-render/re-run. */
+  settingsRef: RefObject<AppSettings>;
+}
 
-  const [prs, setPrs] = useState<PRReportItem[]>([]);
-  const [selectedPrNumbers, setSelectedPrNumbers] = useState<Set<number>>(new Set());
+/**
+ * Toàn bộ nghiệp vụ GitHub Report theo luồng **event-driven** (không có useEffect tự kích hoạt):
+ *
+ *   loadReport(mode) ──► fetch PRs ──► (có PR) ──► generate summary ──► autoCopy / reveal
+ *
+ * - Chỉ được gọi từ: `onReady` của bootstrap, nút/phím ⌘R, đổi khoảng ngày.
+ * - Mỗi lần gọi tăng `generation`; kết quả của lần gọi cũ bị bỏ qua → không chồng chéo,
+ *   không chạy autoCopy/reveal hai lần.
+ * - `useAsyncTask` giữ dữ liệu cũ khi làm mới → UI không chớp.
+ */
+export function useGithubReport({ settingsRef }: UseGithubReportOptions) {
+  const [selectedPrNumbers, setSelectedPrNumbers] = useState<Set<number>>(() => new Set());
+  const [notice, showNotice] = useTransientValue<ReportStatus>(2500);
+  const [isCopied, flashCopied] = useTransientValue<true>(2000);
+  const generationRef = useRef(0);
 
-  const [summaryBullets, setSummaryBullets] = useState<string[]>([]);
-  const [summaryProvider, setSummaryProvider] = useState<string>('');
+  const prsTask = useAsyncTask((sinceIso: string) => githubReportApi.fetchPrs(sinceIso), {
+    onSuccess: (items) => setSelectedPrNumbers(new Set(items.map((pr) => pr.number))),
+  });
 
-  const [isLoadingPrs, setIsLoadingPrs] = useState<boolean>(false);
-  const [isSummarizing, setIsSummarizing] = useState<boolean>(false);
+  const summaryTask = useAsyncTask(
+    (items: PRReportItem[]) => githubReportApi.generateSummary(items, settingsRef.current.ai),
+    // Khoá theo danh sách PR + commit để bấm lặp "Tóm tắt lại" không gọi AI chồng nhau.
+    { getKey: (items) => items.map((pr) => `${pr.number}:${pr.commits.length}`).join(',') },
+  );
 
-  const [statusText, setStatusText] = useState<string>('Sẵn sàng');
-  const [isStatusError, setIsStatusError] = useState<boolean>(false);
-  const [isCopied, setIsCopied] = useState<boolean>(false);
+  const prsRef = useLatestRef(prsTask.data);
+  const bulletsRef = useLatestRef(summaryTask.data?.bullets);
+  const selectedRef = useLatestRef(selectedPrNumbers);
+  const isFetchingRef = useLatestRef(prsTask.isRunning);
 
-  // Tính toán mốc thời gian since ISO theo DateMode
-  const sinceIsoString = useMemo(() => {
-    const now = new Date();
-    if (dateMode === 'today') {
-      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-      return todayStart.toISOString();
-    } else {
-      // Last Workday: Nếu là thứ Hai (1), lùi về thứ Sáu (3 ngày trước)
-      const day = now.getDay();
-      const daysToSubtract = day === 1 ? 3 : day === 0 ? 2 : 1;
-      const targetDate = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate() - daysToSubtract,
-        0,
-        0,
-        0,
-        0,
-      );
-      return targetDate.toISOString();
-    }
-  }, [dateMode]);
+  // ---- Hành động phụ (clipboard / trình duyệt) ------------------------------------------
 
-  // Đếm tổng số commit
-  const totalCommitsCount = useMemo(() => {
-    return prs.reduce((acc, p) => acc + p.commits.length, 0);
-  }, [prs]);
-
-  // Sao chép nội dung vào Clipboard
   const copySummary = useCallback(
-    (overrideText?: string) => {
-      const textToCopy =
-        overrideText ||
-        (summaryBullets.length > 0
-          ? ['Today:', '', ...summaryBullets.map((b) => `• ${b}`)].join('\n')
-          : '');
-
-      if (!textToCopy) return false;
-
+    async (bullets: string[] | undefined = bulletsRef.current) => {
+      if (!bullets || bullets.length === 0) return false;
       try {
-        navigator.clipboard.writeText(textToCopy);
-        setIsCopied(true);
-        setTimeout(() => setIsCopied(false), 2000);
-        setStatusText('✓ Đã sao chép tóm tắt vào Clipboard');
-        setIsStatusError(false);
+        await navigator.clipboard.writeText(formatSummaryText(bullets));
+        flashCopied(true);
+        showNotice({ tone: 'success', message: '✓ Đã sao chép tóm tắt vào Clipboard' });
         return true;
-      } catch {
+      } catch (err) {
+        showNotice({ tone: 'error', message: `Không thể sao chép: ${String(err)}` });
         return false;
       }
     },
-    [summaryBullets],
+    [bulletsRef, flashCopied, showNotice],
   );
 
-  // Kích hoạt tab trình duyệt Parabol / Slack
   const revealDestination = useCallback(async () => {
-    const current = settingsRef.current;
+    const { workflow } = settingsRef.current;
+    if (workflow.destination === 'copy_only') return;
     try {
-      const url =
-        current.workflow.destination === 'parabol'
-          ? current.workflow.parabolUrl || 'https://action.parabol.co'
-          : 'https://app.slack.com';
-
-      await invoke('reveal_browser_tab', {
-        url,
-        browserName: current.workflow.browser,
-      });
-
-      setStatusText(`✓ Đã kích hoạt tab ${current.workflow.destination} trên trình duyệt`);
-      setIsStatusError(false);
+      await githubReportApi.revealBrowserTab(getDestinationUrl(workflow), workflow.browser);
+      showNotice({ tone: 'success', message: `✓ Đã mở ${workflow.destination} trên trình duyệt` });
     } catch (err) {
-      console.warn('Lỗi mở trình duyệt:', err);
+      showNotice({ tone: 'error', message: `Không mở được trình duyệt: ${String(err)}` });
     }
-  }, []);
+  }, [settingsRef, showNotice]);
 
-  // Tóm tắt AI ngầm không khóa giao diện
-  const generateSummary = useCallback(
-    async (itemsToSummarize?: PRReportItem[]) => {
-      const current = settingsRef.current;
-      const targetPrs = itemsToSummarize || prs.filter((p) => selectedPrNumbers.has(p.number));
-      const finalItems = targetPrs.length > 0 ? targetPrs : prs;
+  // ---- Luồng chính ----------------------------------------------------------------------
 
-      if (finalItems.length === 0) {
-        setSummaryBullets([]);
-        setSummaryProvider('');
+  const summarize = useCallback(
+    async (items: PRReportItem[], generation: number) => {
+      const result = await summaryTask.run(items);
+      if (!result || generation !== generationRef.current) return;
+
+      const { workflow } = settingsRef.current;
+      if (workflow.autoCopy) await copySummary(result.bullets);
+      if (workflow.revealBrowser) await revealDestination();
+    },
+    [copySummary, revealDestination, settingsRef, summaryTask.run],
+  );
+
+  /** Quét PR theo khoảng ngày rồi tự động tóm tắt. An toàn khi gọi liên tiếp (latest-wins). */
+  const loadReport = useCallback(
+    async (mode: DateMode) => {
+      const generation = ++generationRef.current;
+      summaryTask.cancel(); // tóm tắt cũ (nếu đang chạy) không còn hợp lệ
+
+      const items = await prsTask.run(getSinceIso(mode));
+      if (!items || generation !== generationRef.current) return;
+
+      if (items.length === 0) {
+        summaryTask.reset();
         return;
       }
-
-      setIsSummarizing(true);
-      setStatusText('Đang tóm tắt bằng Local AI...');
-      setIsStatusError(false);
-
-      try {
-        const result = await invoke<AISummaryResult>('generate_ai_summary', {
-          prs: finalItems,
-          promptTemplate: current.ai.promptTemplate || undefined,
-          providerPreference: current.ai.provider || undefined,
-        });
-
-        setSummaryBullets(result.bullets);
-        setSummaryProvider(result.provider);
-
-        const formatted = ['Today:', '', ...result.bullets.map((b) => `• ${b}`)].join('\n');
-
-        if (current.workflow.autoCopy) {
-          copySummary(formatted);
-        }
-
-        if (current.workflow.revealBrowser && current.workflow.destination !== 'copy_only') {
-          revealDestination();
-        }
-
-        setStatusText(
-          `✓ Đã tóm tắt (${result.provider}) • ${new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`,
-        );
-      } catch (err) {
-        console.warn('Lỗi tóm tắt AI:', err);
-        setStatusText(`Lỗi tóm tắt: ${String(err)}`);
-        setIsStatusError(true);
-      } finally {
-        setIsSummarizing(false);
-      }
+      await summarize(items, generation);
     },
-    [prs, selectedPrNumbers, copySummary, revealDestination],
+    [prsTask.run, summarize, summaryTask.cancel, summaryTask.reset],
   );
 
-  // Quét PR & commits từ GitHub (hàm thủ công)
-  const fetchPrs = useCallback(async () => {
-    setIsLoadingPrs(true);
-    setStatusText('Đang quét PR & commits từ GitHub...');
-    setIsStatusError(false);
+  /** Tóm tắt lại theo các PR đang được chọn (hoặc tất cả nếu không chọn PR nào). */
+  const regenerateSummary = useCallback(async () => {
+    if (isFetchingRef.current) return; // đang quét PR → loadReport sẽ tự tóm tắt sau
+    const all = prsRef.current ?? [];
+    const chosen = all.filter((pr) => selectedRef.current.has(pr.number));
+    const items = chosen.length > 0 ? chosen : all;
+    if (items.length === 0) return;
+    await summarize(items, ++generationRef.current);
+  }, [prsRef, selectedRef, summarize]);
 
-    try {
-      const items = await invoke<PRReportItem[]>('fetch_github_prs', {
-        sinceIso: sinceIsoString,
-      });
+  // ---- Chọn PR & chỉnh sửa tóm tắt ------------------------------------------------------
 
-      setPrs(items);
-      const allNumbers = new Set(items.map((p) => p.number));
-      setSelectedPrNumbers(allNumbers);
-      setIsLoadingPrs(false);
-
-      if (items.length > 0) {
-        setStatusText(
-          `Tìm thấy ${items.length} PRs (${items.reduce((s, p) => s + p.commits.length, 0)} commits)`,
-        );
-        generateSummary(items);
-      } else {
-        setSummaryBullets([]);
-        setStatusText('Không có PR hoặc commit nào trong khoảng thời gian này.');
-      }
-    } catch (err) {
-      console.warn('Lỗi quét PR:', err);
-      setStatusText(`Lỗi GitHub CLI: ${String(err)}`);
-      setIsStatusError(true);
-      setIsLoadingPrs(false);
-    }
-  }, [sinceIsoString, generateSummary]);
-
-  // Luồng tự động khi vào app chính hoặc đổi khoảng ngày:
-  // 1. Quét PR & commits (hiển thị skeleton)
-  // 2. Tự động trigger AI tóm tắt (hiển thị spinner AI, không khóa UI)
-  useEffect(() => {
-    if (!isAppReady) return;
-
-    let isCancelled = false;
-
-    const loadDataAndAutoSummarize = async () => {
-      setIsLoadingPrs(true);
-      setStatusText('Đang quét PR & commits từ GitHub...');
-      setIsStatusError(false);
-
-      try {
-        const items = await invoke<PRReportItem[]>('fetch_github_prs', {
-          sinceIso: sinceIsoString,
-        });
-
-        if (isCancelled) return;
-        setPrs(items);
-        const allNumbers = new Set(items.map((p) => p.number));
-        setSelectedPrNumbers(allNumbers);
-        setIsLoadingPrs(false);
-
-        if (items.length > 0) {
-          setStatusText(
-            `Tìm thấy ${items.length} PRs (${items.reduce((s, p) => s + p.commits.length, 0)} commits). Đang tóm tắt bằng AI...`,
-          );
-          // Tự động trigger AI tóm tắt bất đồng bộ
-          generateSummary(items);
-        } else {
-          setSummaryBullets([]);
-          setStatusText('Không có PR hoặc commit nào trong khoảng thời gian này.');
-        }
-      } catch (err) {
-        if (isCancelled) return;
-        console.warn('Lỗi quét PR:', err);
-        setStatusText(`Lỗi GitHub CLI: ${String(err)}`);
-        setIsStatusError(true);
-        setIsLoadingPrs(false);
-      }
-    };
-
-    loadDataAndAutoSummarize();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [isAppReady, sinceIsoString, generateSummary]);
-
-  // Thao tác danh sách chọn PR
   const togglePr = useCallback((prNumber: number) => {
     setSelectedPrNumbers((prev) => {
       const next = new Set(prev);
-      if (next.has(prNumber)) {
-        next.delete(prNumber);
-      } else {
-        next.add(prNumber);
-      }
+      if (next.has(prNumber)) next.delete(prNumber);
+      else next.add(prNumber);
       return next;
     });
   }, []);
 
-  const selectAll = useCallback(() => {
-    setSelectedPrNumbers(new Set(prs.map((p) => p.number)));
-  }, [prs]);
+  const setAllSelected = useCallback(
+    (isSelected: boolean) => {
+      setSelectedPrNumbers(
+        isSelected ? new Set((prsRef.current ?? []).map((pr) => pr.number)) : new Set(),
+      );
+    },
+    [prsRef],
+  );
 
-  const deselectAll = useCallback(() => {
-    setSelectedPrNumbers(new Set());
-    setSummaryBullets([]);
-  }, []);
+  const updateBullets = useCallback(
+    (bullets: string[]) => {
+      summaryTask.setData((prev) => (prev ? { ...prev, bullets } : prev));
+    },
+    [summaryTask.setData],
+  );
+
+  // ---- Trạng thái dẫn xuất (không lưu state thừa) ---------------------------------------
+
+  const prs = prsTask.data;
+  const totalCommits = useMemo(
+    () => (prs ?? []).reduce((sum, pr) => sum + pr.commits.length, 0),
+    [prs],
+  );
+
+  const status: ReportStatus = useMemo(() => {
+    if (notice) return notice;
+    if (prsTask.isRunning) return { tone: 'busy', message: 'Đang quét PR & commits từ GitHub…' };
+    if (summaryTask.isRunning) return { tone: 'busy', message: 'Đang tóm tắt bằng Local AI…' };
+    if (prsTask.error) return { tone: 'error', message: `Lỗi GitHub CLI: ${prsTask.error}` };
+    if (summaryTask.error) return { tone: 'error', message: `Lỗi tóm tắt: ${summaryTask.error}` };
+    if (summaryTask.data && summaryTask.updatedAt) {
+      return {
+        tone: 'default',
+        message: `✓ Đã tóm tắt (${summaryTask.data.provider}) • ${formatTime(summaryTask.updatedAt)}`,
+      };
+    }
+    if (prs) {
+      return prs.length > 0
+        ? { tone: 'default', message: `Tìm thấy ${prs.length} PRs (${totalCommits} commits)` }
+        : { tone: 'default', message: 'Không có PR hoặc commit nào trong khoảng thời gian này.' };
+    }
+    return { tone: 'default', message: 'Sẵn sàng' };
+  }, [
+    notice,
+    prs,
+    prsTask.error,
+    prsTask.isRunning,
+    summaryTask.data,
+    summaryTask.error,
+    summaryTask.isRunning,
+    summaryTask.updatedAt,
+    totalCommits,
+  ]);
 
   return {
+    prsTask,
+    summaryTask,
     prs,
+    totalCommits,
     selectedPrNumbers,
-    totalCommitsCount,
-    summaryBullets,
-    setSummaryBullets,
-    summaryProvider,
-    isLoadingPrs,
-    isSummarizing,
-    statusText,
-    isStatusError,
-    isCopied,
-    fetchPrs,
-    generateSummary,
-    togglePr,
-    selectAll,
-    deselectAll,
+    isCopied: isCopied !== null,
+    status,
+    loadReport,
+    regenerateSummary,
     copySummary,
     revealDestination,
+    togglePr,
+    setAllSelected,
+    updateBullets,
   };
 }

@@ -27,40 +27,39 @@ Mỗi buổi sáng họp **Daily Standup** hoặc viết cập nhật trên **Pa
    - Tự động tích hợp khoảng trống an toàn 76px (`leftSafeWidth={76}`) cho 3 nút Traffic Lights gốc macOS.
    - Hỗ trợ kéo di chuyển cửa sổ thông qua `data-tauri-drag-region` và phân lập các nút bấm bằng `data-no-drag`.
    - Chia 3 vùng rõ ràng: `leftSlot` (Logo, Title, Bộ chọn ngày), `centerSlot`, `rightSlot` (Fetch ⌘R, Copy, Parabol, Settings ⌘,).
-2. **`AppSplashScreen`**:
-   - Màn hình khởi động tối giản gồm Glowing App Icon, Title, Version badge và thanh tiến trình (Progress bar).
-   - Chỉ đảm nhiệm nạp `settings.json` và kiểm tra môi trường hệ thống trong ~300ms rồi transition mượt mà vào giao diện chính.
+2. **`MiniAppShell` & `MiniAppStatusBar`**:
+   - Khung giao diện chuẩn macOS gồm Header, Main và Footer.
+   - Thanh trạng thái 28px hiển thị trạng thái kết nối GitHub CLI và Local AI CLI.
+3. **`AppSplashScreen`**:
+   - Màn hình khởi động tối giản gồm Glowing App Icon, Title, Version badge và thanh tiến trình.
+4. **`AsyncContent` & `LoadingBar`**:
+   - Điều phối hiển thị theo mô hình **Stale-While-Revalidate**: Tải lần đầu hiện `Skeleton`, làm mới khi đã có dữ liệu chỉ hiện thanh `LoadingBar` mảnh, **không bao giờ chớp giật layout**.
 
-### 2.2. Kiến Trúc Phân Rã Custom Hooks
-
-Thay vì dồn toàn bộ state vào `App.tsx`, ứng dụng được phân tách thành 3 hooks chuyên biệt theo Single Responsibility Principle:
+### 2.2. Kiến Trúc Lớp & Phân Tách Trách Nhiệm (Clean Architecture)
 
 ```text
 apps/github-report/src/
+├── lib/
+│   └── report-utils.ts         # Pure functions: getSinceIso, formatSummaryText, parseSummaryText
+├── services/
+│   ├── github-report-api.ts    # Lớp gọi Tauri IPC có kiểu dữ liệu tĩnh tập trung
+│   └── storage.ts              # Đọc/ghi settings.json qua tauri-plugin-store & local fallback
 ├── hooks/
-│   ├── use-splash-screen.ts    # Quản lý tiến trình splash, nạp settings.json & check CLI
-│   ├── use-github-report.ts    # Quản lý fetch PRs, filter commits, AI summary, clipboard & browser reveal
-│   └── use-global-shortcuts.ts # Quản lý toàn bộ phím tắt macOS (⌘R, ⌘C, ⌘P, ⌘,, ⌘Enter, Esc)
+│   ├── use-app-settings.ts     # Quản lý state settings & settingsRef luôn mới nhất
+│   └── use-github-report.ts    # Nghiệp vụ Event-Driven: quét PRs, AI summary, clipboard, browser
 ├── components/
 │   ├── UnifiedHeader.tsx       # Bọc MiniAppHeader từ @nexus/ui
-│   ├── AISummaryCard.tsx       # Hiển thị AI Summary, inline edit & loading spinner
-│   ├── PRTimelineCard.tsx      # Danh sách PR/Commit checkboxes & skeleton pulse loading
+│   ├── AISummaryCard.tsx       # AI Summary dùng AsyncContent (giữ text cũ mờ nhẹ khi refresh)
+│   ├── PRTimelineCard.tsx      # Timeline PR & Commit dùng AsyncContent (không mất scroll position)
 │   ├── SettingsModal.tsx       # Modal cấu hình prompt, AI provider, Keychain PAT
-│   └── StatusBar.tsx           # Thanh trạng thái tối giản dưới chân trang
-└── App.tsx                     # Component điều phối gọn nhẹ (<150 dòng)
+│   └── StatusBar.tsx           # Bọc MiniAppStatusBar từ @nexus/ui
+└── App.tsx                     # Component điều phối tinh gọn (<120 dòng)
 ```
 
-- **`useSplashScreen`**:
-  - Tải cấu hình từ `settings.json` qua `tauri-plugin-store`.
-  - Kiểm tra điều kiện tiên quyết (GitHub CLI, Antigravity CLI, Keychain).
-  - Trả về `isSplashActive`, `settings`, `updateSettings`.
-- **`useGitHubReport`**:
-  - Tiếp nhận `settings` sau khi splash hoàn tất.
-  - Tự động kích hoạt quét PRs bất đồng bộ khi vào app.
-  - Khi PRs nạp xong, tự động trigger AI tóm tắt ngầm ở background thread.
-  - Cung cấp trạng thái loading cục bộ: `isLoadingPRs`, `isGeneratingSummary`.
-- **`useGlobalShortcuts`**:
-  - Đăng ký listeners phím tắt macOS chuẩn xác, tự động dọn dẹp (cleanup) khi unmount.
+- Chi tiết hướng dẫn xây dựng mini app tương tự xem tại: 👉 **[`docs/mini-app-guide.md`](file:///Users/lethanhba/workspace/app/nexus/docs/mini-app-guide.md)**.
+- **`useAppSettings`**: Quản lý nạp/lưu cài đặt, cung cấp `settingsRef` để callback async luôn đọc giá trị mới nhất mà không gây re-render hoặc trigger effect lặp.
+- **`useGithubReport`**: Xây dựng hoàn toàn theo mô hình **Event-Driven** trên nền `useAsyncTask` (từ `@nexus/ui`). Mọi hành động quét PR hay chạy AI chỉ được kích hoạt từ sự kiện (`onReady`, bấm nút `⌘R`, đổi ngày, bấm `⌘↵`), **không có bất kỳ `useEffect` nào tự động gọi API** $\rightarrow$ Triệt tiêu 100% nguy cơ lặp API.
+- **`useAppBootstrap` & `useHotkeys` (từ `@nexus/ui`)**: Quản lý chuỗi khởi động tuần tự không chớp giật (StrictMode-safe) và bắt phím tắt macOS với một listener duy nhất.
 
 ### 2.3. Wireframe Bố Cục Ứng Dụng
 

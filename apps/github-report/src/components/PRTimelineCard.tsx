@@ -8,227 +8,199 @@ import {
   FolderGit2,
 } from 'lucide-react';
 import { openUrl } from '@tauri-apps/plugin-opener';
-import { PRReportItem } from '../types';
+import { AsyncContent, Skeleton } from '@nexus/ui';
+import type { PRReportItem } from '../types';
 
 export interface PRTimelineCardProps {
-  prs: PRReportItem[];
+  prs: PRReportItem[] | undefined;
+  isLoading: boolean;
+  error: string | null;
   selectedPrNumbers: Set<number>;
-  isLoading?: boolean;
   onTogglePr: (prNumber: number) => void;
-  onSelectAll: () => void;
-  onDeselectAll: () => void;
+  onSetAllSelected: (isSelected: boolean) => void;
+}
+
+const STATE_BADGE: Record<string, string> = {
+  MERGED: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+  CLOSED: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
+  OPEN: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+};
+
+function StateBadge({ state }: { state: string }) {
+  const key = state.toUpperCase();
+  return (
+    <span
+      className={`rounded border px-1.5 py-0.5 text-[10px] font-semibold ${STATE_BADGE[key] ?? STATE_BADGE.OPEN}`}
+    >
+      {key in STATE_BADGE ? key : 'OPEN'}
+    </span>
+  );
+}
+
+function TimelineSkeleton() {
+  return (
+    <div className="space-y-3">
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="space-y-2.5 rounded-xl border border-white/5 bg-white/[0.03] p-3">
+          <div className="flex items-center gap-2.5">
+            <Skeleton className="h-3.5 w-3.5 rounded" />
+            <Skeleton className="h-3 w-10 bg-sky-400/20" />
+            <Skeleton className="h-3 w-28" />
+            <Skeleton className="h-3 w-12" />
+          </div>
+          <Skeleton className="ml-6 h-3.5 w-4/5" />
+          <Skeleton className="ml-6 h-3 w-1/2 bg-white/5" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TimelineEmpty() {
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white/30">
+        <GitPullRequest className="h-6 w-6" />
+      </div>
+      <div>
+        <h4 className="text-sm font-semibold text-white/80">Không có Pull Request nào</h4>
+        <p className="mt-1 max-w-sm text-xs text-white/40">
+          Chưa có PR hoặc commit nào trong khoảng thời gian đã chọn. Thử đổi sang "Ngày trước" hoặc
+          bấm "Quét PR" (⌘R).
+        </p>
+      </div>
+    </div>
+  );
 }
 
 export function PRTimelineCard({
   prs,
+  isLoading,
+  error,
   selectedPrNumbers,
-  isLoading = false,
   onTogglePr,
-  onSelectAll,
-  onDeselectAll,
+  onSetAllSelected,
 }: PRTimelineCardProps) {
-  const [collapsedPrs, setCollapsedPrs] = useState<Set<number>>(new Set());
+  const [collapsedPrs, setCollapsedPrs] = useState<Set<number>>(() => new Set());
+  const items = prs ?? [];
+  const hasItems = items.length > 0;
+  const isAllSelected = hasItems && items.every((pr) => selectedPrNumbers.has(pr.number));
 
   const toggleCollapse = (prNumber: number) => {
     setCollapsedPrs((prev) => {
       const next = new Set(prev);
-      if (next.has(prNumber)) {
-        next.delete(prNumber);
-      } else {
-        next.add(prNumber);
-      }
+      if (next.has(prNumber)) next.delete(prNumber);
+      else next.add(prNumber);
       return next;
     });
   };
 
   const handleOpenLink = (url: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    try {
-      openUrl(url);
-    } catch {
-      window.open(url, '_blank');
-    }
+    openUrl(url).catch(() => window.open(url, '_blank'));
   };
-
-  const getStatusBadge = (state: string) => {
-    switch (state.toUpperCase()) {
-      case 'MERGED':
-        return (
-          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30">
-            MERGED
-          </span>
-        );
-      case 'CLOSED':
-        return (
-          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">
-            CLOSED
-          </span>
-        );
-      default:
-        return (
-          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-            OPEN
-          </span>
-        );
-    }
-  };
-
-  if (prs.length === 0) {
-    return (
-      <div className="w-full flex-1 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl p-8 flex flex-col items-center justify-center text-center space-y-3">
-        <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/30">
-          <GitPullRequest className="w-6 h-6" />
-        </div>
-        <div>
-          <h4 className="text-sm font-semibold text-white/80">Không có Pull Request nào</h4>
-          <p className="text-xs text-white/40 mt-1 max-w-sm">
-            Chưa tìm thấy commit hoặc PR nào được cập nhật trong khoảng thời gian đã chọn. Hãy thử
-            đổi sang "Ngày trước" hoặc bấm "Quét PR".
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  const allSelected = prs.length > 0 && prs.every((p) => selectedPrNumbers.has(p.number));
 
   return (
-    <div className="w-full flex-1 min-h-0 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl p-4 flex flex-col space-y-3 overflow-hidden shadow-lg shadow-black/20">
-      {/* Header của danh sách */}
-      <div className="flex items-center justify-between pb-2 border-b border-white/10 shrink-0">
-        <div className="flex items-center space-x-2">
-          <FolderGit2 className="w-4 h-4 text-sky-400" />
-          <h3 className="text-xs font-semibold text-white uppercase tracking-wider">
-            Pull Requests & Commits ({prs.length})
+    <section className="flex min-h-0 w-full flex-1 flex-col gap-3 overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-4 shadow-lg shadow-black/20 backdrop-blur-xl">
+      <header className="flex shrink-0 items-center justify-between border-b border-white/10 pb-2">
+        <div className="flex items-center gap-2">
+          <FolderGit2 className="h-4 w-4 text-sky-400" />
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-white">
+            Pull Requests & Commits{prs ? ` (${items.length})` : ''}
           </h3>
         </div>
+        <button
+          onClick={() => onSetAllSelected(!isAllSelected)}
+          disabled={!hasItems}
+          className="text-[11px] text-white/60 transition-colors hover:text-white disabled:opacity-30"
+        >
+          {isAllSelected ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+        </button>
+      </header>
 
-        <div className="flex items-center space-x-2 text-[11px]">
-          <button
-            onClick={allSelected ? onDeselectAll : onSelectAll}
-            className="text-white/60 hover:text-white transition-colors"
-          >
-            {allSelected ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
-          </button>
-        </div>
-      </div>
-
-      {/* Danh sách cuộn */}
-      {isLoading ? (
-        <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="rounded-xl border border-white/5 bg-white/[0.03] p-3 space-y-2.5 animate-pulse"
-            >
-              <div className="flex items-center space-x-2.5">
-                <div className="w-3.5 h-3.5 rounded bg-white/10" />
-                <div className="w-10 h-3 rounded bg-sky-400/20" />
-                <div className="w-28 h-3 rounded bg-white/10" />
-                <div className="w-12 h-3 rounded bg-white/10" />
-              </div>
-              <div className="w-4/5 h-3.5 rounded bg-white/10 ml-6" />
-              <div className="w-1/2 h-3 rounded bg-white/5 ml-6" />
-            </div>
-          ))}
-        </div>
-      ) : prs.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-center p-6 text-white/40 space-y-2">
-          <GitPullRequest className="w-8 h-8 opacity-40" />
-          <p className="text-xs">Không tìm thấy PR hoặc commit nào trong khoảng thời gian này.</p>
-        </div>
-      ) : (
-        <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-          {prs.map((pr) => {
+      <AsyncContent
+        className="min-h-0 flex-1 overflow-y-auto pr-1"
+        isLoading={isLoading}
+        hasData={hasItems}
+        error={error}
+        skeleton={<TimelineSkeleton />}
+        empty={<TimelineEmpty />}
+      >
+        <ul className="space-y-3">
+          {items.map((pr) => {
             const isSelected = selectedPrNumbers.has(pr.number);
             const isCollapsed = collapsedPrs.has(pr.number);
 
             return (
-              <div
-                key={pr.number}
-                className={`rounded-xl border transition-all ${
+              <li
+                key={`${pr.repository}#${pr.number}`}
+                className={`rounded-xl border transition-colors ${
                   isSelected
-                    ? 'bg-white/5 border-white/15'
-                    : 'bg-black/20 border-white/5 opacity-60'
+                    ? 'border-white/15 bg-white/5'
+                    : 'border-white/5 bg-black/20 opacity-60'
                 }`}
               >
-                {/* Header của từng PR */}
                 <div
                   onClick={() => toggleCollapse(pr.number)}
-                  className="p-3 flex items-start space-x-2.5 cursor-pointer hover:bg-white/5 rounded-t-xl transition-colors"
+                  className="flex cursor-pointer items-start gap-2.5 rounded-t-xl p-3 transition-colors hover:bg-white/5"
                 >
-                  {/* Checkbox chọn/bỏ chọn */}
                   <input
                     type="checkbox"
                     checked={isSelected}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      onTogglePr(pr.number);
-                    }}
-                    className="mt-0.5 w-3.5 h-3.5 rounded border-white/30 text-sky-500 focus:ring-0 focus:ring-offset-0 bg-black/40 cursor-pointer"
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={() => onTogglePr(pr.number)}
+                    className="mt-0.5 h-3.5 w-3.5 cursor-pointer rounded border-white/30 bg-black/40 text-sky-500 focus:ring-0 focus:ring-offset-0"
                   />
-
-                  {/* Nút collapse/expand */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleCollapse(pr.number);
-                    }}
-                    className="mt-0.5 text-white/50 hover:text-white"
-                  >
+                  <span className="mt-0.5 text-white/50">
                     {isCollapsed ? (
-                      <ChevronRight className="w-3.5 h-3.5" />
+                      <ChevronRight className="h-3.5 w-3.5" />
                     ) : (
-                      <ChevronDown className="w-3.5 h-3.5" />
+                      <ChevronDown className="h-3.5 w-3.5" />
                     )}
-                  </button>
+                  </span>
 
-                  {/* Thông tin PR */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2 flex-wrap gap-y-1">
-                      <span className="text-[11px] font-mono font-medium text-sky-400 shrink-0">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="shrink-0 font-mono text-[11px] font-medium text-sky-400">
                         #{pr.number}
                       </span>
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-white/70 truncate max-w-[180px]">
+                      <span className="max-w-[180px] truncate rounded bg-white/10 px-1.5 py-0.5 font-mono text-[10px] text-white/70">
                         {pr.repository}
                       </span>
-                      {getStatusBadge(pr.state)}
+                      <StateBadge state={pr.state} />
                     </div>
-
-                    <p className="text-xs font-medium text-white/95 mt-1 leading-snug line-clamp-2">
+                    <p className="mt-1 line-clamp-2 text-xs font-medium leading-snug text-white/95">
                       {pr.title}
                     </p>
                   </div>
 
-                  {/* Link mở GitHub */}
                   <button
                     onClick={(e) => handleOpenLink(pr.url, e)}
-                    className="p-1 rounded text-white/40 hover:text-white hover:bg-white/10 transition-colors shrink-0"
+                    className="shrink-0 rounded p-1 text-white/40 transition-colors hover:bg-white/10 hover:text-white"
                     title="Mở Pull Request trên GitHub"
                   >
-                    <ExternalLink className="w-3.5 h-3.5" />
+                    <ExternalLink className="h-3.5 w-3.5" />
                   </button>
                 </div>
 
-                {/* Danh sách commits của PR này */}
                 {!isCollapsed && pr.commits.length > 0 && (
-                  <div className="px-3 pb-3 pt-1 border-t border-white/5 space-y-1.5">
-                    {pr.commits.map((commit, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-start space-x-2 text-[11px] text-white/70 pl-6"
+                  <ul className="space-y-1.5 border-t border-white/5 px-3 pb-3 pt-2">
+                    {pr.commits.map((commit) => (
+                      <li
+                        key={`${commit.committedDate}-${commit.headline}`}
+                        className="flex items-start gap-2 pl-6 text-[11px] text-white/70"
                       >
-                        <GitCommit className="w-3 h-3 text-sky-400/80 mt-0.5 shrink-0" />
-                        <span className="flex-1 leading-tight font-sans">{commit.headline}</span>
-                      </div>
+                        <GitCommit className="mt-0.5 h-3 w-3 shrink-0 text-sky-400/80" />
+                        <span className="flex-1 leading-tight">{commit.headline}</span>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 )}
-              </div>
+              </li>
             );
           })}
-        </div>
-      )}
-    </div>
+        </ul>
+      </AsyncContent>
+    </section>
   );
 }

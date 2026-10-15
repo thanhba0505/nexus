@@ -1,61 +1,52 @@
-import { PrereqStatus } from '../types';
+import { MiniAppStatusBar } from '@nexus/ui';
+import type { ReportStatus } from '../hooks/use-github-report';
+import type { PrereqStatus } from '../types';
 
 export interface StatusBarProps {
-  statusText: string;
-  isError: boolean;
+  status: ReportStatus;
   prereqStatus: PrereqStatus | null;
 }
 
-export function StatusBar({ statusText, isError, prereqStatus }: StatusBarProps) {
+function Indicator({ colorClass, label }: { colorClass: string; label: string }) {
   return (
-    <footer className="h-7 w-full shrink-0 flex items-center justify-between px-3 border-t border-white/10 bg-slate-950/70 backdrop-blur-md text-[11px] select-none">
-      {/* Trạng thái công việc hiện tại */}
-      <div className="flex items-center space-x-1.5 truncate">
-        <span className={`truncate ${isError ? 'text-rose-400 font-medium' : 'text-white/60'}`}>
-          {statusText || 'Sẵn sàng'}
-        </span>
-      </div>
+    <span className="flex items-center gap-1 text-[10px] text-white/50">
+      <span className={`h-1.5 w-1.5 rounded-full ${colorClass}`} />
+      {label}
+    </span>
+  );
+}
 
-      {/* Trạng thái kết nối CLI bên phải */}
-      <div className="hidden sm:flex items-center space-x-3 text-[10px] text-white/50 shrink-0">
-        <div className="flex items-center space-x-1">
-          <span
-            className={`w-1.5 h-1.5 rounded-full ${
-              prereqStatus?.ghLoggedIn
-                ? 'bg-emerald-400'
-                : prereqStatus?.ghInstalled
-                  ? 'bg-amber-400'
-                  : 'bg-rose-400'
-            }`}
-          />
-          <span>
-            gh:{' '}
-            {prereqStatus?.ghLoggedIn
-              ? prereqStatus.ghAccount || 'Connected'
-              : prereqStatus?.ghInstalled
-                ? 'Not logged in'
-                : 'Missing'}
-          </span>
-        </div>
+export function StatusBar({ status, prereqStatus }: StatusBarProps) {
+  const ghColor = prereqStatus?.ghLoggedIn
+    ? 'bg-emerald-400'
+    : prereqStatus?.ghInstalled
+      ? 'bg-amber-400'
+      : 'bg-rose-400';
+  const ghLabel = prereqStatus?.ghLoggedIn
+    ? prereqStatus.ghAccount || 'Connected'
+    : prereqStatus?.ghInstalled
+      ? 'Not logged in'
+      : 'Missing';
 
-        <div className="flex items-center space-x-1">
-          <span
-            className={`w-1.5 h-1.5 rounded-full ${
-              prereqStatus?.claudeCliInstalled || prereqStatus?.antigravityCliInstalled
-                ? 'bg-sky-400'
-                : 'bg-rose-400'
-            }`}
-          />
-          <span>
-            AI:{' '}
-            {prereqStatus?.antigravityCliInstalled
-              ? 'Antigravity'
-              : prereqStatus?.claudeCliInstalled
-                ? 'Claude'
-                : 'None'}
-          </span>
-        </div>
-      </div>
-    </footer>
+  const hasAi = prereqStatus?.claudeCliInstalled || prereqStatus?.antigravityCliInstalled;
+  const aiLabel = prereqStatus?.antigravityCliInstalled
+    ? 'Antigravity'
+    : prereqStatus?.claudeCliInstalled
+      ? 'Claude'
+      : 'None';
+
+  return (
+    <MiniAppStatusBar
+      message={status.message}
+      tone={status.tone}
+      rightSlot={
+        prereqStatus && (
+          <div className="hidden items-center gap-3 sm:flex">
+            <Indicator colorClass={ghColor} label={`gh: ${ghLabel}`} />
+            <Indicator colorClass={hasAi ? 'bg-sky-400' : 'bg-rose-400'} label={`AI: ${aiLabel}`} />
+          </div>
+        )
+      }
+    />
   );
 }

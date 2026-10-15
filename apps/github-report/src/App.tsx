@@ -1,167 +1,162 @@
 import { useState } from 'react';
 import { GitPullRequest, Sparkles } from 'lucide-react';
-import { AppSplashScreen } from '@nexus/ui';
+import {
+  AppSplashScreen,
+  MiniAppShell,
+  useAppBootstrap,
+  useHotkeys,
+  useLatestRef,
+} from '@nexus/ui';
 import { UnifiedHeader } from './components/UnifiedHeader';
 import { AISummaryCard } from './components/AISummaryCard';
 import { PRTimelineCard } from './components/PRTimelineCard';
 import { StatusBar } from './components/StatusBar';
 import { SettingsModal } from './components/SettingsModal';
-import { useSplashScreen } from './hooks/use-splash-screen';
+import { useAppSettings } from './hooks/use-app-settings';
 import { useGithubReport } from './hooks/use-github-report';
-import { useGlobalShortcuts } from './hooks/use-global-shortcuts';
-import { saveSettings } from './services/storage';
-import { DateMode, AppSettings } from './types';
-import { invoke } from '@tauri-apps/api/core';
+import { githubReportApi } from './services/github-report-api';
+import { getDestinationLabel } from './lib/report-utils';
+import type { DateMode, PrereqStatus } from './types';
 
+const APP_VERSION = 'v0.4.0';
+
+/**
+ * Luồng UI (xem docs/mini-app-guide.md):
+ * 1. Splash: nạp settings + kiểm tra môi trường (useAppBootstrap, chạy đúng 1 lần).
+ * 2. onReady → loadReport(): quét PR (skeleton) → tóm tắt AI (skeleton/thanh mảnh).
+ * 3. Mọi lần chạy lại đều do người dùng kích hoạt (⌘R, đổi ngày, Tóm tắt lại) — không có
+ *    useEffect nào tự gọi API, nên không thể xảy ra vòng lặp.
+ */
 export default function App() {
   const [dateMode, setDateMode] = useState<DateMode>('today');
-  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [prereqStatus, setPrereqStatus] = useState<PrereqStatus | null>(null);
 
-  // 1. Hook quản lý Splash Screen & Nạp cấu hình khởi động
-  const {
-    isAppReady,
-    isExitingSplash,
-    initProgress,
-    initMessage,
-    settings,
-    setSettings,
-    prereqStatus,
-    setPrereqStatus,
-  } = useSplashScreen();
+  const appSettings = useAppSettings();
+  const { settings } = appSettings;
+  const report = useGithubReport({ settingsRef: appSettings.settingsRef });
+  const dateModeRef = useLatestRef(dateMode);
 
-  // 2. Hook quản lý toàn bộ luồng PR, Commits & Local AI tóm tắt (Web-like async flow)
-  const {
-    prs,
-    selectedPrNumbers,
-    totalCommitsCount,
-    summaryBullets,
-    setSummaryBullets,
-    summaryProvider,
-    isLoadingPrs,
-    isSummarizing,
-    statusText,
-    isStatusError,
-    isCopied,
-    fetchPrs,
-    generateSummary,
-    togglePr,
-    selectAll,
-    deselectAll,
-    copySummary,
-    revealDestination,
-  } = useGithubReport({
-    isAppReady,
-    dateMode,
-    settings,
+  const boot = useAppBootstrap({
+    steps: [
+      { label: 'Nạp cấu hình settings.json…', run: async () => void (await appSettings.load()) },
+      {
+        label: 'Kiểm tra GitHub CLI & Local AI…',
+        run: async () => setPrereqStatus(await githubReportApi.checkPrerequisites()),
+      },
+    ],
+    onReady: () => void report.loadReport(dateModeRef.current),
   });
 
-  // 3. Hook quản lý phím tắt macOS toàn cục (⌘R, ⌘C, ⌘P, ⌘,, ⌘↵, Esc)
-  useGlobalShortcuts({
-    onFetch: fetchPrs,
-    onSummarize: () => generateSummary(),
-    onCopy: () => copySummary(),
-    onRevealDestination: revealDestination,
-    onToggleSettings: () => setIsSettingsOpen((prev) => !prev),
-    isSettingsOpen,
-    onCloseSettings: () => setIsSettingsOpen(false),
-  });
+  const { prsTask, summaryTask } = report;
 
-  // Lưu cài đặt
-  const handleSaveSettings = async (newSettings: AppSettings) => {
-    setSettings(newSettings);
-    await saveSettings(newSettings);
+  const refresh = () => void report.loadReport(dateMode);
+
+  const changeDateMode = (mode: DateMode) => {
+    if (mode === dateMode) return;
+    setDateMode(mode);
+    void report.loadReport(mode);
   };
 
-  // Lưu token vào Keychain
-  const handleSaveToken = async (token: string) => {
-    await invoke('save_github_token', { token });
-    const prereq = await invoke<typeof prereqStatus>('check_prerequisites');
-    setPrereqStatus(prereq);
+  const saveToken = async (token: string) => {
+    await githubReportApi.saveGithubToken(token);
+    setPrereqStatus(await githubReportApi.checkPrerequisites());
   };
 
-  const destinationLabel =
-    settings.workflow.destination === 'parabol'
-      ? 'Parabol'
-      : settings.workflow.destination === 'slack'
-        ? 'Slack'
-        : 'Copy';
+  useHotkeys(
+    {
+      'mod+r': refresh,
+      'mod+enter': () => void report.regenerateSummary(),
+      'mod+c': () => {
+        if (window.getSelection()?.toString()) return false; // giữ copy mặc định khi bôi đen
+        void report.copySummary();
+      },
+      'mod+p': () => void report.revealDestination(),
+      'mod+,': () => setIsSettingsOpen((open) => !open),
+      escape: isSettingsOpen && (() => setIsSettingsOpen(false)),
+    },
+    { enabled: boot.isReady, enableInInputs: ['escape', 'mod+r', 'mod+,'] },
+  );
+
+  const hasPrs = (report.prs?.length ?? 0) > 0;
+  const isSummaryPending = summaryTask.isRunning || prsTask.isRunning;
 
   return (
-    <div className="w-screen h-screen flex flex-col bg-slate-950/85 text-white font-sans overflow-hidden select-none relative">
-      {/* 1. Màn hình khởi động SplashScreen dùng chung từ @nexus/ui */}
-      {!isAppReady && (
-        <AppSplashScreen
-          icon={
-            <div className="relative">
-              <GitPullRequest className="w-10 h-10 text-sky-400" />
-              <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center">
-                <Sparkles
-                  className="w-3.5 h-3.5 text-indigo-300 animate-spin"
-                  style={{ animationDuration: '4s' }}
-                />
+    <MiniAppShell
+      splash={
+        !boot.isReady && (
+          <AppSplashScreen
+            icon={
+              <div className="relative">
+                <GitPullRequest className="h-10 w-10 text-sky-400" />
+                <div className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full border border-indigo-400/40 bg-indigo-500/20">
+                  <Sparkles className="h-3.5 w-3.5 animate-spin text-indigo-300 [animation-duration:4s]" />
+                </div>
               </div>
-            </div>
-          }
-          title="GitHub Report"
-          version="v0.4.0"
-          progress={initProgress}
-          message={initMessage}
-          isExiting={isExitingSplash}
+            }
+            title="GitHub Report"
+            version={APP_VERSION}
+            progress={boot.progress}
+            message={boot.message}
+            isExiting={boot.phase === 'exiting'}
+          />
+        )
+      }
+      header={
+        <UnifiedHeader
+          dateMode={dateMode}
+          onDateModeChange={changeDateMode}
+          prCount={report.prs?.length}
+          commitCount={report.totalCommits}
+          isBusy={prsTask.isRunning || summaryTask.isRunning}
+          canCopy={(summaryTask.data?.bullets.length ?? 0) > 0}
+          isCopied={report.isCopied}
+          destinationLabel={getDestinationLabel(settings)}
+          canReveal={settings.workflow.destination !== 'copy_only'}
+          onRefresh={refresh}
+          onCopySummary={() => void report.copySummary()}
+          onRevealDestination={() => void report.revealDestination()}
+          onOpenSettings={() => setIsSettingsOpen(true)}
         />
-      )}
-
-      {/* 2. Unified Custom Header (Tận dụng MiniAppHeader từ @nexus/ui) */}
-      <UnifiedHeader
-        dateMode={dateMode}
-        onDateModeChange={setDateMode}
-        prCount={prs.length}
-        commitCount={totalCommitsCount}
-        isLoading={isLoadingPrs || isSummarizing}
-        isCopied={isCopied}
-        destinationLabel={destinationLabel}
-        onFetch={fetchPrs}
-        onCopySummary={() => copySummary()}
-        onRevealDestination={revealDestination}
-        onOpenSettings={() => setIsSettingsOpen(true)}
+      }
+      footer={<StatusBar status={report.status} prereqStatus={prereqStatus} />}
+      overlays={
+        // Mount lại mỗi lần mở → form luôn khởi tạo từ settings mới nhất (không phải mặc định).
+        isSettingsOpen && (
+          <SettingsModal
+            isOpen
+            onClose={() => setIsSettingsOpen(false)}
+            settings={settings}
+            onSaveSettings={(next) => void appSettings.save(next)}
+            prereqStatus={prereqStatus}
+            onSaveToken={saveToken}
+          />
+        )
+      }
+      mainClassName="gap-3 overflow-hidden p-3.5"
+    >
+      <AISummaryCard
+        summary={summaryTask.data}
+        isLoading={isSummaryPending}
+        loadingLabel={
+          prsTask.isRunning ? 'Đang chờ dữ liệu PR & commits…' : 'Đang tóm tắt bằng Local AI…'
+        }
+        error={summaryTask.error}
+        canGenerate={hasPrs && !prsTask.isRunning}
+        isCopied={report.isCopied}
+        onGenerate={() => void report.regenerateSummary()}
+        onCopy={() => void report.copySummary()}
+        onUpdateBullets={report.updateBullets}
       />
 
-      {/* 3. Main Body: 2 Card Tầng (AI Summary + PR Timeline) */}
-      <main className="flex-1 min-h-0 flex flex-col p-3.5 gap-3 overflow-hidden">
-        {/* Card Tóm Tắt AI (Loading spinner khi isSummarizing = true) */}
-        <AISummaryCard
-          bullets={summaryBullets}
-          provider={summaryProvider}
-          isLoading={isSummarizing}
-          onUpdateBullets={setSummaryBullets}
-          onCopy={() => copySummary()}
-          isCopied={isCopied}
-          hasPrs={prs.length > 0}
-          onGenerateSummary={() => generateSummary()}
-        />
-
-        {/* Card Danh Sách PR & Commit Timeline (Skeleton loader khi isLoadingPrs = true) */}
-        <PRTimelineCard
-          prs={prs}
-          selectedPrNumbers={selectedPrNumbers}
-          isLoading={isLoadingPrs}
-          onTogglePr={togglePr}
-          onSelectAll={selectAll}
-          onDeselectAll={deselectAll}
-        />
-      </main>
-
-      {/* 4. Status Bar dưới cùng */}
-      <StatusBar statusText={statusText} isError={isStatusError} prereqStatus={prereqStatus} />
-
-      {/* 5. Settings Modal (⌘,) - Người dùng tự do mở bất kỳ lúc nào */}
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        settings={settings}
-        onSaveSettings={handleSaveSettings}
-        prereqStatus={prereqStatus}
-        onSaveToken={handleSaveToken}
+      <PRTimelineCard
+        prs={report.prs}
+        isLoading={prsTask.isRunning}
+        error={prsTask.error}
+        selectedPrNumbers={report.selectedPrNumbers}
+        onTogglePr={report.togglePr}
+        onSetAllSelected={report.setAllSelected}
       />
-    </div>
+    </MiniAppShell>
   );
 }

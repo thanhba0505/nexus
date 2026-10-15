@@ -15,3 +15,13 @@ export * from './components/AppInfoModal';
 export * from './components/AppStoreModal';
 export * from './components/MiniAppHeader';
 export * from './components/AppSplashScreen';
+export * from './components/MiniAppShell';
+export * from './components/AsyncContent';
+export * from './components/Loading';
+
+// Hooks chuẩn cho mini app (xem docs/mini-app-guide.md)
+export * from './hooks/use-latest-ref';
+export * from './hooks/use-async-task';
+export * from './hooks/use-app-bootstrap';
+export * from './hooks/use-hotkeys';
+export * from './hooks/use-transient-value';
