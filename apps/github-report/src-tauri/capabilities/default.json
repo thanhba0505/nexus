@@ -3,5 +3,10 @@
   "identifier": "default",
   "description": "Default capabilities for GitHub Report",
   "windows": ["main"],
-  "permissions": ["core:default", "opener:default", "store:default"]
+  "permissions": [
+    "core:default",
+    "core:window:allow-start-dragging",
+    "opener:default",
+    "store:default"
+  ]
 }

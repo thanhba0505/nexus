@@ -10,16 +10,20 @@
     "frontendDist": "../dist"
   },
   "app": {
+    "macOSPrivateApi": true,
     "windows": [
       {
         "label": "main",
         "title": "GitHub Report",
-        "width": 800,
-        "height": 550,
-        "minWidth": 600,
-        "minHeight": 400,
+        "width": 920,
+        "height": 660,
+        "minWidth": 760,
+        "minHeight": 520,
         "resizable": true,
-        "center": true
+        "center": true,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
+        "transparent": true
       }
     ],
     "security": {

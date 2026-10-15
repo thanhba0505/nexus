@@ -155,3 +155,4 @@ pnpm build:github-report
 - [`docs/coding-standards.md`](docs/coding-standards.md): Quy chuẩn lập trình, TypeScript String Literal Unions thay cho Enum, lưu trữ Keychain và `tauri-plugin-store`.
 - [`docs/implementation-plan.md`](docs/implementation-plan.md): Lộ trình 6 Phase triển khai và 12 tiêu chí nghiệm thu hoàn thành.
 - [`docs/prerequisites.md`](docs/prerequisites.md): Hướng dẫn chi tiết từng bước cài đặt môi trường trên macOS.
+- [`docs/github-report.md`](docs/github-report.md): Đặc tả kiến trúc, Unified Titlebar Header, luồng xử lý Local AI và lưu trữ cấu hình của ứng dụng GitHub Report.
