@@ -18,6 +18,7 @@ export * from './components/AppSplashScreen';
 export * from './components/MiniAppShell';
 export * from './components/AsyncContent';
 export * from './components/Loading';
+export * from './components/WindowControls';
 
 // Hooks chuẩn cho mini app (xem docs/mini-app-guide.md)
 export * from './hooks/use-latest-ref';

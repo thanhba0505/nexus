@@ -1,9 +1,16 @@
 import React from 'react';
+import { WindowControls } from './WindowControls';
 
 export interface MiniAppHeaderProps {
-  /** Khoảng trống an toàn bên trái để chừa cho 3 nút Traffic Lights gốc của macOS (mặc định 76px) */
+  /** Hiển thị nút điều khiển cửa sổ tùy biến (mặc định true) */
+  showWindowControls?: boolean;
+  /** Vị trí nút điều khiển cửa sổ: 'left' (mặc định) hoặc 'right' */
+  windowControlsPosition?: 'left' | 'right';
+  /** Tùy chọn đóng: 'hide' (ẩn) hoặc 'close' (tắt tiến trình) */
+  closeAction?: 'hide' | 'close';
+  /** Khoảng trống an toàn bên trái khi dùng Traffic Lights gốc của macOS (mặc định 0 khi dùng showWindowControls) */
   leftSafeWidth?: number;
-  /** Vùng chứa các nút điều khiển bên trái (ví dụ bộ chọn ngày, danh mục, filter) */
+  /** Vùng chứa các nút điều khiển bên trái (ví dụ logo, tiêu đề, filter) */
   leftSlot?: React.ReactNode;
   /** Tiêu đề trung tâm hoặc nội dung giữa header */
   centerSlot?: React.ReactNode;
@@ -16,13 +23,23 @@ export interface MiniAppHeaderProps {
 }
 
 export function MiniAppHeader({
-  leftSafeWidth = 76,
+  showWindowControls = true,
+  windowControlsPosition = 'left',
+  closeAction = 'hide',
+  leftSafeWidth = 0,
   leftSlot,
   centerSlot,
   rightSlot,
   className = '',
   onMouseDown,
 }: MiniAppHeaderProps) {
+  const controls = (
+    <WindowControls
+      closeAction={closeAction}
+      className={windowControlsPosition === 'left' ? 'mr-1' : 'ml-1.5'}
+    />
+  );
+
   return (
     <header
       data-tauri-drag-region
@@ -30,18 +47,25 @@ export function MiniAppHeader({
       style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
       className={`w-full h-[38px] px-3 flex items-center justify-between border-b border-white/[0.08] bg-slate-900/60 backdrop-blur-xl select-none z-30 shrink-0 ${className}`}
     >
-      {/* Vùng bên trái: Khoảng an toàn traffic lights + leftSlot */}
+      {/* Vùng bên trái: Window Controls (nếu position = left) + leftSlot */}
       <div
         data-tauri-drag-region
         style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
         className="flex items-center space-x-2 shrink-0 h-full"
       >
-        {/* Khoảng trống không che nút đỏ/vàng/xanh của macOS (cho phép kéo nếu click vào đây) */}
-        <div
-          data-tauri-drag-region
-          style={{ width: `${leftSafeWidth}px` }}
-          className="shrink-0 pointer-events-none h-full"
-        />
+        {showWindowControls && windowControlsPosition === 'left' && (
+          <div className="flex items-center gap-2 shrink-0">
+            {controls}
+            <div className="h-3.5 w-[1px] bg-white/[0.08]" />
+          </div>
+        )}
+        {!showWindowControls && leftSafeWidth > 0 && (
+          <div
+            data-tauri-drag-region
+            style={{ width: `${leftSafeWidth}px` }}
+            className="shrink-0 pointer-events-none h-full"
+          />
+        )}
         <div data-tauri-drag-region className="flex items-center">
           {leftSlot}
         </div>
@@ -70,16 +94,15 @@ export function MiniAppHeader({
         />
       )}
 
-      {/* Vùng bên phải: Các nút hành động */}
-      {rightSlot && (
-        <div
-          data-tauri-drag-region
-          style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
-          className="flex items-center space-x-1.5 shrink-0 h-full"
-        >
-          {rightSlot}
-        </div>
-      )}
+      {/* Vùng bên phải: Các nút hành động + Window Controls (nếu position = right) */}
+      <div
+        data-tauri-drag-region
+        style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+        className="flex items-center space-x-1.5 shrink-0 h-full"
+      >
+        {rightSlot}
+        {showWindowControls && windowControlsPosition === 'right' && controls}
+      </div>
     </header>
   );
 }

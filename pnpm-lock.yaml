@@ -408,6 +408,9 @@ importers:
       '@nexus/shared':
         specifier: workspace:*
         version: link:../shared
+      '@tauri-apps/api':
+        specifier: ^2.2.0
+        version: 2.12.3
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
