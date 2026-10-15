@@ -1,6 +1,6 @@
 [package]
 name = "nexus"
-version = "0.4.0"
+version = "0.5.0"
 description = "Nexus - Personal App Ecosystem"
 edition = "2021"
 
