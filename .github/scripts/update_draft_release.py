@@ -200,13 +200,18 @@ def main() -> None:
         ])
         diff_res = subprocess.run(["git", "diff", "--staged", "--quiet"], cwd=ROOT_DIR)
         if diff_res.returncode != 0:
-            run([
-                "git",
-                "commit",
-                "-m",
-                f"chore(release): bump unified ecosystem to {next_tag} [skip ci]",
-            ])
-            run(["git", "push", "origin", "main"])
+            try:
+                run([
+                    "git",
+                    "commit",
+                    "-m",
+                    f"chore(release): bump unified ecosystem to {next_tag} [skip ci]",
+                ])
+                run(["git", "push", "origin", "main"])
+                print("✅ Đã push commit bump version vào main.")
+            except Exception as e:
+                print(f"⚠️ Nhánh main được bảo vệ (Protected Branch), bỏ qua push commit tự động: {e}")
+                run(["git", "reset", "--hard", "HEAD~1"])
 
     # 4. Phân nhóm thay đổi
     features = []
