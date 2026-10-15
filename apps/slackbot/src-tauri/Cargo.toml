@@ -17,6 +17,5 @@ tauri-plugin-opener = { workspace = true }
 tauri-plugin-store = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-window-vibrancy = { workspace = true }
 keyring = { workspace = true }
 thiserror = { workspace = true }
