@@ -102,11 +102,39 @@ def sync_ecosystem_version(version: str, tag: str) -> bool:
             json.dump(data, f, indent=2)
             f.write("\n")
 
+    # Đồng bộ phần Download trong README.md
+    readme_file = ROOT_DIR / "README.md"
+    if readme_file.exists():
+        content = readme_file.read_text(encoding="utf-8")
+        dmg_name = f"Nexus_{version}_aarch64.dmg"
+        download_url = f"https://github.com/thanhba0505/nexus/releases/download/{tag}/{dmg_name}"
+        new_section = (
+            f"> 💡 **Bấm trực tiếp vào nút bên dưới để tải ngay file cài đặt `.dmg` về máy (Direct Download)**:\n\n"
+            f'<p align="center">\n'
+            f'  <a href="{download_url}">\n'
+            f'    <img src="https://img.shields.io/badge/⬇️_Tải_Ngay_Nexus_cho_macOS-(Apple_Silicon_.dmg)-0ea5e9?style=for-the-badge&logo=apple&logoColor=white" height="42" alt="Tải Ngay Nexus cho macOS" />\n'
+            f"  </a>\n"
+            f"</p>\n\n"
+            f"| Thông Tin Phát Hành | Chi Tiết |\n"
+            f"| :--- | :--- |\n"
+            f"| 🏷️ **Phiên Bản Hiện Tại** | `{tag}` |\n"
+            f"| 📦 **Tệp Cài Đặt Khuyên Dùng** | [`{dmg_name}`]({download_url}) |\n"
+            f"| ⚡ **Cách Thức Tải** | **Tải Trực Tiếp (Direct Download)** — Trình duyệt tự tải file về, không cần qua trang trung gian |\n"
+            f"| 📋 **Xem Chi Tiết Bản Phát Hành** | [📦 Xem GitHub Releases & Changelog](https://github.com/thanhba0505/nexus/releases/latest) |"
+        )
+        content = re.sub(
+            r"<!-- NEXUS_DOWNLOAD_SECTION_START -->[\s\S]*?<!-- NEXUS_DOWNLOAD_SECTION_END -->",
+            f"<!-- NEXUS_DOWNLOAD_SECTION_START -->\n{new_section}\n<!-- NEXUS_DOWNLOAD_SECTION_END -->",
+            content,
+        )
+        readme_file.write_text(content, encoding="utf-8")
+
     run([
         "npx",
         "prettier",
         "--write",
         "apps.json",
+        "README.md",
         "apps/*/package.json",
         "apps/*/src-tauri/tauri.conf.json",
         "packages/*/package.json",
@@ -192,6 +220,7 @@ def main() -> None:
             "git",
             "add",
             "apps.json",
+            "README.md",
             "apps/*/package.json",
             "apps/*/src-tauri/tauri.conf.json",
             "apps/*/src-tauri/Cargo.toml",

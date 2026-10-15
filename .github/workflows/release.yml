@@ -56,7 +56,9 @@ jobs:
           pnpm build:nexus
           for f in target/release/bundle/dmg/*.dmg; do
             [ -f "$f" ] || continue
-            cp "$f" "release-artifacts/$(basename "$f" | tr ' ' '_')"
+            dest="release-artifacts/$(basename "$f" | tr ' ' '_')"
+            cp "$f" "$dest"
+            cp "$f" "release-artifacts/Nexus.dmg"
           done
 
           echo "Biên dịch SlackBot..."
@@ -85,4 +87,59 @@ jobs:
           echo "Uploading artifacts to release $TAG_NAME..."
           gh release upload "$TAG_NAME" release-artifacts/* --clobber
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update README.md with Published Release Details
+        run: |
+          TAG_NAME="${{ github.event.release.tag_name || github.event.inputs.tag }}"
+          VERSION="${TAG_NAME#v}"
+          DMG_NAME="Nexus_${VERSION}_aarch64.dmg"
+          DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/${TAG_NAME}/${DMG_NAME}"
+
+          python3 -c "
+          import re, os
+          from pathlib import Path
+
+          readme = Path('README.md')
+          if not readme.exists():
+              exit(0)
+
+          tag = os.environ.get('TAG_NAME', '')
+          dmg = os.environ.get('DMG_NAME', '')
+          url = os.environ.get('DOWNLOAD_URL', '')
+          repo = os.environ.get('GITHUB_REPOSITORY', 'thanhba0505/nexus')
+
+          content = readme.read_text(encoding='utf-8')
+          new_section = (
+              '> 💡 **Bấm trực tiếp vào nút bên dưới để tải ngay file cài đặt \`.dmg\` về máy (Direct Download)**:\n\n'
+              '<p align=\"center\">\n'
+              f'  <a href=\"{url}\">\n'
+              '    <img src=\"https://img.shields.io/badge/⬇️_Tải_Ngay_Nexus_cho_macOS-(Apple_Silicon_.dmg)-0ea5e9?style=for-the-badge&logo=apple&logoColor=white\" height=\"42\" alt=\"Tải Ngay Nexus cho macOS\" />\n'
+              '  </a>\n'
+              '</p>\n\n'
+              '| Thông Tin Phát Hành | Chi Tiết |\n'
+              '| :--- | :--- |\n'
+              f'| 🏷️ **Phiên Bản Hiện Tại** | \`{tag}\` |\n'
+              f'| 📦 **Tệp Cài Đặt Khuyên Dùng** | [\`{dmg}\`]({url}) |\n'
+              '| ⚡ **Cách Thức Tải** | **Tải Trực Tiếp (Direct Download)** — Trình duyệt tự tải file về, không cần qua trang trung gian |\n'
+              f'| 📋 **Xem Chi Tiết Bản Phát Hành** | [📦 Xem GitHub Releases & Changelog](https://github.com/{repo}/releases/latest) |'
+          )
+
+          content = re.sub(
+              r'<!-- NEXUS_DOWNLOAD_SECTION_START -->[\s\S]*?<!-- NEXUS_DOWNLOAD_SECTION_END -->',
+              f'<!-- NEXUS_DOWNLOAD_SECTION_START -->\n{new_section}\n<!-- NEXUS_DOWNLOAD_SECTION_END -->',
+              content,
+          )
+          readme.write_text(content, encoding='utf-8')
+          "
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          if ! git diff --staged --quiet; then
+            git commit -m "chore(release): update README download link to $TAG_NAME [skip ci]"
+            git push origin HEAD:main || echo "Không thể push commit README lên main, bỏ qua."
+          fi
+        env:
+          TAG_NAME: ${{ github.event.release.tag_name || github.event.inputs.tag }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,158 +1,254 @@
-# Nexus — macOS Mini App Ecosystem
+# 🪐 Nexus — macOS Mini App Ecosystem
 
-> **Nexus**: Nền tảng quản lý hệ sinh thái mini app độc lập trên macOS.  
-> Được xây dựng theo mô hình **Monorepo** với **Tauri v2 + React 19 + TypeScript + Vite + Turborepo + pnpm Workspaces**.
+<p align="center">
+  <img src="tooling/assets/nexus.svg" width="96" height="96" alt="Nexus Logo" />
+</p>
 
----
+<p align="center">
+  <strong>Nền tảng Launchpad & Hệ sinh thái Mini App độc lập siêu nhẹ trên macOS</strong><br />
+  Xây dựng bằng <strong>Tauri v2 + Rust + React 19 + TypeScript + Vite + Tailwind CSS</strong> trong mô hình Monorepo.
+</p>
 
-## 1. Tổng Quan Kiến Trúc
-
-- **Monorepo duy nhất**: Quản lý toàn bộ source code của các ứng dụng độc lập và thư viện dùng chung.
-- **Tính độc lập vòng đời (Independent Lifecycle)**: Mỗi mini app là một macOS Application Bundle (`.app`) riêng biệt, có Process ID, icon, bundle identifier và entry point riêng. Người dùng có thể khởi chạy bất kỳ app nào trực tiếp từ Dock, Spotlight hoặc Raycast mà không cần Nexus phải chạy trước.
-- **Tiết kiệm tài nguyên (Tauri 2 vs Electron)**: Tận dụng trực tiếp **WKWebView** native của macOS và backend **Rust**, tiêu thụ chỉ từ **30MB - 50MB RAM** mỗi app (so với >250MB của Electron).
-- **Cargo Workspace Root**: Chia sẻ chung một thư mục cache `/target/` tại root repo, tiết kiệm 70% dung lượng đĩa (chống phình 15GB).
-- **Local-First & Bảo Mật Token**: Cài đặt thông thường lưu qua `tauri-plugin-store` tại `~/Library/Application Support/`, Token/Secrets nhạy cảm lưu trực tiếp vào **macOS Keychain** qua crate `keyring`.
-
----
-
-## 2. Danh Sách Ứng Dụng Trong Hệ Sinh Thái
-
-| Ứng Dụng          | Thư Mục              | Bundle Identifier                | Port Dev | Giao Diện Hiển Thị                                                  |
-| :---------------- | :------------------- | :------------------------------- | :------: | :------------------------------------------------------------------ |
-| **Nexus**         | `apps/nexus`         | `com.thanhba.nexus`              |  `1420`  | Launchpad macOS kính mờ trong suốt, App Grid, Header & Footer icons |
-| **SlackBot**      | `apps/slackbot`      | `com.thanhba.nexus.slackbot`     |  `1421`  | Placeholder `SlackBot` — `Coming soon`                              |
-| **GitHub Report** | `apps/github-report` | `com.thanhba.nexus.githubreport` |  `1422`  | Placeholder `GitHub Report` — `Coming soon`                         |
+<p align="center">
+  <a href="https://github.com/thanhba0505/nexus/releases/latest">
+    <img src="https://img.shields.io/github/v/release/thanhba0505/nexus?color=0ea5e9&label=Latest%20Release&style=flat-square" alt="Latest Release" />
+  </a>
+  <img src="https://img.shields.io/badge/Platform-macOS%2013%2B%20(Apple%20Silicon)-0284c7?style=flat-square" alt="Platform macOS" />
+  <img src="https://img.shields.io/badge/Architecture-Tauri%20v2%20%2B%20Rust-6366f1?style=flat-square" alt="Tauri v2" />
+  <img src="https://img.shields.io/badge/License-MIT-emerald?style=flat-square" alt="License MIT" />
+</p>
 
 ---
 
-## 3. Cấu Trúc Repository
+## 🚀 Tải Về & Cài Đặt (Quick Download & Installation)
+
+Bạn chỉ cần tải ứng dụng **Nexus Hub** duy nhất. Nexus đóng vai trò là trạm điều khiển trung tâm (Launchpad), giúp bạn mở, quản lý và sử dụng tất cả các mini apps khác trong hệ sinh thái mà không cần cài đặt rời rạc từng ứng dụng.
+
+### 📥 Tải Bản Phát Hành Mới Nhất
+
+<!-- NEXUS_DOWNLOAD_SECTION_START -->
+
+> 💡 **Bấm trực tiếp vào nút bên dưới để tải ngay file cài đặt `.dmg` về máy (Direct Download)**:
+
+<p align="center">
+  <a href="https://github.com/thanhba0505/nexus/releases/download/v0.3.0/Nexus_0.3.0_aarch64.dmg">
+    <img src="https://img.shields.io/badge/⬇️_Tải_Ngay_Nexus_cho_macOS-(Apple_Silicon_.dmg)-0ea5e9?style=for-the-badge&logo=apple&logoColor=white" height="42" alt="Tải Ngay Nexus cho macOS" />
+  </a>
+</p>
+
+| Thông Tin Phát Hành               | Chi Tiết                                                                                                           |
+| :-------------------------------- | :----------------------------------------------------------------------------------------------------------------- |
+| 🏷️ **Phiên Bản Hiện Tại**         | `v0.3.0`                                                                                                           |
+| 📦 **Tệp Cài Đặt Khuyên Dùng**    | [`Nexus_0.3.0_aarch64.dmg`](https://github.com/thanhba0505/nexus/releases/download/v0.3.0/Nexus_0.3.0_aarch64.dmg) |
+| ⚡ **Cách Thức Tải**              | **Tải Trực Tiếp (Direct Download)** — Trình duyệt tự tải file về, không cần qua trang trung gian                   |
+| 📋 **Xem Chi Tiết Bản Phát Hành** | [📦 Xem GitHub Releases & Changelog](https://github.com/thanhba0505/nexus/releases/latest)                         |
+
+<!-- NEXUS_DOWNLOAD_SECTION_END -->
+
+---
+
+### 💻 Hướng Dẫn Cài Đặt Trên macOS
+
+1. Nhấn vào nút **Tải Ngay** ở trên để tải file `Nexus_..._aarch64.dmg` về thư mục Downloads.
+2. Click đúp vào file `.dmg` vừa tải để mở đĩa cài đặt.
+3. Kéo biểu tượng **Nexus** thả vào thư mục **Applications**.
+4. Mở **Nexus** từ Launchpad, thư mục Applications hoặc qua Spotlight (`⌘ + Space`).
+
+> [!TIP]
+> **Xử lý khi macOS hiện thông báo "App cannot be opened because it is from an unidentified developer":**
+>
+> - **Cách 1 (Khuyên dùng)**: Mở Finder vào thư mục `/Applications`, click chuột phải (hoặc giữ phím `Control` + click) vào **Nexus** $\rightarrow$ chọn **Open** $\rightarrow$ chọn tiếp **Open** ở hộp thoại xác nhận. Bạn chỉ cần thực hiện thao tác này đúng một lần đầu tiên.
+> - **Cách 2**: Chạy một dòng lệnh Terminal:
+>   ```bash
+>   xattr -cr /Applications/Nexus.app
+>   ```
+
+---
+
+## 📱 Các Ứng Dụng Trong Hệ Sinh Thái Nexus
+
+Mỗi ứng dụng trong Nexus là một **macOS Native Application Bundle (`.app`) độc lập** có Process ID, cửa sổ và vòng đời riêng biệt, nhưng được liên kết và điều khiển đồng bộ thông qua Nexus Hub.
+
+```
++---------------------------------------------------------------------------------------+
+|                                    NEXUS ECOSYSTEM                                    |
++---------------------------------------------------------------------------------------+
+|                                                                                       |
+|   ┌───────────────────────────────────────────────────────────────────────────────┐   |
+|   │                           🪐 NEXUS LAUNCHPAD HUB                              │   |
+|   │         Trạm điều khiển trung tâm • App Grid • App Store • Đồng bộ trạng thái │   |
+|   └──────────────────────┬────────────────────────────────┬───────────────────────┘   |
+|                          │                                │                           |
+|                          ▼                                ▼                           |
+|   ┌──────────────────────────────────────────┐     ┌──────────────────────────────┐   |
+|   │            📊 GITHUB REPORT              │     │         💬 SLACKBOT          │   |
+|   │  Quét PRs & commits • Local AI Standup   │     │  Tự động hóa Slack • Webhook │   |
+|   │  Phím tắt macOS • Bảo mật Keychain       │     │  Thông báo công việc tức thì │   |
+|   └──────────────────────────────────────────┘     └──────────────────────────────┘   |
+|                                                                                       |
++---------------------------------------------------------------------------------------+
+```
+
+### 1. 🪐 Nexus Hub (`apps/nexus`)
+
+- **Vai trò**: Trạm điều khiển trung tâm và bệ phóng (Launchpad) cho toàn bộ hệ sinh thái.
+- **Tính năng nổi bật**:
+  - Giao diện Acrylic kính mờ (macOS Vibrancy) chuẩn thiết kế Apple.
+  - Quản lý danh sách mini app dạng lưới (App Grid) hỗ trợ click chọn, double-click mở app.
+  - Đồng bộ trạng thái hai chiều (nhận biết app nào đang mở / đã đóng).
+  - Tích hợp cửa hàng Mini App Store nội bộ và menu chuột phải thông minh.
+
+### 2. 📊 GitHub Report (`apps/github-report`)
+
+- **Vai trò**: Tự động tổng hợp kết quả công việc trong ngày và báo cáo Daily Standup.
+- **Tính năng nổi bật**:
+  - **Zero-Token Cost (Local AI First)**: Tận dụng trực tiếp Claude CLI (`claude`) hoặc Antigravity CLI (`agy`) có sẵn trên máy Mac, không tốn chi phí API token.
+  - **Quét Pull Request & Commits**: Tự động lấy các PR và commit từ 00:00 hôm nay hoặc ngày làm việc gần nhất (`Last Workday` cho sáng thứ Hai).
+  - **Chống chớp giật & Bất đồng bộ (Flicker-Free)**: Giao diện non-blocking, không bao giờ khóa luồng IPC hay gây đơ con trỏ xoay 7 màu (Beachball-free).
+  - **Kích hoạt đích đến 1-Click**: Tự động sao chép clipboard và kích hoạt tab **Parabol / Slack / Notion** trên trình duyệt (Brave, Chrome, Safari, Arc).
+  - **Bảo mật phần cứng**: GitHub Token được lưu trữ an toàn trong **macOS Keychain** qua chip Apple Secure Enclave.
+
+### 3. 💬 SlackBot (`apps/slackbot`)
+
+- **Vai trò**: Trợ lý tự động hóa công việc và tương tác nhanh với workspace Slack.
+- **Tính năng nổi bật**: Gửi thông báo tự động, nhận webhook công việc, quản lý lịch nhắc việc nội bộ.
+
+---
+
+## 🏛️ Kiến Trúc Kỹ Thuật (Architecture Highlights)
+
+| Tiêu Chí                | Nexus Ecosystem (Tauri v2 + Rust)                         | Các Giải Pháp Dựa Trên Electron            |
+| :---------------------- | :-------------------------------------------------------- | :----------------------------------------- |
+| **Tiêu Thụ RAM**        | **~30MB - 50MB** mỗi ứng dụng                             | >250MB - 500MB mỗi ứng dụng                |
+| **Dung Lượng Bộ Cài**   | **~2MB - 5MB** (`.dmg`)                                   | >80MB - 150MB                              |
+| **Thời Gian Khởi Động** | Khởi động tức thì (<400ms kèm Splash Screen)              | Trễ 2s - 4s nạp Chromium runtime           |
+| **Cửa Sổ & Giao Diện**  | Native WKWebView + macOS Acrylic Vibrancy                 | Giả lập kính mờ CSS gây tụt FPS            |
+| **Bảo Mật Cấu Hình**    | `tauri-plugin-store` (Application Support) + **Keychain** | Thường lưu plain-text trong `localStorage` |
+| **Vòng Đời App**        | Mỗi mini app là một `.app` riêng biệt, chạy độc lập       | Buộc phải phụ thuộc vào cửa sổ mẹ          |
+
+---
+
+## 📁 Cấu Trúc Mã Nguồn Monorepo
 
 ```text
 nexus/
 ├── apps/
-│   ├── nexus/               # App chính: Nexus Launchpad Hub (Port 1420)
-│   ├── slackbot/            # Mini App: Slack Assistant (Port 1421)
-│   └── github-report/       # Mini App: GitHub PR Monitor (Port 1422)
+│   ├── nexus/               # App chính: Nexus Launchpad Hub (Cổng 1420)
+│   ├── github-report/       # Mini App: GitHub PR Monitor & Standup AI (Cổng 1422)
+│   └── slackbot/            # Mini App: Slack Assistant & Automation (Cổng 1421)
 ├── packages/
-│   ├── config/              # @nexus/config: Shared ESLint, TS, Tailwind presets
-│   ├── shared/              # @nexus/shared: Types, app registry, constants
-│   └── ui/                  # @nexus/ui: Shared Launchpad components, buttons, badges
+│   ├── config/              # @nexus/config: Tailwind presets, ESLint 9, TSConfigs
+│   ├── shared/              # @nexus/shared: Registry apps, kiểu dữ liệu dùng chung
+│   └── ui/                  # @nexus/ui: Thư viện components & hooks chuẩn mini app
+│       ├── components/      # MiniAppShell, MiniAppHeader, AppSplashScreen, AsyncContent...
+│       └── hooks/           # useAsyncTask, useAppBootstrap, useHotkeys, useLatestRef...
 ├── tooling/
-│   ├── assets/              # SVG source icons (nexus, slackbot, github-report)
-│   └── scripts/             # Scripts tiện ích: check-env.sh, generate-icons.sh
-├── docs/                    # Tài liệu kỹ thuật chi tiết
-│   ├── architecture.md      # Đặc tả kiến trúc tổng thể & so sánh Tauri vs Electron
-│   ├── coding-standards.md  # Quy chuẩn lập trình, naming, string unions, Keychain
-│   ├── implementation-plan.md # Kế hoạch triển khai 6 Phase & 12 tiêu chí DoD
-│   └── prerequisites.md     # Hướng dẫn thiết lập môi trường macOS
-├── Cargo.toml               # Cargo Workspace root chia sẻ build cache
+│   ├── assets/              # File icon SVG nguồn (nexus, github-report, slackbot)
+│   └── scripts/             # Shell scripts: check-env.sh, generate-icons.sh
+├── docs/                    # Hệ thống tài liệu kỹ thuật toàn diện
+│   ├── mini-app-guide.md    # Hướng dẫn chi tiết 4 bước xây dựng Mini App chuẩn
+│   ├── github-report.md     # Tài liệu đặc tả kiến trúc GitHub Report
+│   ├── coding-standards.md  # Quy chuẩn lập trình Monorepo & tiêu chuẩn IPC Rust
+│   ├── architecture.md      # Thiết kế kiến trúc tổng quan & so sánh công nghệ
+│   └── prerequisites.md     # Hướng dẫn cài đặt môi trường máy local
+├── Cargo.toml               # Cargo Workspace root (chia sẻ chung /target/ build cache)
 ├── pnpm-workspace.yaml      # Khai báo pnpm workspaces
-├── turbo.json               # Cấu hình Turborepo task pipeline
+├── turbo.json               # Pipeline build và cache Turborepo
 ├── package.json             # Root scripts & dependencies
 └── README.md
 ```
 
 ---
 
-## 4. Hướng Dẫn Cài Đặt & Phát Triển
+## 🛠️ Hướng Dẫn Phát Triển Cho Lập Trình Viên (Developer Guide)
 
-### 4.1. Môi Trường Tiên Quyết (Prerequisites)
+### 1. Môi Trường Tiên Quyết
 
-1. **macOS**: Ventura 13.0 trở lên (Apple Silicon M1/M2/M3/M4 hoặc Intel x86_64).
-2. **Node.js**: v20+ hoặc v24+ (kèm `pnpm@12` qua Corepack: `corepack enable pnpm`).
-3. **Rust & Cargo**: Cài đặt qua rustup:
-   ```bash
-   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-   source "$HOME/.cargo/env"
-   ```
-4. Kiểm tra sức khỏe môi trường bằng script tự động:
-   ```bash
-   ./tooling/scripts/check-env.sh
-   ```
+- **macOS**: Phiên bản 13.0 (Ventura) trở lên (Apple Silicon M1/M2/M3/M4 hoặc Intel).
+- **Node.js**: v20+ hoặc v22+ (kèm `pnpm` qua Corepack: `corepack enable pnpm`).
+- **Rust & Cargo**: Cài đặt qua `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`.
 
-### 4.2. Cài Đặt Dependencies
+Kiểm tra nhanh môi trường bằng script tự động:
+
+```bash
+./tooling/scripts/check-env.sh
+```
+
+### 2. Cài Đặt Dependencies
 
 ```bash
 pnpm install
 ```
 
-### 4.3. Chạy Chế Độ Phát Triển (Development)
-
-Hệ sinh thái Nexus hỗ trợ 2 nhóm lệnh chính:
-
-#### A. Nhóm DEV (Chạy Cửa Sổ Ứng Dụng macOS)
+### 3. Chạy Môi Trường Phát Triển (Development)
 
 ```bash
-# Khởi động đồng thời cả 3 apps và TỰ ĐỘNG MỞ CỬA SỔ DESKTOP NEXUS
+# Mở đồng thời cả 3 app và hiển thị cửa sổ Nexus Launchpad
 pnpm dev
 
-# Chạy cả 3 app ở chế độ Web thuần (không mở cửa sổ desktop)
-pnpm dev:web
-
 # Mở riêng từng cửa sổ Desktop:
-pnpm dev:nexus          # Cửa sổ Nexus Launchpad Hub (Cổng 1420 + Kính mờ)
-pnpm dev:slackbot       # Cửa sổ SlackBot (Cổng 1421)
-pnpm dev:github-report  # Cửa sổ GitHub Report (Cổng 1422)
+pnpm dev:nexus          # Mở cửa sổ Nexus Hub (Cổng 1420)
+pnpm dev:github-report  # Mở cửa sổ GitHub Report (Cổng 1422)
+pnpm dev:slackbot       # Mở cửa sổ SlackBot (Cổng 1421)
+
+# Chạy cả 3 app ở chế độ Web trong trình duyệt (không mở cửa sổ desktop)
+pnpm dev:web
 ```
 
----
-
-### 4.4. Nhóm BUILD (Đóng Gói Ứng Dụng Desktop Native .dmg)
-
-Để biên dịch và đóng gói thành các file bundle macOS `.dmg` / `.app` độc lập trong thư mục `target/release/bundle/`:
+### 4. Kiểm Tra Chất Lượng Mã Nguồn (Lint, Typecheck & Format)
 
 ```bash
-# Build toàn bộ monorepo
-pnpm build
-
-# Đóng gói bộ cài Nexus (.dmg)
-pnpm build:nexus
-
-# Đóng gói bộ cài SlackBot (.dmg)
-pnpm build:slackbot
-
-# Đóng gói bộ cài GitHub Report (.dmg)
-pnpm build:github-report
-```
-
----
-
-### 4.5. Kiểm Tra Typecheck, Linter & Format
-
-```bash
-# Kiểm tra TypeScript toàn bộ monorepo (Strict Mode)
+# Kiểm tra TypeScript Strict Mode toàn monorepo
 pnpm typecheck
 
 # Kiểm tra ESLint
 pnpm lint
 
-# Format mã nguồn bằng Prettier
+# Format code bằng Prettier
 pnpm format
 ```
 
----
-
-### 4.6. Build Mã Nguồn Frontend & Quản Lý Assets
+### 5. Đóng Gói Bộ Cài macOS Native (.dmg)
 
 ```bash
-# Build frontend webview của toàn bộ monorepo qua Turborepo
-pnpm build
-
-# Build riêng từng frontend app
+# Đóng gói bộ cài Nexus Hub (.dmg)
 pnpm build:nexus
-pnpm build:slackbot
+
+# Đóng gói bộ cài GitHub Report (.dmg)
 pnpm build:github-report
 
-# Sinh lại toàn bộ app icon (.icns, .ico, .png) từ file SVG gốc
-./tooling/scripts/generate-icons.sh
+# Đóng gói bộ cài SlackBot (.dmg)
+pnpm build:slackbot
 ```
+
+File `.dmg` hoàn chỉnh sẽ nằm trong thư mục `target/release/bundle/dmg/`.
 
 ---
 
-## 5. Tài Liệu Kỹ Thuật Chi Tiết Trong `docs/`
+## 🤖 Cơ Chế Tự Động Hóa Release Của Bot (Release Drafter & Publisher)
 
-- [`docs/architecture.md`](docs/architecture.md): Phân tích chuyên sâu kiến trúc hệ thống, so sánh Tauri v2 vs Electron, thiết kế cửa sổ trong suốt và macOS Vibrancy.
-- [`docs/coding-standards.md`](docs/coding-standards.md): Quy chuẩn lập trình, TypeScript String Literal Unions thay cho Enum, lưu trữ Keychain và `tauri-plugin-store`.
-- [`docs/implementation-plan.md`](docs/implementation-plan.md): Lộ trình 6 Phase triển khai và 12 tiêu chí nghiệm thu hoàn thành.
-- [`docs/prerequisites.md`](docs/prerequisites.md): Hướng dẫn chi tiết từng bước cài đặt môi trường trên macOS.
-- [`docs/github-report.md`](docs/github-report.md): Đặc tả kiến trúc, Unified Titlebar Header, luồng xử lý Local AI và lưu trữ cấu hình của ứng dụng GitHub Report.
+Dự án tích hợp sẵn hệ thống CI/CD GitHub Actions tự động hóa:
+
+1. **🛰️ Release Drafter (`.github/workflows/draft-release.yml`)**:
+   - Khi có commit mới trên `main`, bot tự động phân tích commit history theo SemVer.
+   - Tự động đồng bộ số version mới vào `apps.json`, `package.json`, `tauri.conf.json`, `Cargo.toml` và `README.md`.
+   - Cập nhật sẵn bản ghi chú phát hành (Draft Release Notes) phân loại theo `Features`, `Bug Fixes`, `Maintenance`.
+2. **🚀 Build & Publish Release (`.github/workflows/release.yml`)**:
+   - Khi release được publish, GitHub Actions runner trên macOS sẽ tự động biên dịch file `.dmg` cho cả 3 apps.
+   - Đính kèm file cài đặt (`Nexus_<version>_aarch64.dmg`, `Nexus.dmg`) trực tiếp vào release assets để người dùng luôn có thể tải ngay lập tức.
+   - Tự động cập nhật số phiên bản và liên kết tải mới nhất vào `README.md`.
+
+---
+
+## 📖 Tài Liệu Tham Khảo
+
+- 👉 **[Hướng Dẫn Kiến Trúc Mini App](docs/mini-app-guide.md)**: Hướng dẫn chi tiết cách tạo một mini app mới theo chuẩn Nexus.
+- 👉 **[Đặc Tả Kỹ Thuật GitHub Report](docs/github-report.md)**: Kiến trúc, Unified Titlebar và Local AI.
+- 👉 **[Quy Chuẩn Lập Trình Monorepo](docs/coding-standards.md)**: Coding standards, Naming conventions và Keychain Security.
+- 👉 **[Kiến Trúc Tổng Thể](docs/architecture.md)**: Phân tích kiến trúc monorepo và mô hình đa ứng dụng.
+
+---
+
+<p align="center">
+  Phát triển với ❤️ bởi <strong>Nexus Engineering Team</strong> • Bản quyền © 2026 MIT License
+</p>
