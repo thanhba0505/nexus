@@ -15,15 +15,69 @@ fn open_mini_app(bundle_id: String, app_name: Option<String>) -> Result<String, 
     {
         use std::process::Command;
 
-        // 1. Thử mở qua dev bundle ID trước nếu đang chạy dev (ví dụ: com.thanhba.nexus.githubreport.dev)
-        let dev_bundle = format!("{}.dev", bundle_id);
-        if let Ok(res) = Command::new("open").arg("-b").arg(&dev_bundle).output() {
-            if res.status.success() {
-                return Ok(format!("Opened application: {}", dev_bundle));
+        let binary_slug = app_name.as_ref().map(|n| n.to_lowercase().replace(' ', "-"));
+
+        // =========================================================================
+        // 1. MÔI TRƯỜNG DEV (chạy tauri dev / debug_assertions)
+        // =========================================================================
+        if cfg!(debug_assertions) {
+            // 1.1. Nếu ứng dụng dev đang chạy, đưa cửa sổ lên phía trước (activate)
+            if let Some(ref slug) = binary_slug {
+                let is_running = Command::new("pgrep")
+                    .arg("-x")
+                    .arg(slug)
+                    .status()
+                    .map(|s| s.success())
+                    .unwrap_or(false);
+
+                if is_running {
+                    let _ = Command::new("osascript")
+                        .arg("-e")
+                        .arg(format!(
+                            "tell application \"System Events\" to set frontmost of first process whose name is \"{}\" to true",
+                            slug
+                        ))
+                        .output();
+                    if let Some(ref name) = app_name {
+                        let _ = Command::new("osascript")
+                            .arg("-e")
+                            .arg(format!("tell application \"{}\" to activate", name))
+                            .output();
+                    }
+                    return Ok(format!("Activated already running dev app: {}", slug));
+                }
+            }
+
+            // 1.2. Thử mở qua dev bundle ID (nếu bundle .dev đã đăng ký)
+            let dev_bundle = format!("{}.dev", bundle_id);
+            if let Ok(res) = Command::new("open").arg("-b").arg(&dev_bundle).output() {
+                if res.status.success() {
+                    return Ok(format!("Opened application bundle: {}", dev_bundle));
+                }
+            }
+
+            // 1.3. Khởi chạy binary debug trong target/debug (kết nối trực tiếp devUrl Vite)
+            if let Some(ref slug) = binary_slug {
+                let bin_candidates = [
+                    format!("./target/debug/{}", slug),
+                    format!("../../target/debug/{}", slug),
+                    format!("../target/debug/{}", slug),
+                    format!("../{}/src-tauri/target/debug/{}", slug, slug),
+                ];
+                for path in bin_candidates {
+                    if std::path::Path::new(&path).exists() {
+                        if let Ok(_) = Command::new(&path).spawn() {
+                            return Ok(format!("Spawned dev binary: {}", path));
+                        }
+                    }
+                }
             }
         }
 
-        // 2. Thử mở qua standard macOS bundle ID (/Applications hoặc đã cài)
+        // =========================================================================
+        // 2. MÔI TRƯỜNG PRODUCTION (hoặc khi không tìm thấy bản dev)
+        // =========================================================================
+        // 2.1. Thử mở qua standard macOS bundle ID (/Applications hoặc hệ thống)
         if !bundle_id.is_empty() {
             let output = Command::new("open")
                 .arg("-b")
@@ -37,33 +91,15 @@ fn open_mini_app(bundle_id: String, app_name: Option<String>) -> Result<String, 
             }
         }
 
-        // 3. Dự phòng trong môi trường dev / local build
+        // 2.2. Tìm app bundle theo tên trong /Applications hoặc thư mục build release
         if let Some(ref name) = app_name {
             let app_bundle_name = format!("{}.app", name);
-            let binary_slug = name.to_lowercase().replace(' ', "-");
-
-            // Ưu tiên chạy binary trong target/debug nếu có
-            let bin_candidates = [
-                format!("./target/debug/{}", binary_slug),
-                format!("../../target/debug/{}", binary_slug),
-                format!("./target/release/{}", binary_slug),
-                format!("../../target/release/{}", binary_slug),
-            ];
-            for path in bin_candidates {
-                if std::path::Path::new(&path).exists() {
-                    if let Ok(_) = Command::new(&path).spawn() {
-                        return Ok(format!("Spawned binary: {}", path));
-                    }
-                }
-            }
-
             let candidate_paths = [
                 format!("/Applications/{}", app_bundle_name),
                 format!("./target/release/bundle/macos/{}", app_bundle_name),
-                format!("./target/release/bundle/osx/{}", app_bundle_name),
                 format!("../../target/release/bundle/macos/{}", app_bundle_name),
+                format!("./target/release/bundle/osx/{}", app_bundle_name),
                 format!("../../target/release/bundle/osx/{}", app_bundle_name),
-                format!("../{}/src-tauri/target/release/bundle/macos/{}", name.to_lowercase(), app_bundle_name),
             ];
 
             for path in candidate_paths {
