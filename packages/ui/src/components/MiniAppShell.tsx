@@ -38,7 +38,7 @@ export function MiniAppShell({
     <div
       className={twMerge(
         clsx(
-          'relative flex h-screen w-screen select-none flex-col overflow-hidden rounded-xl border border-white/[0.08] bg-slate-950/85 font-sans text-white shadow-2xl',
+          'relative flex h-screen w-screen select-none flex-col overflow-hidden rounded-[20px] border border-white/[0.12] bg-slate-950/85 font-sans text-white shadow-2xl',
           className,
         ),
       )}
