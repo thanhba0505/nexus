@@ -45,3 +45,15 @@ body {
 .animate-fade-in {
   animation: fadeIn 100ms ease-out forwards;
 }
+
+[data-tauri-drag-region] {
+  -webkit-app-region: drag;
+}
+
+button,
+input,
+select,
+textarea,
+[data-no-drag] {
+  -webkit-app-region: no-drag;
+}

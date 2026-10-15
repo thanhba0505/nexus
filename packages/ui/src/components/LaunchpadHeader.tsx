@@ -26,12 +26,17 @@ export function LaunchpadHeader({
     <header
       data-tauri-drag-region
       onMouseDown={onMouseDown}
-      className="w-full h-16 px-6 flex items-center justify-between z-10 select-none"
+      style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+      className="w-full h-16 px-6 flex items-center justify-between z-10 select-none cursor-default"
     >
       {/* Left controls: Grid Switch */}
-      <div className="flex items-center space-x-2" data-tauri-drag-region>
+      <div
+        data-no-drag
+        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+        className="flex items-center space-x-2"
+      >
         <button
-          className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all backdrop-blur-lg border border-white/10"
+          className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all backdrop-blur-lg border border-white/10 cursor-pointer"
           title="App Grid View"
         >
           <LayoutGrid className="w-4 h-4" />
@@ -39,7 +44,11 @@ export function LaunchpadHeader({
       </div>
 
       {/* Center Search Bar */}
-      <div className="relative w-72 sm:w-80">
+      <div
+        data-no-drag
+        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+        className="relative w-72 sm:w-80"
+      >
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-white/50">
           <Search className="w-4 h-4" />
         </div>
@@ -48,14 +57,18 @@ export function LaunchpadHeader({
           value={searchQuery}
           onChange={handleInputChange}
           placeholder="Tìm kiếm ứng dụng..."
-          className="w-full pl-9 pr-4 py-1.5 text-sm bg-white/10 border border-white/15 rounded-full text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-indigo-400/50 backdrop-blur-xl transition-all"
+          className="w-full pl-9 pr-4 py-1.5 text-sm bg-white/10 border border-white/15 rounded-full text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-indigo-400/50 backdrop-blur-xl transition-all cursor-text"
         />
       </div>
 
       {/* Right controls: Folder & Settings */}
-      <div className="relative flex items-center space-x-2" data-tauri-drag-region>
+      <div
+        data-no-drag
+        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+        className="relative flex items-center space-x-2"
+      >
         <button
-          className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all backdrop-blur-lg border border-white/10"
+          className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all backdrop-blur-lg border border-white/10 cursor-pointer"
           title="Categories"
         >
           <Folder className="w-4 h-4" />
@@ -64,7 +77,7 @@ export function LaunchpadHeader({
         <div className="relative">
           <button
             onClick={onOpenSettings}
-            className="relative p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all backdrop-blur-lg border border-white/10"
+            className="relative p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all backdrop-blur-lg border border-white/10 cursor-pointer"
             title="Cài đặt & Cập nhật"
           >
             <Settings className="w-4 h-4" />

@@ -22,6 +22,8 @@ import {
   NexusAppMeta,
 } from '@nexus/shared';
 import { Info, RefreshCw, Trash2, ArrowDownCircle, Play, Square, CheckCircle2 } from 'lucide-react';
+import { getCurrentWindow } from '@tauri-apps/api/window';
+import { invoke } from '@tauri-apps/api/core';
 
 const LOCAL_STORAGE_KEY = 'nexus_installed_app_ids';
 
@@ -130,7 +132,6 @@ export default function App() {
     // Mở ứng dụng macOS qua bundleId bằng native Tauri command
     if (app.bundleId) {
       try {
-        const { invoke } = await import('@tauri-apps/api/core');
         await invoke('open_mini_app', { bundleId: app.bundleId });
       } catch (err) {
         console.warn(`Không thể mở ứng dụng ${app.name} qua Tauri:`, err);
@@ -309,13 +310,12 @@ export default function App() {
     ];
   }, [contextMenu.app, runningAppIds]);
 
-  const handleHeaderMouseDown = async (e: React.MouseEvent) => {
+  const handleHeaderMouseDown = (e: React.MouseEvent) => {
     if (e.button === 0) {
       const target = e.target as HTMLElement | null;
-      if (target && !target.closest('button, input, [role="button"], textarea')) {
+      if (target && !target.closest('button, input, [role="button"], textarea, [data-no-drag]')) {
         try {
-          const { getCurrentWindow } = await import('@tauri-apps/api/window');
-          await getCurrentWindow().startDragging();
+          getCurrentWindow().startDragging();
         } catch {
           // Bỏ qua nếu chạy ngoài môi trường Tauri
         }
