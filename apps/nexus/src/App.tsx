@@ -309,6 +309,20 @@ export default function App() {
     ];
   }, [contextMenu.app, runningAppIds]);
 
+  const handleHeaderMouseDown = async (e: React.MouseEvent) => {
+    if (e.button === 0) {
+      const target = e.target as HTMLElement | null;
+      if (target && !target.closest('button, input, [role="button"], textarea')) {
+        try {
+          const { getCurrentWindow } = await import('@tauri-apps/api/window');
+          await getCurrentWindow().startDragging();
+        } catch {
+          // Bỏ qua nếu chạy ngoài môi trường Tauri
+        }
+      }
+    }
+  };
+
   return (
     <LaunchpadLayout>
       <LaunchpadHeader
@@ -316,6 +330,7 @@ export default function App() {
         onSearchChange={setSearchQuery}
         onOpenSettings={() => setIsSettingsOpen((prev) => !prev)}
         hasNexusUpdate={!isDev && nexusUpdateStatus === 'available'}
+        onMouseDown={handleHeaderMouseDown}
         settingsMenu={
           <DropdownMenu
             isOpen={isSettingsOpen}

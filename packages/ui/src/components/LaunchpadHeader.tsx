@@ -7,6 +7,7 @@ export interface LaunchpadHeaderProps {
   onOpenSettings?: () => void;
   hasNexusUpdate?: boolean;
   settingsMenu?: React.ReactNode;
+  onMouseDown?: ((e: React.MouseEvent) => void) | undefined;
 }
 
 export function LaunchpadHeader({
@@ -15,15 +16,20 @@ export function LaunchpadHeader({
   onOpenSettings,
   hasNexusUpdate = false,
   settingsMenu,
+  onMouseDown,
 }: LaunchpadHeaderProps) {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onSearchChange(e.target.value);
   };
 
   return (
-    <header className="w-full h-16 px-6 flex items-center justify-between z-10">
+    <header
+      data-tauri-drag-region
+      onMouseDown={onMouseDown}
+      className="w-full h-16 px-6 flex items-center justify-between z-10 select-none"
+    >
       {/* Left controls: Grid Switch */}
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2" data-tauri-drag-region>
         <button
           className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all backdrop-blur-lg border border-white/10"
           title="App Grid View"
@@ -47,7 +53,7 @@ export function LaunchpadHeader({
       </div>
 
       {/* Right controls: Folder & Settings */}
-      <div className="relative flex items-center space-x-2">
+      <div className="relative flex items-center space-x-2" data-tauri-drag-region>
         <button
           className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all backdrop-blur-lg border border-white/10"
           title="Categories"
