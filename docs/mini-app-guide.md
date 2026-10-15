@@ -3,17 +3,17 @@
 > **Tài liệu**: Quy chuẩn & Hướng dẫn xây dựng Mini App (Desktop Mini-App Architecture Guide)  
 > **Áp dụng cho**: Toàn bộ ứng dụng độc lập trong thư mục `apps/` (`github-report`, `slackbot`, v.v.)  
 > **Thư viện dùng chung**: `@nexus/ui`, `@nexus/shared`, `@nexus/config`  
-> **Mục tiêu**: Trải nghiệm macOS mượt mà, không chớp giật (Flicker-Free), triệt tiêu vòng lặp API (Loop-Free), và không bao giờ khóa luồng IPC (Beachball-Free).
+> **Mục tiêu**: Trải nghiệm macOS mượt mà chuẩn native, luồng dữ liệu hướng sự kiện nhất quán (Event-Driven), hiển thị chuyển tiếp ổn định (Stale-While-Revalidate), và tối ưu hóa xử lý nền bất đồng bộ (Non-blocking IPC).
 
 ---
 
-## 1. Ba Vấn Đề Kinh Điển & Giải Pháp Kiến Trúc Nexus
+## 1. Ba Nguyên Lý Thiết Kế Nền Tảng Trong Nexus
 
-| Vấn đề               | Hiện tượng                                       | Nguyên nhân gốc rễ                                                                          | Giải pháp chuẩn Nexus                                                                                                                                              |
-| :------------------- | :----------------------------------------------- | :------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **API Loop**         | Gọi API vô tận, máy nóng, log tràn ngập          | Dùng `useEffect` phụ thuộc vào callback (`fetchData`) hoặc mảng/object mới tạo ở mỗi render | **Event-Driven**: Chỉ kích hoạt tác vụ từ sự kiện người dùng hoặc sự kiện `onReady` duy nhất của `useAppBootstrap`. Không dùng `useEffect` để chạy business logic. |
-| **UI Flicker**       | Màn hình chớp trắng, layout giật cục khi tải lại | Xoá sạch dữ liệu cũ (`setData([])`), render lại `Skeleton` toàn phần mỗi lần bấm Refresh    | **Stale-While-Revalidate**: `useAsyncTask` giữ nguyên dữ liệu cũ, component `AsyncContent` giữ UI hiển thị (mờ nhẹ) kèm `LoadingBar` mảnh ở mép trên.              |
-| **Beachball Cursor** | Chuột xoay 7 màu của macOS bị treo               | Chạy lệnh shell CLI (`gh`, `claude`, `osascript`) đồng bộ trên luồng IPC của Tauri          | **Async Backend**: Mọi lệnh Rust là `async fn` + `tauri::async_runtime::spawn_blocking(...)`.                                                                      |
+| Thách thức kỹ thuật                                   | Tác động giao diện / Hiệu năng                     | Nguyên nhân gốc rễ                                                                      | Giải pháp chuẩn Nexus                                                                                                                                           |
+| :---------------------------------------------------- | :------------------------------------------------- | :-------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Vòng lặp yêu cầu dữ liệu (Infinite Request Loop)**  | Gửi request liên tục, tiêu tốn tài nguyên CPU/mạng | Sử dụng `useEffect` phụ thuộc vào hàm callback hoặc object/array tái tạo sau mỗi render | **Event-Driven**: Chỉ kích hoạt tác vụ từ sự kiện người dùng hoặc sự kiện `onReady` của `useAppBootstrap`. Không dùng `useEffect` để kích hoạt logic nghiệp vụ. |
+| **Chuyển dịch bố cục khi tải lại (Layout Shift)**     | Mất dữ liệu cũ và nhảy layout khi nạp lại dữ liệu  | Xóa trắng dữ liệu (`setData([])`) và dựng lại `Skeleton` toàn phần trong lúc re-fetch   | **Stale-While-Revalidate**: `useAsyncTask` duy trì dữ liệu hiện có, `AsyncContent` giữ layout hiển thị mượt mà kèm thanh `LoadingBar` thanh mảnh ở mép trên.    |
+| **Khóa luồng giao diện (Main / IPC Thread Blocking)** | Ứng dụng ngưng phản hồi tạm thời                   | Thực thi lệnh shell CLI (`gh`, `claude`, `osascript`) đồng bộ trực tiếp trên luồng IPC  | **Non-blocking Worker**: Mọi lệnh Rust là `async fn` kết hợp `tauri::async_runtime::spawn_blocking(...)`.                                                       |
 
 ---
 
@@ -28,7 +28,7 @@ packages/ui/
 │   ├── MiniAppHeader.tsx       # Titlebar Overlay macOS (an toàn 76px Traffic Lights, data-tauri-drag-region)
 │   ├── MiniAppStatusBar.tsx    # Thanh trạng thái 28px dưới chân trang
 │   ├── AppSplashScreen.tsx     # Màn hình khởi động tối giản (Glowing Icon + Progress bar)
-│   ├── AsyncContent.tsx        # Bộ điều phối hiển thị chống chớp giật layout
+│   ├── AsyncContent.tsx        # Điều phối hiển thị chuyển tiếp mượt mà (Stale-While-Revalidate)
 │   └── Loading.tsx             # Skeleton, LoadingBar, Spinner
 └── hooks/
     ├── use-async-task.ts       # Quản lý task IPC: latest-wins, in-flight dedupe, stale-while-revalidate
@@ -216,8 +216,8 @@ export default function App() {
 
 Trước khi gửi PR hoặc release bất kỳ Mini App nào, bắt buộc kiểm tra các tiêu chí sau:
 
-- [ ] **Không vòng lặp API**: Không có `useEffect` nào nhận hàm `fetch` hay `generate` trong dependency array.
-- [ ] **Không chớp giật giao diện**: Bấm `⌘R` khi app đã có dữ liệu, danh sách cũ vẫn hiển thị mờ nhẹ kèm thanh `LoadingBar` mảnh, không bị nhảy giật khung xương Skeleton.
-- [ ] **Khởi động một lần (StrictMode-safe)**: Màn hình splash nạp tuần tự 0% $\rightarrow$ 100%, không bị reset progress 2 lần ở chế độ React StrictMode.
-- [ ] **Tương tác liên tục**: Khi đang quét dữ liệu hoặc AI đang suy nghĩ, người dùng vẫn bấm mở được Modal Settings (`⌘,`) và cuộn danh sách bình thường.
-- [ ] **Backend Rust Async**: Toàn bộ `Command::new` hoặc AppleScript chạy qua `tauri::async_runtime::spawn_blocking`, không làm xuất hiện con trỏ xoay 7 màu của macOS.
+- [ ] **Luồng dữ liệu Event-Driven**: Không đặt hàm fetch hoặc trigger logic nghiệp vụ bất đồng bộ vào dependency array của `useEffect`.
+- [ ] **Bố cục hiển thị ổn định**: Khi làm mới dữ liệu (Refresh/Re-fetch), dữ liệu hiện tại vẫn hiển thị kèm thanh `LoadingBar`, không làm nhảy bố cục hoặc mất vị trí cuộn.
+- [ ] **Khởi động một lần (StrictMode-safe)**: Màn hình splash nạp tuần tự 0% $\rightarrow$ 100%, an toàn với React StrictMode.
+- [ ] **Tương tác liên tục**: Khi tác vụ nền đang chạy, người dùng vẫn tương tác được với giao diện (mở Cài đặt, cuộn trang).
+- [ ] **Backend Rust Async**: Toàn bộ tác vụ I/O nặng (CLI, AppleScript, Network) chạy qua `tauri::async_runtime::spawn_blocking`, bảo toàn độ phản hồi tức thì của cửa sổ.

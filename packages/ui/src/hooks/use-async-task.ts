@@ -76,7 +76,7 @@ function defaultKey(...args: unknown[]): string {
  *
  * - **Latest-wins**: kết quả của lần chạy cũ bị bỏ qua nếu đã có lần chạy mới hơn.
  * - **Dedupe**: gọi `run()` trùng khoá khi đang chạy → dùng lại promise, không gọi API thêm.
- * - **Stale-while-revalidate**: data cũ được giữ trong lúc chạy lại → UI không chớp.
+ * - **Stale-while-revalidate**: dữ liệu hiện có được duy trì trong lúc nạp lại (giữ giao diện ổn định).
  * - **`run` ổn định**: an toàn khi dùng trong event handler, không cần đưa vào deps.
  *
  * @example

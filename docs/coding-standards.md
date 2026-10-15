@@ -182,7 +182,7 @@ export type AppStatus = (typeof APP_STATUS)[keyof typeof APP_STATUS];
 
 ### 3.6. Quy Chuẩn Hạn Chế Tối Đa `useEffect` (You Might Not Need an Effect)
 
-Theo triết lý React hiện đại, `useEffect` là "cửa thoát hiểm" (escape hatch) để đồng bộ với các hệ thống bên ngoài trình duyệt, **KHÔNG PHẢI** công cụ để điều khiển luồng dữ liệu state nội bộ. Việc lạm dụng `useEffect` gây ra lỗi re-render thừa, chớp giật giao diện (layout flicker), và khó debug state.
+Theo triết lý React hiện đại, `useEffect` là "cửa thoát hiểm" (escape hatch) để đồng bộ với các hệ thống bên ngoài trình duyệt, **KHÔNG PHẢI** công cụ để điều khiển luồng dữ liệu state nội bộ. Việc lạm dụng `useEffect` gây ra lỗi re-render dư thừa, chuyển dịch bố cục ngoài ý muốn (layout shift), và làm phức tạp hóa vòng đời dữ liệu.
 
 #### 5 Nguyên Tắc Bắt Buộc Về `useEffect`:
 
@@ -442,12 +442,12 @@ pub fn launch_mini_app(bundle_id: String) -> Result<String, String> {
 - Không bao giờ cấp quyền wildcard (`"*"`) trong file `capabilities/default.json`.
 - Chỉ khai báo chính xác các lệnh IPC được phép gọi từ frontend webview tương ứng.
 
-### 6.4. Bắt Buộc Sử Dụng Asynchronous IPC Commands Để Tránh Treo UI & Beachball Cursor (Chuột 7 Màu)
+### 6.4. Bắt Buộc Sử Dụng Asynchronous IPC Commands Để Bảo Toàn Khả Năng Phản Hồi Của Giao Diện (Non-Blocking IPC)
 
 Khi thực thi các tác vụ tốn thời gian trong Rust backend (chạy process CLI ngoài qua `Command`, gọi AppleScript `osascript`, truy vấn I/O ổ đĩa hoặc HTTP network):
 
 - **NGHIÊM CẤM** chạy các lệnh đồng bộ (`std::process::Command::output()`, `thread::sleep`, v.v.) trực tiếp trong luồng chính của Tauri command.
-- **HẬU QUẢ NẾU LÀM SAI**: Tauri Command chạy trên luồng IPC xử lý sự kiện. Nếu luồng này bị chặn quá 2 giây, macOS WindowServer sẽ nhận định ứng dụng "Not Responding" và lập tức biến con trỏ chuột thành **con trỏ xoay 7 màu (Spinning Beachball Cursor)**, gây đóng băng toàn bộ cửa sổ ứng dụng.
+- **HẬU QUẢ NẾU LÀM SAI**: Tauri Command chạy trên luồng IPC xử lý sự kiện. Nếu luồng này bị chặn, macOS WindowServer sẽ nhận định ứng dụng "Application Not Responding", gây đóng băng cửa sổ và làm gián đoạn hoàn toàn tương tác của người dùng.
 - **QUY TẮC BẮT BUỘC**:
   1. Hàm command phải là `pub async fn`.
   2. Bọc toàn bộ các tác vụ blocking bên trong `tauri::async_runtime::spawn_blocking(...)`.
@@ -465,7 +465,7 @@ pub async fn fetch_github_prs(since_iso: String) -> Result<Vec<PRReportItem>, St
     .map_err(|e| format!("Task execution failed: {}", e))?
 }
 
-// ❌ SAI LẦM: Chặn luồng IPC làm đơ giao diện và hiện chuột xoay 7 màu
+// ❌ SAI LẦM: Chặn luồng IPC gây khóa giao diện (Blocking Main/IPC Thread)
 #[tauri::command]
 pub fn fetch_github_prs(since_iso: String) -> Result<Vec<PRReportItem>, String> {
     // Luồng IPC bị treo cho đến khi lệnh `gh` chạy xong!
@@ -537,7 +537,7 @@ flowchart TD
 
 1. **Hiển thị tức thì (Instant Interface)**: Người dùng phải nhìn thấy cấu trúc giao diện làm việc ngay lập tức, không để màn hình trắng hoặc màn hình splash đơ cứng.
 2. **Skeleton Loading cục bộ**: Khu vực nào đang tải dữ liệu thì hiển thị Skeleton/Spinner cục bộ ở đúng khu vực đó (ví dụ Skeleton tại PR Timeline, Spinner tại AI Summary Card).
-3. **Không khóa tương tác**: Trong khi hệ thống đang quét dữ liệu hoặc AI đang suy nghĩ, người dùng vẫn hoàn toàn tự do bấm mở Modal Cài đặt (`⌘,`), xem danh sách, chỉnh sửa cấu hình mà không gặp bất kỳ hiện tượng giật lag hay khóa chuột nào.
+3. **Không khóa tương tác**: Trong khi hệ thống đang quét dữ liệu hoặc AI đang xử lý, người dùng vẫn hoàn toàn tự do thao tác mở Modal Cài đặt (`⌘,`), xem danh sách, chỉnh sửa cấu hình với trải nghiệm mượt mà liên tục.
 
 ---
 
@@ -558,5 +558,5 @@ Mọi đóng góp mã nguồn mới bắt buộc phải thỏa mãn checklist sa
 - [ ] Đặt tên đúng chuẩn (kebab-case cho files, PascalCase cho Components, `is/has/can/should` cho booleans).
 - [ ] Không sử dụng `enum` số; đã dùng `as const` hoặc string literal unions.
 - [ ] Code Rust không chứa `.unwrap()` ở runtime context.
-- [ ] **Tác vụ nặng trong Rust (CLI, Network, AppleScript) bắt buộc dùng `async fn` + `tauri::async_runtime::spawn_blocking` để không gây đơ chuột 7 màu (beachball cursor)**.
+- [ ] **Tác vụ nặng trong Rust (CLI, Network, AppleScript) bắt buộc dùng `async fn` + `tauri::async_runtime::spawn_blocking` để tránh chặn luồng IPC và bảo toàn khả năng phản hồi của giao diện**.
 - [ ] **Mini Apps kế thừa `MiniAppHeader` và `AppSplashScreen` từ `@nexus/ui`, tuân thủ trải nghiệm tải dữ liệu bất đồng bộ non-blocking**.

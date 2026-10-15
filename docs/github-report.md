@@ -33,7 +33,7 @@ Mỗi buổi sáng họp **Daily Standup** hoặc viết cập nhật trên **Pa
 3. **`AppSplashScreen`**:
    - Màn hình khởi động tối giản gồm Glowing App Icon, Title, Version badge và thanh tiến trình.
 4. **`AsyncContent` & `LoadingBar`**:
-   - Điều phối hiển thị theo mô hình **Stale-While-Revalidate**: Tải lần đầu hiện `Skeleton`, làm mới khi đã có dữ liệu chỉ hiện thanh `LoadingBar` mảnh, **không bao giờ chớp giật layout**.
+   - Điều phối hiển thị theo mô hình **Stale-While-Revalidate**: Tải lần đầu hiển thị `Skeleton`, khi làm mới dữ liệu tiếp tục giữ nội dung hiển thị kèm thanh `LoadingBar` thanh mảnh, đảm bảo giao diện luôn ổn định và liền mạch.
 
 ### 2.2. Kiến Trúc Lớp & Phân Tách Trách Nhiệm (Clean Architecture)
 
@@ -57,9 +57,9 @@ apps/github-report/src/
 ```
 
 - Chi tiết hướng dẫn xây dựng mini app tương tự xem tại: 👉 **[`docs/mini-app-guide.md`](file:///Users/lethanhba/workspace/app/nexus/docs/mini-app-guide.md)**.
-- **`useAppSettings`**: Quản lý nạp/lưu cài đặt, cung cấp `settingsRef` để callback async luôn đọc giá trị mới nhất mà không gây re-render hoặc trigger effect lặp.
-- **`useGithubReport`**: Xây dựng hoàn toàn theo mô hình **Event-Driven** trên nền `useAsyncTask` (từ `@nexus/ui`). Mọi hành động quét PR hay chạy AI chỉ được kích hoạt từ sự kiện (`onReady`, bấm nút `⌘R`, đổi ngày, bấm `⌘↵`), **không có bất kỳ `useEffect` nào tự động gọi API** $\rightarrow$ Triệt tiêu 100% nguy cơ lặp API.
-- **`useAppBootstrap` & `useHotkeys` (từ `@nexus/ui`)**: Quản lý chuỗi khởi động tuần tự không chớp giật (StrictMode-safe) và bắt phím tắt macOS với một listener duy nhất.
+- **`useAppSettings`**: Quản lý nạp/lưu cài đặt, cung cấp `settingsRef` để callback async luôn đọc giá trị mới nhất mà không gây re-render không mong muốn.
+- **`useGithubReport`**: Xây dựng hoàn toàn theo mô hình **Event-Driven** trên nền `useAsyncTask` (từ `@nexus/ui`). Mọi hành động quét PR hay chạy AI chỉ được kích hoạt từ sự kiện rõ ràng (`onReady`, bấm nút `⌘R`, đổi ngày, bấm `⌘↵`), đảm bảo luồng dữ liệu một chiều rõ ràng và kiểm soát tài nguyên chặt chẽ.
+- **`useAppBootstrap` & `useHotkeys` (từ `@nexus/ui`)**: Quản lý chuỗi khởi động tuần tự an toàn với React StrictMode và bắt phím tắt macOS với một event listener duy nhất.
 
 ### 2.3. Wireframe Bố Cục Ứng Dụng
 
@@ -93,7 +93,7 @@ apps/github-report/src/
 
 ## 3. Luồng Nghiệp Vụ & Nạp Dữ Liệu Bất Đồng Bộ (Web-Like Async Flow)
 
-Quy trình nạp dữ liệu được thiết kế hoàn toàn bất đồng bộ (non-blocking). Mọi lệnh nặng trong Rust đều chạy qua `tauri::async_runtime::spawn_blocking`, đảm bảo không bao giờ khóa luồng giao diện hay gây hiện tượng con trỏ xoay 7 màu (beachball):
+Quy trình nạp dữ liệu được thiết kế hoàn toàn bất đồng bộ (non-blocking). Mọi tác vụ nặng trong Rust (gọi CLI, AppleScript) đều được chuyển sang worker pool thông qua `tauri::async_runtime::spawn_blocking`, bảo toàn khả năng phản hồi tức thì của luồng giao diện và IPC:
 
 ```mermaid
 sequenceDiagram
@@ -256,5 +256,5 @@ Các lệnh được đăng ký trong `tauri::generate_handler!`:
 - [x] **Giai đoạn 5 (Refactor Chuẩn Monorepo)**:
   - Tách `MiniAppHeader` & `AppSplashScreen` vào package dùng chung `@nexus/ui`.
   - Phân rã hooks (`useSplashScreen`, `useGitHubReport`, `useGlobalShortcuts`), thu gọn `App.tsx` dưới 150 dòng.
-  - Chuyển toàn bộ tác vụ Rust sang Non-blocking Async (`spawn_blocking`) triệt tiêu hoàn toàn hiện tượng Beachball Cursor.
+  - Chuyển toàn bộ tác vụ Rust sang Non-blocking Async (`spawn_blocking`) tối ưu hiệu năng đa nhiệm và độ phản hồi của giao diện.
 - [ ] **Giai đoạn 6**: Viết test hồi quy, bổ sung caching PRs cục bộ và đóng gói bundle `.dmg` cho Production.

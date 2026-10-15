@@ -22,7 +22,7 @@ export interface UseGithubReportOptions {
  * - Chỉ được gọi từ: `onReady` của bootstrap, nút/phím ⌘R, đổi khoảng ngày.
  * - Mỗi lần gọi tăng `generation`; kết quả của lần gọi cũ bị bỏ qua → không chồng chéo,
  *   không chạy autoCopy/reveal hai lần.
- * - `useAsyncTask` giữ dữ liệu cũ khi làm mới → UI không chớp.
+ * - `useAsyncTask` duy trì dữ liệu hiện có trong lúc làm mới (Stale-While-Revalidate).
  */
 export function useGithubReport({ settingsRef }: UseGithubReportOptions) {
   const [selectedPrNumbers, setSelectedPrNumbers] = useState<Set<number>>(() => new Set());

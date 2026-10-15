@@ -15,19 +15,19 @@ Xem đầy đủ kiến trúc, cơ chế Unified Titlebar, lưu trữ `tauri-plu
 
 ## 🏛️ Kiến Trúc & Cấu Trúc Mã Nguồn
 
-Ứng dụng tuân theo chuẩn kiến trúc Mini App Nexus bất đồng bộ, triệt tiêu hoàn toàn vòng lặp API và chớp giật giao diện:
+Ứng dụng tuân theo chuẩn kiến trúc hướng sự kiện (Event-Driven) kết hợp mô hình hiển thị Stale-While-Revalidate:
 
 - **UI Components Dùng Chung từ `@nexus/ui`**:
   - `MiniAppShell`: Khung layout chuẩn macOS (`Header` $\rightarrow$ `Main` $\rightarrow$ `Footer` + `Splash`).
-  - `MiniAppHeader`: Chừa khoảng trống an toàn 76px cho 3 nút Traffic Lights, tích hợp kéo cửa sổ.
-  - `MiniAppStatusBar`: Thanh trạng thái 28px kết nối chỉ báo CLI.
-  - `AsyncContent` & `Loading`: Ngăn chặn chớp giao diện (Stale-while-revalidate, chỉ hiện thanh mảnh khi refresh).
-  - `AppSplashScreen`: Màn hình khởi động tối giản.
+  - `MiniAppHeader`: Header chuẩn macOS Overlay Titlebar, chừa 76px an toàn cho Traffic Lights và hỗ trợ kéo cửa sổ.
+  - `MiniAppStatusBar`: Thanh trạng thái 28px hiển thị trạng thái kết nối GitHub CLI và AI Provider.
+  - `AsyncContent` & `Loading`: Bộ điều phối trạng thái tải dữ liệu mượt mà, giữ bố cục ổn định khi làm mới dữ liệu.
+  - `AppSplashScreen`: Màn hình khởi động tối giản với thanh tiến trình nạp cấu hình.
 - **Hooks Chuẩn & Nghiệp Vụ**:
-  - `src/hooks/use-app-settings.ts`: Quản lý cấu hình, cung cấp `settingsRef` ổn định cho các luồng async.
-  - `src/hooks/use-github-report.ts`: Quản lý quét PR và AI tóm tắt hoàn toàn theo hướng sự kiện (Event-Driven), không có `useEffect` gây vòng lặp.
-  - `useAppBootstrap` & `useHotkeys` (từ `@nexus/ui`): Khởi động app tuần tự 1 lần và bắt phím tắt macOS toàn cục.
-- **Rust Backend Async**: Mọi lệnh shell (`gh`, `claude`, `agy`, AppleScript) chạy qua `tauri::async_runtime::spawn_blocking`, tuyệt đối không khóa luồng IPC hay gây hiện tượng chuột xoay 7 màu (beachball).
+  - `src/hooks/use-app-settings.ts`: Quản lý cấu hình người dùng, cung cấp ref đồng bộ cho các luồng xử lý bất đồng bộ.
+  - `src/hooks/use-github-report.ts`: Đóng gói toàn bộ luồng nghiệp vụ quét PRs, tóm tắt AI, sao chép clipboard và điều hướng trình duyệt.
+  - `useAppBootstrap` & `useHotkeys` (từ `@nexus/ui`): Khởi động tuần tự và quản lý phím tắt macOS toàn cục.
+- **Rust Backend**: Xử lý các tác vụ hệ thống (GitHub CLI, Local AI CLI, AppleScript) bất đồng bộ trong background thread qua `tauri::async_runtime::spawn_blocking`.
 
 ---
 

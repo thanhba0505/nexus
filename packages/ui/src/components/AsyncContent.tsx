@@ -42,7 +42,7 @@ function DefaultError({ error }: { error: string }) {
  * | Có data (+ đang làm mới)      | `children` (mờ nhẹ) + `LoadingBar` mảnh ở trên  |
  * | Có data + lỗi làm mới         | `children` + dải lỗi nhỏ phía trên              |
  *
- * Nội dung cũ KHÔNG bao giờ bị thay bằng skeleton khi làm mới → hết chớp giao diện.
+ * Nội dung hiện có được duy trì liên tục khi làm mới, đảm bảo tính ổn định của layout.
  */
 export function AsyncContent({
   isLoading,

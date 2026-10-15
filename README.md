@@ -93,20 +93,20 @@ Mỗi ứng dụng trong Nexus là một **macOS Native Application Bundle (`.ap
 
 - **Vai trò**: Trạm điều khiển trung tâm và bệ phóng (Launchpad) cho toàn bộ hệ sinh thái.
 - **Tính năng nổi bật**:
-  - Giao diện Acrylic kính mờ (macOS Vibrancy) chuẩn thiết kế Apple.
+  - Giao diện Acrylic kính mờ (macOS Vibrancy) chuẩn phong cách Apple.
   - Quản lý danh sách mini app dạng lưới (App Grid) hỗ trợ click chọn, double-click mở app.
-  - Đồng bộ trạng thái hai chiều (nhận biết app nào đang mở / đã đóng).
+  - Tự động đồng bộ trạng thái mở/đóng của các ứng dụng theo thời gian thực.
   - Tích hợp cửa hàng Mini App Store nội bộ và menu chuột phải thông minh.
 
 ### 2. 📊 GitHub Report (`apps/github-report`)
 
 - **Vai trò**: Tự động tổng hợp kết quả công việc trong ngày và báo cáo Daily Standup.
 - **Tính năng nổi bật**:
-  - **Zero-Token Cost (Local AI First)**: Tận dụng trực tiếp Claude CLI (`claude`) hoặc Antigravity CLI (`agy`) có sẵn trên máy Mac, không tốn chi phí API token.
-  - **Quét Pull Request & Commits**: Tự động lấy các PR và commit từ 00:00 hôm nay hoặc ngày làm việc gần nhất (`Last Workday` cho sáng thứ Hai).
-  - **Chống chớp giật & Bất đồng bộ (Flicker-Free)**: Giao diện non-blocking, không bao giờ khóa luồng IPC hay gây đơ con trỏ xoay 7 màu (Beachball-free).
-  - **Kích hoạt đích đến 1-Click**: Tự động sao chép clipboard và kích hoạt tab **Parabol / Slack / Notion** trên trình duyệt (Brave, Chrome, Safari, Arc).
-  - **Bảo mật phần cứng**: GitHub Token được lưu trữ an toàn trong **macOS Keychain** qua chip Apple Secure Enclave.
+  - **Tự động quét Pull Request & Commits**: Thu thập nhanh hoạt động GitHub theo ngày (Hôm nay hoặc Ngày làm việc trước cho sáng thứ Hai).
+  - **Tóm tắt Daily Standup bằng AI thông minh**: Tự động nhóm công việc và tạo 3-4 dòng tóm tắt súc tích bằng Local AI (Claude CLI, Antigravity CLI - không tốn phí token) hoặc Cloud API.
+  - **Chỉnh sửa & Tùy biến nhanh (Inline Edit)**: Bật/tắt từng PR/commit bằng checkbox và sửa trực tiếp nội dung tóm tắt trước khi gửi.
+  - **Tích hợp quy trình 1-Click**: Tự động sao chép vào Clipboard và mở tab **Parabol / Slack / Notion** trên trình duyệt (Brave, Chrome, Safari, Arc).
+  - **Bảo mật phần cứng**: Lưu trữ an toàn GitHub Token và API keys trong **macOS Keychain** qua chip Apple Secure Enclave.
 
 ### 3. 💬 SlackBot (`apps/slackbot`)
 
