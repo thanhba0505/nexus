@@ -20,8 +20,8 @@ export function AppGrid({
   onOpenAppStore,
 }: AppGridProps) {
   return (
-    <div className="w-full flex-1 overflow-y-auto px-6 py-4 flex items-center justify-center">
-      <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 gap-y-6 gap-x-6 max-w-4xl justify-items-center items-center">
+    <div className="w-full flex-1 overflow-y-auto px-8 py-8 flex items-center justify-center">
+      <div className="flex flex-wrap items-center justify-center gap-x-10 sm:gap-x-14 gap-y-10 sm:gap-y-12 max-w-5xl mx-auto">
         {apps.map((app) => (
           <AppIconItem
             key={app.id}

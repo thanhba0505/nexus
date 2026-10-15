@@ -4,17 +4,17 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 
 export interface WindowControlsProps {
   /** Hành động khi bấm nút đóng: 'hide' (ẩn ngầm, mặc định) hoặc 'close' (tắt tiến trình) */
-  closeAction?: 'hide' | 'close';
+  closeAction?: 'hide' | 'close' | undefined;
   /** Kiểu giao diện nút: 'tinted' (Đỏ/Vàng/Xanh chuẩn glass, mặc định) hoặc 'subtle' (kính tối trung tính) */
-  variant?: 'tinted' | 'subtle';
+  variant?: 'tinted' | 'subtle' | undefined;
   /** Callback tùy biến khi bấm nút đóng */
-  onClose?: () => void;
+  onClose?: (() => void) | undefined;
   /** Callback tùy biến khi bấm nút thu nhỏ */
-  onMinimize?: () => void;
+  onMinimize?: (() => void) | undefined;
   /** Callback tùy biến khi bấm nút phóng to/khôi phục */
-  onMaximize?: () => void;
+  onMaximize?: (() => void) | undefined;
   /** ClassName bổ sung */
-  className?: string;
+  className?: string | undefined;
 }
 
 export function WindowControls({

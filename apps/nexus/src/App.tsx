@@ -394,6 +394,14 @@ export default function App() {
         onOpenSettings={() => setIsSettingsOpen((prev) => !prev)}
         hasNexusUpdate={!isDev && nexusUpdateStatus === 'available'}
         onMouseDown={handleHeaderMouseDown}
+        showWindowControls={true}
+        onClose={() => {
+          try {
+            getCurrentWindow().hide();
+          } catch {
+            // fallback
+          }
+        }}
         settingsMenu={
           <DropdownMenu
             isOpen={isSettingsOpen}
@@ -424,11 +432,7 @@ export default function App() {
         )}
       </main>
 
-      <LaunchpadFooter
-        currentCategory={currentCategory}
-        onSelectCategory={setCurrentCategory}
-        onPowerOff={() => console.log('Thoát Launchpad')}
-      />
+      <LaunchpadFooter currentCategory={currentCategory} onSelectCategory={setCurrentCategory} />
 
       {contextMenu.isOpen && (
         <ContextMenu
