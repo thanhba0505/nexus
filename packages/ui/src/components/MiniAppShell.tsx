@@ -38,7 +38,7 @@ export function MiniAppShell({
     <div
       className={twMerge(
         clsx(
-          'relative flex h-screen w-screen select-none flex-col overflow-hidden rounded-[14px] border border-white/[0.12] bg-slate-950/40 backdrop-blur-3xl font-sans text-white',
+          'relative flex h-screen w-screen select-none flex-col overflow-hidden rounded-[14px] border border-white/10 bg-slate-950 font-sans text-white',
           className,
         ),
       )}
@@ -82,7 +82,7 @@ export function MiniAppStatusBar({
     <footer
       className={twMerge(
         clsx(
-          'flex h-7 w-full shrink-0 select-none items-center justify-between gap-3 border-t border-white/10 bg-slate-950/70 px-3 text-[11px] backdrop-blur-md',
+          'flex h-7 w-full shrink-0 select-none items-center justify-between gap-3 border-t border-white/10 bg-slate-900/90 px-3 text-[11px]',
           className,
         ),
       )}
