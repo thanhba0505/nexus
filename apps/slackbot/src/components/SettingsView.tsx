@@ -11,7 +11,7 @@ import {
   EyeOff,
   Settings,
 } from 'lucide-react';
-import { ContentCard, AppButton } from '@nexus/ui';
+import { ContentCard, AppButton, AppSelect, AppSelectOption } from '@nexus/ui';
 import type {
   AIConfig,
   PersonaConfig,
@@ -19,6 +19,27 @@ import type {
   SlackCredentialsDto,
   SlackStatusDto,
 } from '../types';
+
+const AI_PROVIDER_OPTIONS: AppSelectOption<AIConfig['provider']>[] = [
+  { value: 'auto', label: 'Tự động (Ưu tiên Claude CLI / Antigravity CLI)' },
+  { value: 'claude', label: 'Claude Code CLI (claude -p)' },
+  { value: 'agy', label: 'Antigravity CLI (agy -p)' },
+  { value: 'cloud', label: 'Cloud AI (Dự phòng)' },
+];
+
+const TONE_OPTIONS: AppSelectOption<PersonaConfig['tone']>[] = [
+  { value: 'professional_friendly', label: 'Chuyên nghiệp & Thân thiện' },
+  { value: 'professional_technical', label: 'Kỹ thuật & Chuẩn xác' },
+  { value: 'concise', label: 'Ngắn gọn, súc tích' },
+  { value: 'friendly', label: 'Thân mật, cởi mở' },
+];
+
+const PRONOUN_OPTIONS: AppSelectOption<PersonaConfig['pronoun']>[] = [
+  { value: 'mình_bạn', label: 'mình / bạn' },
+  { value: 'em_anh', label: 'em / anh, chị' },
+  { value: 'tôi_bạn', label: 'tôi / bạn' },
+  { value: 'mình_các_bạn', label: 'mình / các bạn' },
+];
 
 export interface SettingsViewProps {
   settings: SlackAppSettings;
@@ -285,67 +306,52 @@ export function SettingsView({
             {/* Provider Selection */}
             <div className="space-y-1.5">
               <label className="text-[11px] font-medium text-white/80">AI Provider Ưu Tiên</label>
-              <select
+              <AppSelect
                 value={formData.ai.provider}
-                onChange={(e) =>
+                onChange={(val) =>
                   setFormData({
                     ...formData,
-                    ai: { ...formData.ai, provider: e.target.value as AIConfig['provider'] },
+                    ai: { ...formData.ai, provider: val as AIConfig['provider'] },
                   })
                 }
-                className="w-full bg-black/40 border border-violet-500/25 rounded-lg px-3 py-2 text-white/90 text-xs focus:outline-hidden focus:border-violet-500"
-              >
-                <option value="auto">Tự động (Ưu tiên Claude CLI / Antigravity CLI)</option>
-                <option value="claude">Claude Code CLI (claude -p)</option>
-                <option value="agy">Antigravity CLI (agy -p)</option>
-                <option value="cloud">Cloud AI (Dự phòng)</option>
-              </select>
+                options={AI_PROVIDER_OPTIONS}
+              />
             </div>
 
             {/* Persona Tone & Pronoun */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <label className="text-[11px] font-medium text-white/80">Giọng điệu (Tone)</label>
-                <select
+                <AppSelect
                   value={formData.persona.tone}
-                  onChange={(e) =>
+                  onChange={(val) =>
                     setFormData({
                       ...formData,
                       persona: {
                         ...formData.persona,
-                        tone: e.target.value as PersonaConfig['tone'],
+                        tone: val as PersonaConfig['tone'],
                       },
                     })
                   }
-                  className="w-full bg-black/40 border border-violet-500/25 rounded-lg px-3 py-2 text-white/90 text-xs focus:outline-hidden focus:border-violet-500"
-                >
-                  <option value="professional_friendly">Chuyên nghiệp & Thân thiện</option>
-                  <option value="professional_technical">Kỹ thuật & Chuẩn xác</option>
-                  <option value="concise">Ngắn gọn, súc tích</option>
-                  <option value="friendly">Thân mật, cởi mở</option>
-                </select>
+                  options={TONE_OPTIONS}
+                />
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-[11px] font-medium text-white/80">Danh xưng xưng hô</label>
-                <select
+                <AppSelect
                   value={formData.persona.pronoun}
-                  onChange={(e) =>
+                  onChange={(val) =>
                     setFormData({
                       ...formData,
                       persona: {
                         ...formData.persona,
-                        pronoun: e.target.value as PersonaConfig['pronoun'],
+                        pronoun: val as PersonaConfig['pronoun'],
                       },
                     })
                   }
-                  className="w-full bg-black/40 border border-violet-500/25 rounded-lg px-3 py-2 text-white/90 text-xs focus:outline-hidden focus:border-violet-500"
-                >
-                  <option value="mình_bạn">mình / bạn</option>
-                  <option value="em_anh">em / anh, chị</option>
-                  <option value="tôi_bạn">tôi / bạn</option>
-                  <option value="mình_các_bạn">mình / các bạn</option>
-                </select>
+                  options={PRONOUN_OPTIONS}
+                />
               </div>
             </div>
 

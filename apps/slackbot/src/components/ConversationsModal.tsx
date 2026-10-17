@@ -1,6 +1,20 @@
 import { useState } from 'react';
 import { X, Hash, Lock, Users, User, Plus, Trash2, Check, Shield } from 'lucide-react';
+import { AppSelect, AppSelectOption } from '@nexus/ui';
 import type { ConversationRule } from '../types';
+
+const CHANNEL_TYPE_OPTIONS: AppSelectOption<ConversationRule['type']>[] = [
+  { value: 'public_channel', label: 'Public Channel' },
+  { value: 'private_channel', label: 'Private Channel' },
+  { value: 'mpdm', label: 'Group DM (MPDM)' },
+  { value: 'im', label: 'Direct Message (1-1)' },
+];
+
+const MODE_OPTIONS: AppSelectOption<ConversationRule['mode']>[] = [
+  { value: 'draft_review', label: 'Draft & Review' },
+  { value: 'auto_pilot', label: 'Auto-Pilot' },
+  { value: 'manual', label: 'Manual Chỉ dẫn' },
+];
 
 export interface ConversationsModalProps {
   isOpen: boolean;
@@ -123,16 +137,14 @@ export function ConversationsModal({
               Thêm kênh / DM mới vào whitelist
             </span>
             <div className="flex items-center gap-2">
-              <select
-                value={newChannelType}
-                onChange={(e) => setNewChannelType(e.target.value as ConversationRule['type'])}
-                className="bg-black/40 border border-violet-500/25 rounded-lg px-2.5 py-1.5 text-white/90 text-xs focus:outline-hidden focus:border-violet-500"
-              >
-                <option value="public_channel">Public Channel</option>
-                <option value="private_channel">Private Channel</option>
-                <option value="mpdm">Group DM (MPDM)</option>
-                <option value="im">Direct Message (1-1)</option>
-              </select>
+              <div className="w-44 shrink-0">
+                <AppSelect
+                  size="sm"
+                  value={newChannelType}
+                  onChange={(val) => setNewChannelType(val as ConversationRule['type'])}
+                  options={CHANNEL_TYPE_OPTIONS}
+                />
+              </div>
 
               <input
                 type="text"
@@ -192,17 +204,14 @@ export function ConversationsModal({
 
                   <div className="flex items-center gap-2 shrink-0">
                     {/* Mode selection */}
-                    <select
-                      value={rule.mode}
-                      onChange={(e) =>
-                        handleModeChange(idx, e.target.value as ConversationRule['mode'])
-                      }
-                      className="bg-black/40 border border-violet-500/25 rounded-lg px-2 py-1 text-white/80 text-[11px] focus:outline-hidden focus:border-violet-500"
-                    >
-                      <option value="draft_review">Draft & Review</option>
-                      <option value="auto_pilot">Auto-Pilot</option>
-                      <option value="manual">Manual Chỉ dẫn</option>
-                    </select>
+                    <div className="w-36 shrink-0">
+                      <AppSelect
+                        size="sm"
+                        value={rule.mode}
+                        onChange={(val) => handleModeChange(idx, val as ConversationRule['mode'])}
+                        options={MODE_OPTIONS}
+                      />
+                    </div>
 
                     {/* Custom Prefix */}
                     <input

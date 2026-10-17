@@ -1,7 +1,27 @@
 import { useState } from 'react';
 import { X, Sparkles, Compass, ShieldCheck, Check, RotateCcw, Key, Terminal } from 'lucide-react';
+import { AppSelect, AppSelectOption } from '@nexus/ui';
 import { AppSettings, PrereqStatus } from '../types';
 import { DEFAULT_PROMPT } from '../services/storage';
+
+const AI_PROVIDER_OPTIONS: AppSelectOption<'auto' | 'claude' | 'agy'>[] = [
+  { value: 'auto', label: 'Tự động (Ưu tiên Claude Code CLI → Antigravity CLI)' },
+  { value: 'claude', label: 'Claude Code CLI (claude -p)' },
+  { value: 'agy', label: 'Antigravity CLI (agy -p)' },
+];
+
+const DESTINATION_OPTIONS: AppSelectOption<'parabol' | 'slack' | 'copy_only'>[] = [
+  { value: 'parabol', label: 'Parabol (Mở tab parabol.co và tự kích hoạt)' },
+  { value: 'slack', label: 'Slack Web / App' },
+  { value: 'copy_only', label: 'Chỉ sao chép vào Clipboard (Không mở trình duyệt)' },
+];
+
+const BROWSER_OPTIONS: AppSelectOption<'Brave Browser' | 'Google Chrome' | 'Arc' | 'Safari'>[] = [
+  { value: 'Brave Browser', label: 'Brave Browser' },
+  { value: 'Google Chrome', label: 'Google Chrome' },
+  { value: 'Arc', label: 'Arc Browser' },
+  { value: 'Safari', label: 'Safari' },
+];
 
 export interface SettingsModalProps {
   isOpen: boolean;
@@ -102,20 +122,16 @@ export function SettingsModal({
             <div className="space-y-3.5">
               <div>
                 <label className="block text-white/80 font-medium mb-1">AI Provider ưu tiên</label>
-                <select
+                <AppSelect
                   value={formData.ai.provider}
-                  onChange={(e) =>
+                  onChange={(val) =>
                     setFormData({
                       ...formData,
-                      ai: { ...formData.ai, provider: e.target.value as 'auto' | 'claude' | 'agy' },
+                      ai: { ...formData.ai, provider: val as 'auto' | 'claude' | 'agy' },
                     })
                   }
-                  className="w-full h-8 px-2.5 rounded-lg bg-black/40 border border-sky-500/25 text-white/90 text-xs focus:outline-none focus:border-sky-400/80 focus:ring-1 focus:ring-sky-400/40 transition-colors"
-                >
-                  <option value="auto">Tự động (Ưu tiên Claude Code CLI → Antigravity CLI)</option>
-                  <option value="claude">Claude Code CLI (`claude -p`)</option>
-                  <option value="agy">Antigravity CLI (`agy -p`)</option>
-                </select>
+                  options={AI_PROVIDER_OPTIONS}
+                />
                 <p className="text-[11px] text-white/40 mt-1 leading-relaxed">
                   Sử dụng session đăng nhập CLI có sẵn trên máy Mac, hoàn toàn không tốn token cost.
                 </p>
@@ -174,48 +190,36 @@ export function SettingsModal({
             <div className="space-y-3.5">
               <div>
                 <label className="block text-white/80 font-medium mb-1">Đích Đến Mặc Định</label>
-                <select
+                <AppSelect
                   value={formData.workflow.destination}
-                  onChange={(e) =>
+                  onChange={(val) =>
                     setFormData({
                       ...formData,
                       workflow: {
                         ...formData.workflow,
-                        destination: e.target.value as 'parabol' | 'slack' | 'copy_only',
+                        destination: val as 'parabol' | 'slack' | 'copy_only',
                       },
                     })
                   }
-                  className="w-full h-8 px-2.5 rounded-lg bg-black/40 border border-sky-500/25 text-white/90 text-xs focus:outline-none focus:border-sky-400/80 focus:ring-1 focus:ring-sky-400/40 transition-colors"
-                >
-                  <option value="parabol">Parabol (Mở tab parabol.co và tự kích hoạt)</option>
-                  <option value="slack">Slack Web / App</option>
-                  <option value="copy_only">
-                    Chỉ sao chép vào Clipboard (Không mở trình duyệt)
-                  </option>
-                </select>
+                  options={DESTINATION_OPTIONS}
+                />
               </div>
 
               <div>
                 <label className="block text-white/80 font-medium mb-1">Trình Duyệt Ưu Tiên</label>
-                <select
+                <AppSelect
                   value={formData.workflow.browser}
-                  onChange={(e) =>
+                  onChange={(val) =>
                     setFormData({
                       ...formData,
                       workflow: {
                         ...formData.workflow,
-                        browser: e.target.value as
-                          'Brave Browser' | 'Google Chrome' | 'Arc' | 'Safari',
+                        browser: val as 'Brave Browser' | 'Google Chrome' | 'Arc' | 'Safari',
                       },
                     })
                   }
-                  className="w-full h-8 px-2.5 rounded-lg bg-black/40 border border-sky-500/25 text-white/90 text-xs focus:outline-none focus:border-sky-400/80 focus:ring-1 focus:ring-sky-400/40 transition-colors"
-                >
-                  <option value="Brave Browser">Brave Browser</option>
-                  <option value="Google Chrome">Google Chrome</option>
-                  <option value="Arc">Arc Browser</option>
-                  <option value="Safari">Safari</option>
-                </select>
+                  options={BROWSER_OPTIONS}
+                />
                 <p className="text-[11px] text-white/40 mt-1 leading-relaxed">
                   Ứng dụng sẽ tìm tab Parabol đang mở trên trình duyệt này bằng AppleScript để
                   chuyển tới ngay lập tức.

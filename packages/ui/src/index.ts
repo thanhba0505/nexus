@@ -25,6 +25,7 @@ export * from './components/AppSidebar';
 export * from './components/ContentCard';
 export * from './components/AppButton';
 export * from './components/AppTabs';
+export * from './components/AppSelect';
 
 // Hooks chuẩn cho mini app (xem docs/mini-app-guide.md)
 export * from './hooks/use-latest-ref';
