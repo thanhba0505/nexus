@@ -78,14 +78,14 @@ export function SettingsModal({
     >
       <div className="flex flex-col space-y-4">
         {/* Segmented Tab Controls */}
-        <div className="flex items-center p-1 bg-white/[0.06] rounded-xl border border-white/10 text-xs font-medium">
+        <div className="flex items-center p-1 bg-white/[0.06] rounded-xl border border-[var(--app-tone-3,#6366f1)]/25 text-xs font-medium">
           <button
             type="button"
             onClick={() => setActiveTab('updates')}
             className={clsx(
               'flex-1 flex items-center justify-center space-x-2 py-1.5 rounded-lg transition-all',
               activeTab === 'updates'
-                ? 'bg-white/15 text-white shadow-sm border border-white/10'
+                ? 'bg-white/15 text-white shadow-sm border border-[var(--app-tone-3,#6366f1)]/30'
                 : 'text-white/60 hover:text-white hover:bg-white/5',
             )}
           >
@@ -100,7 +100,7 @@ export function SettingsModal({
             className={clsx(
               'flex-1 flex items-center justify-center space-x-2 py-1.5 rounded-lg transition-all',
               activeTab === 'preferences'
-                ? 'bg-white/15 text-white shadow-sm border border-white/10'
+                ? 'bg-white/15 text-white shadow-sm border border-[var(--app-tone-3,#6366f1)]/30'
                 : 'text-white/60 hover:text-white hover:bg-white/5',
             )}
           >
@@ -114,7 +114,7 @@ export function SettingsModal({
             className={clsx(
               'flex-1 flex items-center justify-center space-x-2 py-1.5 rounded-lg transition-all',
               activeTab === 'about'
-                ? 'bg-white/15 text-white shadow-sm border border-white/10'
+                ? 'bg-white/15 text-white shadow-sm border border-[var(--app-tone-3,#6366f1)]/30'
                 : 'text-white/60 hover:text-white hover:bg-white/5',
             )}
           >
@@ -127,9 +127,9 @@ export function SettingsModal({
         {activeTab === 'updates' && (
           <div className="space-y-4 animate-in fade-in duration-200">
             {/* Version Card */}
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+            <div className="p-4 rounded-2xl bg-white/5 border border-[var(--app-tone-3,#6366f1)]/25 flex items-center justify-between">
               <div className="flex items-center space-x-3.5">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-sky-500/20 border border-white/20">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-sky-500/20 border border-[var(--app-tone-3,#6366f1)]/30">
                   <Layers className="w-5 h-5" />
                 </div>
                 <div>
@@ -157,7 +157,7 @@ export function SettingsModal({
             </div>
 
             {/* Action Box */}
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+            <div className="p-4 rounded-2xl bg-white/5 border border-[var(--app-tone-3,#6366f1)]/25 space-y-3">
               <div className="flex items-start justify-between">
                 <div>
                   <h5 className="text-xs font-semibold text-white/90">
@@ -192,7 +192,7 @@ export function SettingsModal({
                         href={latestReleaseInfo.downloadUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="flex items-center justify-center space-x-1 p-2 text-xs font-medium rounded-xl bg-white/10 hover:bg-white/15 text-white/90 border border-white/10 transition-colors"
+                        className="flex items-center justify-center space-x-1 p-2 text-xs font-medium rounded-xl bg-white/10 hover:bg-white/15 text-white/90 border border-[var(--app-tone-3,#6366f1)]/25 transition-colors"
                         title="Tải gói cài đặt trực tiếp"
                       >
                         <Download className="w-4 h-4" />
@@ -211,7 +211,7 @@ export function SettingsModal({
                     type="button"
                     disabled={isChecking}
                     onClick={onCheckUpdate}
-                    className="shrink-0 whitespace-nowrap flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium rounded-xl bg-white/10 hover:bg-white/15 active:bg-white/20 text-white border border-white/10 transition-all disabled:opacity-50 cursor-pointer"
+                    className="shrink-0 whitespace-nowrap flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium rounded-xl bg-white/10 hover:bg-white/15 active:bg-white/20 text-white border border-[var(--app-tone-3,#6366f1)]/25 transition-all disabled:opacity-50 cursor-pointer"
                   >
                     <RefreshCw className={clsx('w-3.5 h-3.5', isChecking && 'animate-spin')} />
                     <span>{isChecking ? 'Đang kiểm tra...' : 'Kiểm tra cập nhật'}</span>
@@ -226,7 +226,7 @@ export function SettingsModal({
         {activeTab === 'preferences' && (
           <div className="space-y-3.5 animate-in fade-in duration-200">
             {/* Auto hide preference */}
-            <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+            <div className="p-3.5 rounded-2xl bg-white/5 border border-[var(--app-tone-3,#6366f1)]/25 flex items-center justify-between">
               <div className="flex-1 min-w-0 pr-4">
                 <h5 className="text-xs font-semibold text-white/90">
                   Tự động ẩn sau khi mở ứng dụng
@@ -253,7 +253,7 @@ export function SettingsModal({
             </div>
 
             {/* Reset apps */}
-            <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+            <div className="p-3.5 rounded-2xl bg-white/5 border border-[var(--app-tone-3,#6366f1)]/25 flex items-center justify-between">
               <div className="flex-1 min-w-0 pr-4">
                 <h5 className="text-xs font-semibold text-white/90">
                   Khôi phục danh sách mặc định
@@ -269,7 +269,7 @@ export function SettingsModal({
                   'shrink-0 whitespace-nowrap flex items-center space-x-1.5 px-3.5 py-1.5 text-xs font-medium rounded-xl transition-all cursor-pointer border active:scale-95 shadow-sm',
                   resetSuccess
                     ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-                    : 'bg-white/10 hover:bg-white/15 active:bg-white/20 text-white/90 hover:text-white border-white/10 hover:border-white/20',
+                    : 'bg-white/10 hover:bg-white/15 active:bg-white/20 text-white/90 hover:text-white border-[var(--app-tone-3,#6366f1)]/25 hover:border-[var(--app-tone-3,#6366f1)]/50',
                 )}
               >
                 {resetSuccess ? (
@@ -287,18 +287,18 @@ export function SettingsModal({
             </div>
 
             {/* Shortcuts Guide */}
-            <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+            <div className="p-3.5 rounded-2xl bg-white/5 border border-[var(--app-tone-3,#6366f1)]/25 space-y-2">
               <h5 className="text-xs font-semibold text-white/90">Phím tắt & Thao tác nhanh</h5>
               <div className="grid grid-cols-2 gap-2 text-[11px]">
                 <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.04]">
                   <span className="text-white/60">Đóng Launchpad</span>
-                  <kbd className="px-1.5 py-0.5 rounded bg-white/10 border border-white/20 text-white/90 font-mono text-[10px]">
+                  <kbd className="px-1.5 py-0.5 rounded bg-white/10 border border-[var(--app-tone-3,#6366f1)]/25 text-white/90 font-mono text-[10px]">
                     Esc
                   </kbd>
                 </div>
                 <div className="flex items-center justify-between p-2 rounded-lg bg-white/[0.04]">
                   <span className="text-white/60">Menu ứng dụng</span>
-                  <kbd className="px-1.5 py-0.5 rounded bg-white/10 border border-white/20 text-white/90 font-mono text-[10px]">
+                  <kbd className="px-1.5 py-0.5 rounded bg-white/10 border border-[var(--app-tone-3,#6366f1)]/25 text-white/90 font-mono text-[10px]">
                     Chuột phải
                   </kbd>
                 </div>
@@ -319,8 +319,8 @@ export function SettingsModal({
         {activeTab === 'about' && (
           <div className="space-y-4 animate-in fade-in duration-200">
             {/* Brand Box */}
-            <div className="flex flex-col items-center justify-center p-5 rounded-2xl bg-white/5 border border-white/10 text-center space-y-2.5">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-500 via-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-xl shadow-indigo-500/25 border border-white/20">
+            <div className="flex flex-col items-center justify-center p-5 rounded-2xl bg-white/5 border border-[var(--app-tone-3,#6366f1)]/25 text-center space-y-2.5">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-500 via-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-xl shadow-indigo-500/25 border border-[var(--app-tone-3,#6366f1)]/30">
                 <Sparkles className="w-7 h-7" />
               </div>
               <div>
@@ -341,7 +341,7 @@ export function SettingsModal({
 
             {/* Architecture Details */}
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+              <div className="p-3 rounded-xl bg-white/5 border border-[var(--app-tone-3,#6366f1)]/25">
                 <div className="flex items-center space-x-1.5 text-white/50 mb-1">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>Bundle ID</span>
@@ -349,7 +349,7 @@ export function SettingsModal({
                 <p className="font-mono text-white/90 truncate">com.thanhba.nexus</p>
               </div>
 
-              <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+              <div className="p-3 rounded-xl bg-white/5 border border-[var(--app-tone-3,#6366f1)]/25">
                 <div className="flex items-center space-x-1.5 text-white/50 mb-1">
                   <Cpu className="w-3.5 h-3.5" />
                   <span>Nền tảng</span>
@@ -359,7 +359,7 @@ export function SettingsModal({
             </div>
 
             {/* GitHub and Author Link */}
-            <div className="flex items-center justify-between pt-1 border-t border-white/10 text-xs">
+            <div className="flex items-center justify-between pt-1 border-t border-[var(--app-tone-3,#6366f1)]/20 text-xs">
               <span className="text-white/50">Phát triển bởi Lê Thanh Bá</span>
               <a
                 href="https://github.com/thanhba0505/nexus"

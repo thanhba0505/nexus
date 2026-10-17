@@ -59,7 +59,7 @@ export function LaunchpadHeader({
           value={searchQuery}
           onChange={handleInputChange}
           placeholder="Tìm kiếm ứng dụng..."
-          className="w-full pl-10 pr-4 py-2 text-sm bg-white/[0.08] hover:bg-white/[0.12] focus:bg-white/[0.15] border border-white/10 focus:border-white/20 rounded-full text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-sky-500/40 backdrop-blur-xl transition-all cursor-text shadow-inner shadow-black/20"
+          className="w-full pl-10 pr-4 py-2 text-sm bg-white/[0.08] hover:bg-white/[0.12] focus:bg-white/[0.15] border border-[var(--app-tone-3,#6366f1)]/25 focus:border-[var(--app-tone-3,#6366f1)]/50 rounded-full text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[var(--app-tone-3,#6366f1)]/40 backdrop-blur-xl transition-all cursor-text shadow-inner shadow-black/20"
         />
       </div>
 
@@ -77,7 +77,7 @@ export function LaunchpadHeader({
             data-tauri-drag-region="false"
             style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
             onClick={onOpenSettings}
-            className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all backdrop-blur-lg border border-white/10 cursor-pointer active:scale-95"
+            className="p-2.5 rounded-full bg-[var(--app-tone-3,#6366f1)]/10 hover:bg-[var(--app-tone-3,#6366f1)]/20 text-white/80 hover:text-white transition-all backdrop-blur-lg border border-[var(--app-tone-3,#6366f1)]/25 cursor-pointer active:scale-95"
             title="Cài đặt"
           >
             <Settings className="w-4 h-4" />

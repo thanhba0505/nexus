@@ -56,7 +56,7 @@ export function DropdownMenu({
       ref={menuRef}
       className={clsx(
         'absolute z-50 min-w-56 rounded-xl p-1 shadow-2xl shadow-black/60',
-        'bg-slate-900/95 backdrop-blur-2xl border border-white/10',
+        'bg-[var(--app-tone-5,#070714)]/95 backdrop-blur-2xl border border-[var(--app-tone-3,#6366f1)]/30',
         'animate-menu-in origin-top-right',
         className,
       )}

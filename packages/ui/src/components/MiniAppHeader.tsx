@@ -49,7 +49,7 @@ export function MiniAppHeader({
       data-tauri-drag-region
       onMouseDown={onMouseDown}
       style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
-      className={`w-full h-[38px] px-3 flex items-center justify-between border-b border-white/[0.08] bg-slate-900 select-none z-30 shrink-0 ${className}`}
+      className={`w-full h-[38px] px-3 flex items-center justify-between border-b border-[var(--app-tone-3,#6366f1)]/20 bg-[var(--app-tone-5,#070714)]/90 backdrop-blur-md select-none z-30 shrink-0 ${className}`}
     >
       {/* Vùng bên trái: Window Controls (nếu position = left) + leftSlot */}
       <div
@@ -61,7 +61,7 @@ export function MiniAppHeader({
         {showWindowControls && windowControlsPosition === 'left' && (
           <div className="flex items-center gap-2 shrink-0">
             {controls}
-            <div className="h-3.5 w-[1px] bg-white/[0.08]" />
+            <div className="h-3.5 w-[1px] bg-[var(--app-tone-3,#6366f1)]/20" />
           </div>
         )}
         {!showWindowControls && leftSafeWidth > 0 && (

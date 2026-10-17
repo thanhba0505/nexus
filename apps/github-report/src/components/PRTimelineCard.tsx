@@ -42,10 +42,7 @@ function TimelineSkeleton() {
   return (
     <div className="space-y-2.5">
       {[0, 1, 2].map((i) => (
-        <div
-          key={i}
-          className="space-y-2 rounded-xl border border-white/[0.05] bg-white/[0.02] p-3"
-        >
+        <div key={i} className="space-y-2 rounded-xl border border-sky-500/20 bg-sky-950/20 p-3">
           <div className="flex items-center gap-2">
             <Skeleton className="h-3.5 w-3.5 rounded" />
             <Skeleton className="h-3.5 flex-1" />
@@ -64,7 +61,7 @@ function TimelineSkeleton() {
 function TimelineEmpty() {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-2.5 p-6 text-center">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.03] text-white/30">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-sky-500/25 bg-sky-500/10 text-sky-400">
         <GitPullRequest className="h-5 w-5" />
       </div>
       <div>
@@ -147,7 +144,7 @@ export function PRTimelineCard({
                 key={`${pr.repository}#${pr.number}`}
                 className={`group rounded-xl border transition-all ${
                   isSelected
-                    ? 'border-white/[0.08] bg-white/[0.035] hover:bg-white/[0.055]'
+                    ? 'border-sky-500/25 bg-sky-950/30 hover:border-sky-500/40 hover:bg-sky-950/50'
                     : 'border-transparent bg-black/20 opacity-45 hover:opacity-75'
                 }`}
               >
@@ -161,7 +158,7 @@ export function PRTimelineCard({
                     disabled={isLoading || isBusy}
                     onClick={(e) => e.stopPropagation()}
                     onChange={() => onTogglePr(pr.number)}
-                    className="mt-0.5 h-3.5 w-3.5 cursor-pointer rounded border-white/30 bg-black/40 text-sky-500 focus:ring-0 focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="mt-0.5 h-3.5 w-3.5 cursor-pointer rounded border-sky-500/40 bg-black/40 text-sky-500 focus:ring-0 focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-40"
                   />
                   <span className="mt-0.5 text-white/40 transition-colors group-hover:text-white/70">
                     {isCollapsed ? (
@@ -182,7 +179,7 @@ export function PRTimelineCard({
                     <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px]">
                       <span className="font-mono font-medium text-sky-400/90">#{pr.number}</span>
                       <span
-                        className="max-w-[160px] truncate rounded border border-white/[0.06] bg-white/[0.04] px-1.5 py-0.5 font-mono text-white/60 sm:max-w-[220px]"
+                        className="max-w-[160px] truncate rounded border border-sky-500/25 bg-sky-500/10 px-1.5 py-0.5 font-mono text-sky-300 sm:max-w-[220px]"
                         title={pr.repository}
                       >
                         {pr.repository}
@@ -206,7 +203,7 @@ export function PRTimelineCard({
                 </div>
 
                 {!isCollapsed && pr.commits.length > 0 && (
-                  <ul className="space-y-1 border-t border-white/[0.04] px-3 pb-2.5 pt-1.5">
+                  <ul className="space-y-1 border-t border-sky-500/20 px-3 pb-2.5 pt-1.5">
                     {pr.commits.map((commit) => (
                       <li
                         key={`${commit.committedDate}-${commit.headline}`}

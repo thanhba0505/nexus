@@ -13,7 +13,7 @@ export function Card({ children, className, isFrosted = true, ...props }: CardPr
         clsx(
           'rounded-2xl p-6 transition-all',
           isFrosted
-            ? 'bg-slate-900/60 backdrop-blur-2xl border border-white/10 shadow-2xl text-white'
+            ? 'bg-slate-900/60 backdrop-blur-2xl border border-[var(--app-tone-3,#6366f1)]/25 shadow-2xl text-white'
             : 'bg-slate-900 border border-slate-800 text-slate-100',
           className,
         ),

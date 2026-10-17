@@ -103,7 +103,7 @@ export function DashboardView({
             </div>
 
             {/* Live Prefix Preview Card */}
-            <div className="mt-4 rounded-xl border border-white/[0.08] bg-black/40 p-3.5">
+            <div className="mt-4 rounded-xl border border-violet-500/25 bg-black/40 p-3.5">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-semibold text-white/50 uppercase tracking-wider">
                   Bản Xem Trước Tin Nhắn Trên Slack (Message Prefix Engine)
@@ -112,7 +112,7 @@ export function DashboardView({
                   Prefix: {settings.identity.enablePrefix ? settings.identity.defaultPrefix : 'Tắt'}
                 </span>
               </div>
-              <div className="flex items-start gap-2.5 rounded-lg bg-white/[0.02] p-3 border border-white/[0.04]">
+              <div className="flex items-start gap-2.5 rounded-lg bg-violet-500/[0.04] p-3 border border-violet-500/20">
                 <div className="h-7 w-7 rounded-md bg-violet-600/30 border border-violet-500/30 flex items-center justify-center text-violet-300 font-semibold text-xs shrink-0">
                   U
                 </div>
@@ -162,7 +162,7 @@ export function DashboardView({
                 Duy trì kết nối WebSocket thời gian thực hai chiều bảo mật sau tường lửa nội bộ qua
                 App Token.
               </p>
-              <div className="mt-3 pt-2 border-t border-white/[0.06] flex items-center justify-between text-[11px]">
+              <div className="mt-3 pt-2 border-t border-violet-500/20 flex items-center justify-between text-[11px]">
                 <span className="text-white/40">App Token:</span>
                 <span className="font-mono text-white/80">
                   {credentials?.hasAppToken ? credentials.maskedAppToken : 'Chưa lưu'}
@@ -182,7 +182,7 @@ export function DashboardView({
                 Kiến trúc 3 lớp chống tự lặp vô tận: lọc ID người gửi, đối chiếu tiền tố và lưu LRU
                 100 tin nhắn.
               </p>
-              <div className="mt-3 pt-2 border-t border-white/[0.06] flex items-center justify-between text-[11px]">
+              <div className="mt-3 pt-2 border-t border-violet-500/20 flex items-center justify-between text-[11px]">
                 <span className="text-white/40">Kênh Whitelist:</span>
                 <span className="font-medium text-violet-300">
                   {activeConversations.length} kênh kích hoạt
@@ -202,7 +202,7 @@ export function DashboardView({
                 Sẵn sàng tiếp nhận bản tóm tắt Daily Standup từ GitHub Report để đẩy vào kênh Slack
                 định sẵn.
               </p>
-              <div className="mt-3 pt-2 border-t border-white/[0.06] flex items-center justify-between text-[11px]">
+              <div className="mt-3 pt-2 border-t border-violet-500/20 flex items-center justify-between text-[11px]">
                 <span className="text-white/40">Local AI Engine:</span>
                 <span className="font-medium text-violet-300">
                   {status?.localAiEngine || 'Claude/Antigravity'}
@@ -232,8 +232,8 @@ export function DashboardView({
                   key={c.conversationId}
                   className={`p-2.5 rounded-xl border flex items-center justify-between gap-2 transition-colors ${
                     c.enabled
-                      ? 'bg-white/[0.02] border-white/[0.06] hover:border-violet-500/30'
-                      : 'bg-black/20 border-white/[0.03] opacity-40'
+                      ? 'bg-violet-500/[0.04] border-violet-500/20 hover:border-violet-500/35'
+                      : 'bg-black/20 border-violet-500/10 opacity-40'
                   }`}
                 >
                   <div className="min-w-0 flex items-center gap-2">
@@ -247,7 +247,7 @@ export function DashboardView({
                   </div>
 
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-white/[0.04] text-violet-300 border border-white/[0.06]">
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-violet-500/10 text-violet-300 border border-violet-500/25">
                       {c.customPrefix || settings.identity.defaultPrefix}
                     </span>
                     <span
@@ -298,8 +298,8 @@ export function DashboardView({
                   key={c.conversationId}
                   className={`p-3 rounded-xl border flex items-center justify-between gap-2.5 transition-all ${
                     c.enabled
-                      ? 'bg-white/[0.02] border-white/[0.06] hover:border-violet-500/40 hover:bg-white/[0.04]'
-                      : 'bg-black/20 border-white/[0.03] opacity-40'
+                      ? 'bg-violet-500/[0.04] border-violet-500/20 hover:border-violet-500/40 hover:bg-violet-500/[0.08]'
+                      : 'bg-black/20 border-violet-500/10 opacity-40'
                   }`}
                 >
                   <div className="min-w-0 flex items-center gap-2.5">

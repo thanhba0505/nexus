@@ -61,7 +61,7 @@ export function AISummaryCard({
       icon={Sparkles}
       badge={
         summary?.provider && (
-          <span className="flex items-center gap-1 rounded-md border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] text-white/60">
+          <span className="flex items-center gap-1 rounded-md border border-sky-500/25 bg-sky-500/10 px-1.5 py-0.5 font-mono text-[10px] text-sky-300">
             <Bot className="h-2.5 w-2.5 text-sky-400/80" />
             {summary.provider}
           </span>
@@ -145,7 +145,7 @@ export function AISummaryCard({
                 if (e.key === 'Enter' && e.metaKey) saveEdit();
               }}
               rows={4}
-              className="w-full resize-none rounded-xl border border-white/[0.12] bg-black/40 p-3 font-sans text-xs leading-relaxed text-white/90 placeholder-white/40 focus:border-sky-400/80 focus:outline-none focus:ring-1 focus:ring-sky-400/40"
+              className="w-full resize-none rounded-xl border border-sky-500/30 bg-black/40 p-3 font-sans text-xs leading-relaxed text-white/90 placeholder-white/40 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400/40"
               placeholder="Mỗi dòng là một gạch đầu dòng…"
             />
             <div className="flex justify-end gap-2">

@@ -35,7 +35,7 @@ const VARIANT_MAP = {
     'bg-gradient-to-br from-[var(--app-tone-4)]/85 via-[var(--app-tone-4)]/65 to-[var(--app-tone-5)]/90 border border-[var(--app-tone-3)]/30 shadow-2xl backdrop-blur-xl',
   subtle:
     'bg-[var(--app-tone-4)]/40 border border-[var(--app-tone-3)]/20 shadow-lg backdrop-blur-lg',
-  flat: 'bg-[var(--app-tone-4)]/90 border border-white/10 shadow-sm',
+  flat: 'bg-[var(--app-tone-4)]/90 border border-[var(--app-tone-3)]/25 shadow-sm',
 };
 
 export function ContentCard({

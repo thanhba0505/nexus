@@ -22,12 +22,12 @@ export function AppInfoModal({ isOpen, onClose, app }: AppInfoModalProps) {
     >
       <div className="flex flex-col space-y-5">
         {/* App Header Box */}
-        <div className="flex items-center space-x-4 p-4 rounded-2xl bg-white/5 border border-white/10">
+        <div className="flex items-center space-x-4 p-4 rounded-2xl bg-white/5 border border-[var(--app-tone-3,#6366f1)]/25">
           <div
             style={{
               background: `linear-gradient(135deg, ${app.accentColor}dd, ${app.accentColor}99)`,
             }}
-            className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-md border border-white/20"
+            className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-md border border-[var(--app-tone-3,#6366f1)]/30"
           >
             <Info className="w-7 h-7" />
           </div>
@@ -47,7 +47,7 @@ export function AppInfoModal({ isOpen, onClose, app }: AppInfoModalProps) {
 
         {/* Specs Details */}
         <div className="grid grid-cols-2 gap-2.5 text-xs">
-          <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+          <div className="p-3 rounded-xl bg-white/5 border border-[var(--app-tone-3,#6366f1)]/25">
             <div className="flex items-center space-x-1.5 text-white/50 mb-1">
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Bundle Identifier</span>
@@ -55,7 +55,7 @@ export function AppInfoModal({ isOpen, onClose, app }: AppInfoModalProps) {
             <p className="font-mono text-white/90 truncate">{app.bundleId}</p>
           </div>
 
-          <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+          <div className="p-3 rounded-xl bg-white/5 border border-[var(--app-tone-3,#6366f1)]/25">
             <div className="flex items-center space-x-1.5 text-white/50 mb-1">
               <Cpu className="w-3.5 h-3.5" />
               <span>Port Development</span>
@@ -65,7 +65,7 @@ export function AppInfoModal({ isOpen, onClose, app }: AppInfoModalProps) {
             </p>
           </div>
 
-          <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+          <div className="p-3 rounded-xl bg-white/5 border border-[var(--app-tone-3,#6366f1)]/25">
             <div className="flex items-center space-x-1.5 text-white/50 mb-1">
               <HardDrive className="w-3.5 h-3.5" />
               <span>Vị trí dữ liệu</span>
@@ -73,7 +73,7 @@ export function AppInfoModal({ isOpen, onClose, app }: AppInfoModalProps) {
             <p className="text-white/90 truncate">~/Library/Application Support/</p>
           </div>
 
-          <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+          <div className="p-3 rounded-xl bg-white/5 border border-[var(--app-tone-3,#6366f1)]/25">
             <div className="flex items-center space-x-1.5 text-white/50 mb-1">
               <Info className="w-3.5 h-3.5" />
               <span>Kiến trúc nền</span>
@@ -83,7 +83,7 @@ export function AppInfoModal({ isOpen, onClose, app }: AppInfoModalProps) {
         </div>
 
         {/* Footer note */}
-        <div className="flex items-center justify-between pt-2 border-t border-white/10 text-xs text-white/50">
+        <div className="flex items-center justify-between pt-2 border-t border-[var(--app-tone-3,#6366f1)]/20 text-xs text-white/50">
           <span>Nexus macOS Ecosystem</span>
           <a
             href="https://github.com/thanhba0505/nexus"

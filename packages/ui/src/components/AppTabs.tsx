@@ -31,7 +31,7 @@ export const AppTabs: React.FC<AppTabsProps> = ({
   const isSegmented = variant === 'segmented';
 
   const containerBase = isSegmented
-    ? 'inline-flex p-1 rounded-xl bg-black/35 border border-white/[0.08] backdrop-blur-md items-center'
+    ? 'inline-flex p-1 rounded-xl bg-black/35 border border-[var(--app-tone-3,#6366f1)]/25 backdrop-blur-md items-center'
     : 'inline-flex gap-1.5 items-center';
 
   const sizeClasses = {
@@ -73,7 +73,7 @@ export const AppTabs: React.FC<AppTabsProps> = ({
                   ? 'bg-[var(--app-tone-3,#6366f1)] text-[var(--app-tone-5,#070714)] font-bold shadow-md shadow-[var(--app-tone-3,#6366f1)]/25'
                   : isSegmented
                     ? 'text-[var(--app-tone-2,#a5b4fc)]/80 hover:text-white hover:bg-white/[0.06]'
-                    : 'text-[var(--app-tone-2,#a5b4fc)]/80 bg-white/[0.04] border border-white/[0.06] hover:text-white hover:bg-white/[0.08]'
+                    : 'text-[var(--app-tone-2,#a5b4fc)]/80 bg-[var(--app-tone-3,#6366f1)]/[0.06] border border-[var(--app-tone-3,#6366f1)]/20 hover:text-white hover:bg-[var(--app-tone-3,#6366f1)]/15'
               }
             `}
           >
@@ -92,7 +92,7 @@ export const AppTabs: React.FC<AppTabsProps> = ({
                   ${
                     isActive
                       ? 'bg-[var(--app-tone-5,#070714)]/25 text-[var(--app-tone-5,#070714)] font-bold'
-                      : 'bg-white/10 text-[var(--app-tone-1,#e0e7ff)]/80'
+                      : 'bg-[var(--app-tone-3,#6366f1)]/20 text-[var(--app-tone-2,#a5b4fc)] border border-[var(--app-tone-3,#6366f1)]/20'
                   }
                 `}
               >

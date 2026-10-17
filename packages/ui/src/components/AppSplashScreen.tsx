@@ -34,7 +34,7 @@ export function AppSplashScreen({
         {/* Glowing Logo Card */}
         <div className="relative mb-6">
           <div className="absolute -inset-3 bg-gradient-to-r from-sky-500 to-indigo-600 rounded-3xl blur-2xl opacity-50 animate-pulse" />
-          <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-white/15 shadow-2xl flex items-center justify-center">
+          <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-[var(--app-tone-3,#6366f1)]/30 shadow-2xl flex items-center justify-center">
             {icon}
           </div>
         </div>
@@ -44,7 +44,7 @@ export function AppSplashScreen({
 
         {/* Thanh tiến trình (Progress Bar) */}
         <div className="w-64 max-w-xs space-y-2">
-          <div className="w-full bg-black/50 h-1.5 rounded-full overflow-hidden p-[1px] border border-white/10">
+          <div className="w-full bg-black/50 h-1.5 rounded-full overflow-hidden p-[1px] border border-[var(--app-tone-3,#6366f1)]/25">
             <div
               className="h-full rounded-full bg-gradient-to-r from-sky-400 via-indigo-400 to-sky-400 transition-all duration-300 ease-out shadow-sm shadow-sky-500/50"
               style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}

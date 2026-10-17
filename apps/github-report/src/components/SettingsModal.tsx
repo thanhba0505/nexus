@@ -43,13 +43,13 @@ export function SettingsModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in select-none">
-      <div className="relative w-full max-w-lg rounded-2xl bg-slate-900/95 border border-white/10 backdrop-blur-2xl shadow-2xl shadow-black/60 flex flex-col overflow-hidden max-h-[85vh]">
+      <div className="relative w-full max-w-lg rounded-2xl bg-slate-900/95 border border-sky-500/30 backdrop-blur-2xl shadow-2xl shadow-black/60 flex flex-col overflow-hidden max-h-[85vh]">
         {/* Header của Modal */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.08] shrink-0">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-sky-500/20 shrink-0">
           <h3 className="text-xs font-semibold text-white/90">Cài đặt GitHub Report</h3>
           <button
             onClick={onClose}
-            className="p-1 rounded-md text-white/40 hover:text-white hover:bg-white/[0.08] transition-colors"
+            className="p-1 rounded-md text-white/40 hover:text-white hover:bg-sky-500/15 transition-colors"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -57,7 +57,7 @@ export function SettingsModal({
 
         {/* Tab Navigation (macOS Segmented Control) */}
         <div className="px-5 pt-3 shrink-0">
-          <div className="flex rounded-lg bg-black/30 p-0.5 border border-white/[0.06] gap-1">
+          <div className="flex rounded-lg bg-black/30 p-0.5 border border-sky-500/20 gap-1">
             <button
               onClick={() => setActiveTab('ai')}
               className={`flex-1 py-1.5 flex items-center justify-center gap-1.5 rounded-md text-xs transition-all ${
@@ -110,7 +110,7 @@ export function SettingsModal({
                       ai: { ...formData.ai, provider: e.target.value as 'auto' | 'claude' | 'agy' },
                     })
                   }
-                  className="w-full h-8 px-2.5 rounded-lg bg-black/40 border border-white/10 text-white/90 text-xs focus:outline-none focus:border-sky-400/80 focus:ring-1 focus:ring-sky-400/40 transition-colors"
+                  className="w-full h-8 px-2.5 rounded-lg bg-black/40 border border-sky-500/25 text-white/90 text-xs focus:outline-none focus:border-sky-400/80 focus:ring-1 focus:ring-sky-400/40 transition-colors"
                 >
                   <option value="auto">Tự động (Ưu tiên Claude Code CLI → Antigravity CLI)</option>
                   <option value="claude">Claude Code CLI (`claude -p`)</option>
@@ -146,7 +146,7 @@ export function SettingsModal({
                     })
                   }
                   rows={5}
-                  className="w-full p-2.5 rounded-lg bg-black/40 border border-white/10 text-white/90 placeholder-white/30 focus:outline-none focus:border-sky-400/80 focus:ring-1 focus:ring-sky-400/40 font-mono text-[11px] leading-relaxed resize-none"
+                  className="w-full p-2.5 rounded-lg bg-black/40 border border-sky-500/25 text-white/90 placeholder-white/30 focus:outline-none focus:border-sky-400/80 focus:ring-1 focus:ring-sky-400/40 font-mono text-[11px] leading-relaxed resize-none"
                 />
               </div>
 
@@ -164,7 +164,7 @@ export function SettingsModal({
                     })
                   }
                   placeholder="Ví dụ: Tập trung vào kết quả bàn giao, bỏ qua các commit merge…"
-                  className="w-full h-8 px-2.5 rounded-lg bg-black/40 border border-white/10 text-white/90 placeholder-white/40 text-xs focus:outline-none focus:border-sky-400/80 focus:ring-1 focus:ring-sky-400/40 transition-colors"
+                  className="w-full h-8 px-2.5 rounded-lg bg-black/40 border border-sky-500/25 text-white/90 placeholder-white/40 text-xs focus:outline-none focus:border-sky-400/80 focus:ring-1 focus:ring-sky-400/40 transition-colors"
                 />
               </div>
             </div>
@@ -185,7 +185,7 @@ export function SettingsModal({
                       },
                     })
                   }
-                  className="w-full h-8 px-2.5 rounded-lg bg-black/40 border border-white/10 text-white/90 text-xs focus:outline-none focus:border-sky-400/80 focus:ring-1 focus:ring-sky-400/40 transition-colors"
+                  className="w-full h-8 px-2.5 rounded-lg bg-black/40 border border-sky-500/25 text-white/90 text-xs focus:outline-none focus:border-sky-400/80 focus:ring-1 focus:ring-sky-400/40 transition-colors"
                 >
                   <option value="parabol">Parabol (Mở tab parabol.co và tự kích hoạt)</option>
                   <option value="slack">Slack Web / App</option>
@@ -209,7 +209,7 @@ export function SettingsModal({
                       },
                     })
                   }
-                  className="w-full h-8 px-2.5 rounded-lg bg-black/40 border border-white/10 text-white/90 text-xs focus:outline-none focus:border-sky-400/80 focus:ring-1 focus:ring-sky-400/40 transition-colors"
+                  className="w-full h-8 px-2.5 rounded-lg bg-black/40 border border-sky-500/25 text-white/90 text-xs focus:outline-none focus:border-sky-400/80 focus:ring-1 focus:ring-sky-400/40 transition-colors"
                 >
                   <option value="Brave Browser">Brave Browser</option>
                   <option value="Google Chrome">Google Chrome</option>
@@ -222,7 +222,7 @@ export function SettingsModal({
                 </p>
               </div>
 
-              <div className="space-y-2.5 pt-2 border-t border-white/[0.06]">
+              <div className="space-y-2.5 pt-2 border-t border-sky-500/20">
                 <label className="flex items-center gap-2.5 cursor-pointer">
                   <input
                     type="checkbox"
@@ -233,7 +233,7 @@ export function SettingsModal({
                         workflow: { ...formData.workflow, autoCopy: e.target.checked },
                       })
                     }
-                    className="h-3.5 w-3.5 rounded border-white/30 text-sky-500 focus:ring-0 bg-black/40 cursor-pointer"
+                    className="h-3.5 w-3.5 rounded border-sky-500/35 text-sky-500 focus:ring-0 bg-black/40 cursor-pointer"
                   />
                   <span className="text-white/80 font-normal select-none">
                     Tự động sao chép vào Clipboard khi tóm tắt xong
@@ -250,7 +250,7 @@ export function SettingsModal({
                         workflow: { ...formData.workflow, revealBrowser: e.target.checked },
                       })
                     }
-                    className="h-3.5 w-3.5 rounded border-white/30 text-sky-500 focus:ring-0 bg-black/40 cursor-pointer"
+                    className="h-3.5 w-3.5 rounded border-sky-500/35 text-sky-500 focus:ring-0 bg-black/40 cursor-pointer"
                   />
                   <span className="text-white/80 font-normal select-none">
                     Tự động kích hoạt tab trình duyệt khi có kết quả
@@ -263,12 +263,12 @@ export function SettingsModal({
           {activeTab === 'system' && (
             <div className="space-y-3.5">
               {/* Trạng thái CLIs */}
-              <div className="p-3 rounded-lg bg-black/25 border border-white/[0.06] space-y-2">
+              <div className="p-3 rounded-lg bg-black/25 border border-sky-500/20 space-y-2">
                 <h4 className="text-[10px] font-semibold text-white/40 uppercase tracking-wider">
                   Trạng Thái Công Cụ Hệ Thống
                 </h4>
 
-                <div className="flex items-center justify-between py-1 border-b border-white/[0.04]">
+                <div className="flex items-center justify-between py-1 border-b border-sky-500/15">
                   <span className="text-white/80 flex items-center gap-1.5">
                     <Terminal className="w-3.5 h-3.5 text-sky-400" />
                     <span>GitHub CLI (`gh`)</span>
@@ -282,7 +282,7 @@ export function SettingsModal({
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between py-1 border-b border-white/[0.04]">
+                <div className="flex items-center justify-between py-1 border-b border-sky-500/15">
                   <span className="text-white/80 flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                     <span>Claude Code CLI (`claude`)</span>
@@ -324,7 +324,7 @@ export function SettingsModal({
                       value={tokenInput}
                       onChange={(e) => setTokenInput(e.target.value)}
                       placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-                      className="w-full h-8 pl-8 pr-2.5 rounded-lg bg-black/40 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:border-sky-400/80 font-mono text-[11px]"
+                      className="w-full h-8 pl-8 pr-2.5 rounded-lg bg-black/40 border border-sky-500/25 text-white placeholder-white/40 focus:outline-none focus:border-sky-400/80 font-mono text-[11px]"
                     />
                   </div>
                   <button
@@ -346,7 +346,7 @@ export function SettingsModal({
         </div>
 
         {/* Footer của Modal */}
-        <div className="flex items-center justify-end gap-2 px-5 py-2.5 border-t border-white/[0.08] bg-black/20 shrink-0">
+        <div className="flex items-center justify-end gap-2 px-5 py-2.5 border-t border-sky-500/20 bg-black/20 shrink-0">
           <button
             onClick={onClose}
             className="h-7.5 px-3 rounded-lg text-xs font-medium text-white/60 hover:text-white hover:bg-white/[0.08] transition-colors"

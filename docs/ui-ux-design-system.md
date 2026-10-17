@@ -171,6 +171,9 @@ One of the primary refinement goals is to reduce unnecessary visual containers.
 - Keep shadows subtle and primarily reserved for elevation.
 - Do not apply the same rounded-card treatment indiscriminately to buttons, fields, tables, dialogs, and content sections.
 
+> [!CAUTION]
+> **Tuyệt đối cấm sử dụng viền trắng trung tính (`border-white/10`, `border-white/[0.08]`) trong giao diện tối Dark Glassmorphism.** Mọi đường viền phải được tint theo sắc thái nhận diện thương hiệu của từng miniapp (`border-[var(--app-tone-3)]/20-30` hoặc `border-sky-500/25`, `border-violet-500/25`, `border-[#00c49a]/30`). Viền trắng trung tính làm mất đi chiều sâu acrylic và tạo cảm giác giao diện thô cứng.
+
 Every border, shadow, and container must have a clear purpose.
 
 ---
@@ -380,10 +383,10 @@ Mọi cửa sổ miniapp khi đặt cạnh nhau trên macOS đều lập tức m
    - Thẻ và khối container ngoài (`ContentCard`): `rounded-2xl` (16px – 18px).
    - Nút bấm, ô nhập liệu, tab switcher (`AppButton`, `AppTabs`): `rounded-xl` (12px).
    - Pill, Badge, Tooltip: `rounded-lg` (8px).
-2. **Đường viền siêu mỏng 1px (Micro-Borders)**:
+2. **Đường viền siêu mỏng 1px ngâm màu thương hiệu (Brand-Tinted Micro-Borders)**:
    - Cố định độ dày `1px`. Không dùng viền 2px thô ráp.
-   - Viền trung tính: `border-white/[0.08]` đến `border-white/[0.12]`.
-   - Viền thương hiệu: `border-[var(--app-tone-3)]/25` (bình thường) → `border-[var(--app-tone-3)]/60` (hover/active).
+   - **Tuyệt đối cấm sử dụng viền trắng trung tính (`border-white/10`, `border-white/[0.08]`, `border-white/20`) trong giao diện tối Dark Glassmorphism**. Viền trắng tạo cảm giác xỉn màu và làm gãy không gian kính acrylic.
+   - **Mọi đường viền bắt buộc phải được tint theo sắc thái thương hiệu**: `border-[var(--app-tone-3)]/20-30` (bình thường) → `border-[var(--app-tone-3)]/60` (hover/active), hoặc sử dụng các biến thể Tailwind chuẩn của từng app (`border-sky-500/25` cho GitHub Report, `border-violet-500/25` cho SlackBot, `border-[#00c49a]/30` cho 2D Pet).
 3. **Kính mờ acrylic đa tầng (Multilayer Acrylic Glassmorphism)**:
    - Sử dụng `backdrop-blur-xl` kết hợp nền gradient 3 điểm dừng:
      `bg-gradient-to-br from-[var(--app-tone-4)]/85 via-[var(--app-tone-4)]/65 to-[var(--app-tone-5)]/90`.

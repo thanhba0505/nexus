@@ -91,9 +91,9 @@ export function ConversationsModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in select-none">
-      <div className="relative w-full max-w-2xl rounded-2xl bg-slate-900/95 border border-white/10 backdrop-blur-2xl shadow-2xl shadow-black/60 flex flex-col overflow-hidden max-h-[85vh]">
+      <div className="relative w-full max-w-2xl rounded-2xl bg-slate-900/95 border border-violet-500/30 backdrop-blur-2xl shadow-2xl shadow-black/60 flex flex-col overflow-hidden max-h-[85vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.08] shrink-0">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-violet-500/20 shrink-0">
           <div className="flex items-center gap-2">
             <div className="flex h-5 w-5 items-center justify-center rounded-md bg-violet-500/20 text-violet-400">
               <Shield className="h-3 w-3" />
@@ -118,7 +118,7 @@ export function ConversationsModal({
         {/* Content Table */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 text-xs">
           {/* Add Channel Bar */}
-          <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-2">
+          <div className="p-3 rounded-xl bg-violet-500/[0.04] border border-violet-500/20 space-y-2">
             <span className="text-[11px] font-semibold text-white/80">
               Thêm kênh / DM mới vào whitelist
             </span>
@@ -126,7 +126,7 @@ export function ConversationsModal({
               <select
                 value={newChannelType}
                 onChange={(e) => setNewChannelType(e.target.value as ConversationRule['type'])}
-                className="bg-black/40 border border-white/10 rounded-lg px-2.5 py-1.5 text-white/90 text-xs focus:outline-hidden focus:border-violet-500"
+                className="bg-black/40 border border-violet-500/25 rounded-lg px-2.5 py-1.5 text-white/90 text-xs focus:outline-hidden focus:border-violet-500"
               >
                 <option value="public_channel">Public Channel</option>
                 <option value="private_channel">Private Channel</option>
@@ -139,7 +139,7 @@ export function ConversationsModal({
                 value={newChannelId}
                 onChange={(e) => setNewChannelId(e.target.value)}
                 placeholder="Channel ID (vd: C0123ABC)"
-                className="w-36 bg-black/40 border border-white/10 rounded-lg px-2.5 py-1.5 text-white/90 text-xs font-mono focus:outline-hidden focus:border-violet-500"
+                className="w-36 bg-black/40 border border-violet-500/25 rounded-lg px-2.5 py-1.5 text-white/90 text-xs font-mono focus:outline-hidden focus:border-violet-500"
               />
 
               <input
@@ -147,7 +147,7 @@ export function ConversationsModal({
                 value={newChannelName}
                 onChange={(e) => setNewChannelName(e.target.value)}
                 placeholder="Tên kênh (vd: team-standup)"
-                className="flex-1 bg-black/40 border border-white/10 rounded-lg px-2.5 py-1.5 text-white/90 text-xs focus:outline-hidden focus:border-violet-500"
+                className="flex-1 bg-black/40 border border-violet-500/25 rounded-lg px-2.5 py-1.5 text-white/90 text-xs focus:outline-hidden focus:border-violet-500"
               />
 
               <button
@@ -169,8 +169,8 @@ export function ConversationsModal({
                 key={rule.conversationId}
                 className={`p-3 rounded-xl border transition-all ${
                   rule.enabled
-                    ? 'bg-white/[0.03] border-white/[0.08]'
-                    : 'bg-black/20 border-white/[0.04] opacity-60'
+                    ? 'bg-violet-500/[0.04] border-violet-500/20'
+                    : 'bg-black/20 border-violet-500/10 opacity-60'
                 }`}
               >
                 <div className="flex items-center justify-between gap-3">
@@ -179,7 +179,7 @@ export function ConversationsModal({
                       type="checkbox"
                       checked={rule.enabled}
                       onChange={() => handleToggleEnable(idx)}
-                      className="w-4 h-4 rounded border-white/20 bg-black/40 text-violet-500 focus:ring-0 cursor-pointer"
+                      className="w-4 h-4 rounded border-violet-500/35 bg-black/40 text-violet-500 focus:ring-0 cursor-pointer"
                     />
                     <div className="flex items-center gap-1.5 min-w-0">
                       {getChannelIcon(rule.type)}
@@ -197,7 +197,7 @@ export function ConversationsModal({
                       onChange={(e) =>
                         handleModeChange(idx, e.target.value as ConversationRule['mode'])
                       }
-                      className="bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-white/80 text-[11px] focus:outline-hidden focus:border-violet-500"
+                      className="bg-black/40 border border-violet-500/25 rounded-lg px-2 py-1 text-white/80 text-[11px] focus:outline-hidden focus:border-violet-500"
                     >
                       <option value="draft_review">Draft & Review</option>
                       <option value="auto_pilot">Auto-Pilot</option>
@@ -211,7 +211,7 @@ export function ConversationsModal({
                       onChange={(e) => handlePrefixChange(idx, e.target.value)}
                       placeholder={defaultPrefix}
                       title="Tiền tố riêng cho hội thoại này"
-                      className="w-24 bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-white/80 text-[11px] font-mono focus:outline-hidden focus:border-violet-500"
+                      className="w-24 bg-black/40 border border-violet-500/25 rounded-lg px-2 py-1 text-white/80 text-[11px] font-mono focus:outline-hidden focus:border-violet-500"
                     />
 
                     {/* Mentions only toggle */}
@@ -223,7 +223,7 @@ export function ConversationsModal({
                         type="checkbox"
                         checked={rule.autoReplyMentionsOnly}
                         onChange={(e) => handleMentionsChange(idx, e.target.checked)}
-                        className="w-3.5 h-3.5 rounded border-white/20 bg-black/40 text-violet-500 focus:ring-0"
+                        className="w-3.5 h-3.5 rounded border-violet-500/35 bg-black/40 text-violet-500 focus:ring-0"
                       />
                       <span>@mention</span>
                     </label>
@@ -251,10 +251,10 @@ export function ConversationsModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-white/[0.08] bg-black/20 shrink-0">
+        <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-violet-500/20 bg-black/20 shrink-0">
           <button
             onClick={onClose}
-            className="px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/[0.06] text-white/70 hover:text-white text-xs transition-colors"
+            className="px-3 py-1.5 rounded-lg border border-violet-500/25 hover:bg-violet-500/10 text-white/70 hover:text-white text-xs transition-colors"
           >
             Hủy bỏ
           </button>

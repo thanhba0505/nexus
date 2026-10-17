@@ -72,8 +72,8 @@ export function AppIconItem({
           className={clsx(
             'relative w-18 h-18 sm:w-20 sm:h-20 rounded-[22px] sm:rounded-[24px]',
             'flex items-center justify-center text-white/70 shadow-lg shadow-black/25',
-            'border border-dashed border-white/25 bg-white/[0.04] backdrop-blur-md',
-            'group-hover:scale-105 group-hover:border-white/50 group-hover:text-white group-hover:bg-white/[0.08] group-hover:shadow-xl group-hover:shadow-black/40',
+            'border border-dashed border-[var(--app-tone-3,#6366f1)]/30 bg-[var(--app-tone-3,#6366f1)]/[0.04] backdrop-blur-md',
+            'group-hover:scale-105 group-hover:border-[var(--app-tone-3,#6366f1)]/60 group-hover:text-white group-hover:bg-[var(--app-tone-3,#6366f1)]/10 group-hover:shadow-xl group-hover:shadow-black/40',
             'transition-all duration-200 ease-out active:scale-95',
           )}
         >
@@ -125,7 +125,7 @@ export function AppIconItem({
         className={clsx(
           'relative w-18 h-18 sm:w-20 sm:h-20 rounded-[22px] sm:rounded-[24px]',
           'flex items-center justify-center text-white shadow-xl shadow-black/30',
-          'border border-white/20 backdrop-blur-md',
+          'border border-[var(--app-tone-3,#6366f1)]/25 backdrop-blur-md',
           'group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-black/50',
           'transition-transform duration-200 ease-out active:scale-95',
           isSelected && 'ring-2 ring-white/70 ring-offset-2 ring-offset-transparent',

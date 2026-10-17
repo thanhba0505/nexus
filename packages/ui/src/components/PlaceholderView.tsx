@@ -63,7 +63,7 @@ export function PlaceholderView({
   };
 
   return (
-    <div className="w-screen h-screen flex flex-col justify-between overflow-hidden rounded-[14px] border border-white/[0.12] bg-slate-950 select-none">
+    <div className="w-screen h-screen flex flex-col justify-between overflow-hidden rounded-[14px] border border-[var(--app-tone-3,#6366f1)]/30 bg-[var(--app-tone-5,#070714)] select-none">
       <MiniAppHeader
         leftSlot={
           <div className="flex items-center space-x-2 pl-1">
@@ -77,8 +77,8 @@ export function PlaceholderView({
       />
 
       <div className="flex-1 flex items-center justify-center p-6 overflow-y-auto">
-        <Card className="max-w-md w-full flex flex-col items-center text-center p-8 border-white/15">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/30 to-violet-500/30 border border-white/20 flex items-center justify-center mb-4 shadow-xl">
+        <Card className="max-w-md w-full flex flex-col items-center text-center p-8 border-[var(--app-tone-3,#6366f1)]/30">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/30 to-violet-500/30 border border-[var(--app-tone-3,#6366f1)]/30 flex items-center justify-center mb-4 shadow-xl">
             {icon || <Box className="w-10 h-10 text-indigo-300" />}
           </div>
 
@@ -87,16 +87,16 @@ export function PlaceholderView({
 
           {/* Thông tin phiên bản và trạng thái */}
           <div className="flex items-center space-x-2 mb-6">
-            <span className="text-xs font-mono px-2.5 py-1 rounded-lg bg-white/10 text-white/80 border border-white/10">
+            <span className="text-xs font-mono px-2.5 py-1 rounded-lg bg-white/10 text-white/80 border border-[var(--app-tone-3,#6366f1)]/20">
               v{displayedVersion}
             </span>
             <Badge status={APP_STATUS.COMING_SOON} className="text-xs px-2.5 py-1" />
           </div>
 
           {/* Khung chức năng Cập nhật phiên bản / Môi trường Dev */}
-          <div className="w-full pt-4 border-t border-white/10 flex flex-col items-center space-y-3">
+          <div className="w-full pt-4 border-t border-[var(--app-tone-3,#6366f1)]/20 flex flex-col items-center space-y-3">
             {isDevMode ? (
-              <div className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-center flex items-center justify-center space-x-2">
+              <div className="w-full p-3 rounded-xl bg-white/5 border border-[var(--app-tone-3,#6366f1)]/20 text-center flex items-center justify-center space-x-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <p className="text-xs text-white/70">
                   Đang chạy từ mã nguồn cục bộ (Môi trường phát triển)

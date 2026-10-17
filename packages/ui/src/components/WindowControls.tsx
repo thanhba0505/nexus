@@ -110,11 +110,11 @@ export function WindowControls({
         }
       : {
           close:
-            'border-white/[0.08] bg-white/[0.04] text-white/50 hover:bg-rose-500/20 hover:border-rose-500/30 hover:text-rose-300 active:bg-rose-500/30',
+            'border-[var(--app-tone-3,#6366f1)]/20 bg-[var(--app-tone-3,#6366f1)]/[0.06] text-white/50 hover:bg-rose-500/20 hover:border-rose-500/30 hover:text-rose-300 active:bg-rose-500/30',
           minimize:
-            'border-white/[0.08] bg-white/[0.04] text-white/50 hover:bg-white/[0.1] hover:border-white/20 hover:text-white active:bg-white/[0.14]',
+            'border-[var(--app-tone-3,#6366f1)]/20 bg-[var(--app-tone-3,#6366f1)]/[0.06] text-white/50 hover:bg-[var(--app-tone-3,#6366f1)]/15 hover:border-[var(--app-tone-3,#6366f1)]/40 hover:text-white active:bg-[var(--app-tone-3,#6366f1)]/25',
           maximize:
-            'border-white/[0.08] bg-white/[0.04] text-white/50 hover:bg-white/[0.1] hover:border-white/20 hover:text-white active:bg-white/[0.14]',
+            'border-[var(--app-tone-3,#6366f1)]/20 bg-[var(--app-tone-3,#6366f1)]/[0.06] text-white/50 hover:bg-[var(--app-tone-3,#6366f1)]/15 hover:border-[var(--app-tone-3,#6366f1)]/40 hover:text-white active:bg-[var(--app-tone-3,#6366f1)]/25',
         };
 
   return (

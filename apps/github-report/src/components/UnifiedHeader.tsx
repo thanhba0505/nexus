@@ -57,7 +57,7 @@ export function UnifiedHeader({
           </div>
           <div
             data-tauri-drag-region
-            className="hidden h-7 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 text-[11px] text-white/60 sm:flex"
+            className="hidden h-7 items-center gap-1.5 rounded-lg border border-sky-500/25 bg-sky-500/10 px-2.5 text-[11px] text-sky-200 sm:flex"
           >
             <span className="font-medium tabular-nums text-sky-300">{prCount ?? '—'}</span> PRs
             <span className="text-white/20">•</span>

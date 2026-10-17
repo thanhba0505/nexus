@@ -23,7 +23,7 @@ export function LaunchpadFooter({ currentCategory, onSelectCategory }: Launchpad
         data-no-drag
         data-tauri-drag-region="false"
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-        className="pointer-events-auto flex items-center p-1.5 rounded-2xl bg-white/[0.08] border border-white/10 backdrop-blur-2xl shadow-2xl shadow-black/40 space-x-1"
+        className="pointer-events-auto flex items-center p-1.5 rounded-2xl bg-[var(--app-tone-4,#131238)]/75 border border-[var(--app-tone-3,#6366f1)]/25 backdrop-blur-2xl shadow-2xl shadow-black/40 space-x-1"
       >
         {categories.map((category) => {
           const isActive = currentCategory === category.id;
@@ -38,8 +38,8 @@ export function LaunchpadFooter({ currentCategory, onSelectCategory }: Launchpad
               className={clsx(
                 'px-4 py-1.5 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer active:scale-95',
                 isActive
-                  ? 'bg-white/20 text-white shadow-sm shadow-black/30 font-semibold'
-                  : 'text-white/60 hover:text-white hover:bg-white/[0.08]',
+                  ? 'bg-[var(--app-tone-3,#6366f1)] text-[var(--app-tone-5,#070714)] shadow-md shadow-[var(--app-tone-3,#6366f1)]/30 font-bold'
+                  : 'text-[var(--app-tone-2,#a5b4fc)]/70 hover:text-white hover:bg-[var(--app-tone-3,#6366f1)]/15',
               )}
             >
               {category.label}

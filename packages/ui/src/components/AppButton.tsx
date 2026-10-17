@@ -25,7 +25,7 @@ const VARIANT_MAP = {
   secondary:
     'bg-[var(--app-tone-4)]/85 hover:bg-[var(--app-tone-4)] text-[var(--app-tone-1)] border border-[var(--app-tone-3)]/30 hover:border-[var(--app-tone-3)]/60 shadow-sm',
   glass:
-    'bg-white/10 hover:bg-white/20 text-white border border-white/15 backdrop-blur-xl shadow-md',
+    'bg-[var(--app-tone-3)]/10 hover:bg-[var(--app-tone-3)]/20 text-white border border-[var(--app-tone-3)]/30 backdrop-blur-xl shadow-md',
   ghost: 'hover:bg-[var(--app-tone-3)]/15 text-[var(--app-tone-2)] hover:text-[var(--app-tone-1)]',
   danger:
     'bg-gradient-to-r from-red-500 to-rose-600 text-white hover:brightness-110 shadow-lg shadow-rose-950/50 border border-rose-400/30',

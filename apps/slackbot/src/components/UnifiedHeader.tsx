@@ -40,13 +40,13 @@ export function UnifiedHeader({
 
           <div
             data-tauri-drag-region
-            className="hidden h-7 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 text-[11px] text-white/60 sm:flex"
+            className="hidden h-7 items-center gap-1.5 rounded-lg border border-violet-500/25 bg-violet-500/10 px-2.5 text-[11px] text-violet-200 sm:flex"
           >
             <span className="font-medium text-violet-300">
               {enablePrefix ? prefix.trim() || '[Bot]' : 'No Prefix'}
             </span>
-            <span className="text-white/20">•</span>
-            <span className="font-medium tabular-nums text-white/80">{allowedChannelsCount}</span>
+            <span className="text-violet-400/30">•</span>
+            <span className="font-medium tabular-nums text-violet-100">{allowedChannelsCount}</span>
             <span>hội thoại</span>
           </div>
         </div>
@@ -56,7 +56,7 @@ export function UnifiedHeader({
           data-no-drag
           data-tauri-drag-region="false"
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-          className="flex h-7 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-black/25 px-2.5 text-[11px] text-white/70"
+          className="flex h-7 items-center gap-1.5 rounded-lg border border-violet-500/25 bg-violet-950/40 px-2.5 text-[11px] text-violet-200"
         >
           <span
             className={`h-2 w-2 rounded-full ${

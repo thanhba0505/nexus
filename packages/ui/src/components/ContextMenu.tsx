@@ -111,7 +111,7 @@ export function ContextMenu({ isOpen, x, y, onClose, items }: ContextMenuProps) 
       }}
       className={clsx(
         'fixed z-50 min-w-48 rounded-xl p-1 shadow-2xl shadow-black/60',
-        'bg-slate-900/95 backdrop-blur-2xl border border-white/10',
+        'bg-[var(--app-tone-5,#070714)]/95 backdrop-blur-2xl border border-[var(--app-tone-3,#6366f1)]/30',
         'animate-menu-in',
       )}
     >

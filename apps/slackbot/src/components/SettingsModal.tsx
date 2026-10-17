@@ -82,9 +82,9 @@ export function SettingsModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in select-none">
-      <div className="relative w-full max-w-lg rounded-2xl bg-slate-900/95 border border-white/10 backdrop-blur-2xl shadow-2xl shadow-black/60 flex flex-col overflow-hidden max-h-[85vh]">
+      <div className="relative w-full max-w-lg rounded-2xl bg-slate-900/95 border border-violet-500/30 backdrop-blur-2xl shadow-2xl shadow-black/60 flex flex-col overflow-hidden max-h-[85vh]">
         {/* Header Modal */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.08] shrink-0">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-violet-500/20 shrink-0">
           <div className="flex items-center gap-2">
             <div className="flex h-5 w-5 items-center justify-center rounded-md bg-violet-500/20 text-violet-400">
               <Bot className="h-3 w-3" />
@@ -101,7 +101,7 @@ export function SettingsModal({
 
         {/* Segmented Control Tabs */}
         <div className="px-5 pt-3 shrink-0">
-          <div className="flex rounded-lg bg-black/30 p-0.5 border border-white/[0.06] gap-1">
+          <div className="flex rounded-lg bg-black/30 p-0.5 border border-violet-500/20 gap-1">
             <button
               onClick={() => setActiveTab('identity')}
               className={`flex-1 py-1.5 flex items-center justify-center gap-1.5 rounded-md text-xs transition-all ${
@@ -180,7 +180,7 @@ export function SettingsModal({
                         ? 'Nhập mã mới để ghi đè (xoxp-...)'
                         : 'xoxp-your-user-token'
                     }
-                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-white/90 placeholder:text-white/30 text-xs focus:outline-hidden focus:border-violet-500 font-mono"
+                    className="w-full bg-black/40 border border-violet-500/25 rounded-lg px-3 py-2 text-white/90 placeholder:text-white/30 text-xs focus:outline-hidden focus:border-violet-500 font-mono"
                   />
                 </div>
               </div>
@@ -208,7 +208,7 @@ export function SettingsModal({
                         ? 'Nhập mã mới để ghi đè (xapp-...)'
                         : 'xapp-your-app-token'
                     }
-                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-white/90 placeholder:text-white/30 text-xs focus:outline-hidden focus:border-violet-500 font-mono"
+                    className="w-full bg-black/40 border border-violet-500/25 rounded-lg px-3 py-2 text-white/90 placeholder:text-white/30 text-xs focus:outline-hidden focus:border-violet-500 font-mono"
                   />
                 </div>
               </div>
@@ -242,7 +242,7 @@ export function SettingsModal({
               </div>
 
               {/* Message Prefix Settings */}
-              <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-3">
+              <div className="p-3.5 rounded-xl bg-violet-500/[0.04] border border-violet-500/20 space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="text-xs font-semibold text-white/90">
@@ -261,7 +261,7 @@ export function SettingsModal({
                         identity: { ...formData.identity, enablePrefix: e.target.checked },
                       })
                     }
-                    className="w-4 h-4 rounded border-white/20 bg-black/40 text-violet-500 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                    className="w-4 h-4 rounded border-violet-500/35 bg-black/40 text-violet-500 focus:ring-0 focus:ring-offset-0 cursor-pointer"
                   />
                 </div>
 
@@ -277,7 +277,7 @@ export function SettingsModal({
                         })
                       }
                       placeholder="[Bot] "
-                      className="w-32 bg-black/40 border border-white/10 rounded-lg px-2.5 py-1.5 text-white/90 text-xs font-mono focus:outline-hidden focus:border-violet-500"
+                      className="w-32 bg-black/40 border border-violet-500/25 rounded-lg px-2.5 py-1.5 text-white/90 text-xs font-mono focus:outline-hidden focus:border-violet-500"
                     />
                     <span className="text-[11px] text-white/50 font-mono">
                       Xem trước:{' '}
@@ -304,7 +304,7 @@ export function SettingsModal({
                       ai: { ...formData.ai, provider: e.target.value as AIConfig['provider'] },
                     })
                   }
-                  className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-white/90 text-xs focus:outline-hidden focus:border-violet-500"
+                  className="w-full bg-black/40 border border-violet-500/25 rounded-lg px-3 py-2 text-white/90 text-xs focus:outline-hidden focus:border-violet-500"
                 >
                   <option value="auto">Tự động (Ưu tiên Claude CLI / Antigravity CLI)</option>
                   <option value="claude">Claude Code CLI (claude -p)</option>
@@ -328,7 +328,7 @@ export function SettingsModal({
                         },
                       })
                     }
-                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-white/90 text-xs focus:outline-hidden focus:border-violet-500"
+                    className="w-full bg-black/40 border border-violet-500/25 rounded-lg px-3 py-2 text-white/90 text-xs focus:outline-hidden focus:border-violet-500"
                   >
                     <option value="professional_friendly">Chuyên nghiệp & Thân thiện</option>
                     <option value="professional_technical">Kỹ thuật & Chuẩn xác</option>
@@ -350,7 +350,7 @@ export function SettingsModal({
                         },
                       })
                     }
-                    className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-white/90 text-xs focus:outline-hidden focus:border-violet-500"
+                    className="w-full bg-black/40 border border-violet-500/25 rounded-lg px-3 py-2 text-white/90 text-xs focus:outline-hidden focus:border-violet-500"
                   >
                     <option value="mình_bạn">mình / bạn</option>
                     <option value="em_anh">em / anh, chị</option>
@@ -375,7 +375,7 @@ export function SettingsModal({
                     })
                   }
                   placeholder="— _Soạn tự động bởi SlackBot_"
-                  className="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-white/90 text-xs focus:outline-hidden focus:border-violet-500 font-mono"
+                  className="w-full bg-black/40 border border-violet-500/25 rounded-lg px-3 py-2 text-white/90 text-xs focus:outline-hidden focus:border-violet-500 font-mono"
                 />
               </div>
 
@@ -393,7 +393,7 @@ export function SettingsModal({
                       ai: { ...formData.ai, systemPrompt: e.target.value },
                     })
                   }
-                  className="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-white/90 text-xs leading-relaxed focus:outline-hidden focus:border-violet-500"
+                  className="w-full bg-black/40 border border-violet-500/25 rounded-lg p-2.5 text-white/90 text-xs leading-relaxed focus:outline-hidden focus:border-violet-500"
                 />
               </div>
             </div>
@@ -402,7 +402,7 @@ export function SettingsModal({
           {activeTab === 'security' && (
             <div className="space-y-4">
               {/* Loop Prevention Architecture */}
-              <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-3">
+              <div className="p-3.5 rounded-xl bg-violet-500/[0.04] border border-violet-500/20 space-y-3">
                 <h4 className="text-xs font-semibold text-white/90 flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-violet-400" />
                   <span>3-Layer Loop Prevention Guard</span>
@@ -425,7 +425,7 @@ export function SettingsModal({
                           },
                         })
                       }
-                      className="w-4 h-4 rounded border-white/20 bg-black/40 text-violet-500 focus:ring-0"
+                      className="w-4 h-4 rounded border-violet-500/35 bg-black/40 text-violet-500 focus:ring-0"
                     />
                     <span className="text-white/80">Bật cơ chế chống lặp (Loop Guard Active)</span>
                   </label>
@@ -443,7 +443,7 @@ export function SettingsModal({
                           },
                         })
                       }
-                      className="w-4 h-4 rounded border-white/20 bg-black/40 text-violet-500 focus:ring-0"
+                      className="w-4 h-4 rounded border-violet-500/35 bg-black/40 text-violet-500 focus:ring-0"
                     />
                     <span className="text-white/80">
                       Tự động DROP tin nhắn do chính bạn gửi bắt đầu bằng tiền tố bot
@@ -451,7 +451,7 @@ export function SettingsModal({
                   </label>
                 </div>
 
-                <div className="pt-2 text-[11px] text-white/50 flex items-center justify-between border-t border-white/[0.06]">
+                <div className="pt-2 text-[11px] text-white/50 flex items-center justify-between border-t border-violet-500/20">
                   <span>LRU Message ID Cache Size:</span>
                   <span className="font-mono text-violet-300">
                     {formData.loopPrevention.lruCacheSize} IDs gần nhất
@@ -486,10 +486,10 @@ export function SettingsModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-white/[0.08] bg-black/20 shrink-0">
+        <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-violet-500/20 bg-black/20 shrink-0">
           <button
             onClick={onClose}
-            className="px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/[0.06] text-white/70 hover:text-white text-xs transition-colors"
+            className="px-3 py-1.5 rounded-lg border border-violet-500/25 hover:bg-violet-500/10 text-white/70 hover:text-white text-xs transition-colors"
           >
             Hủy bỏ
           </button>

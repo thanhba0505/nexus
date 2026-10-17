@@ -15,10 +15,11 @@ export function Button({
 }: ButtonProps) {
   const variantClasses = {
     primary: 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30',
-    secondary: 'bg-white/10 hover:bg-white/20 text-white border border-white/10',
-    ghost: 'hover:bg-white/10 text-white/80 hover:text-white',
+    secondary:
+      'bg-[var(--app-tone-4,#131238)]/85 hover:bg-[var(--app-tone-4,#131238)] text-white border border-[var(--app-tone-3,#6366f1)]/30',
+    ghost: 'hover:bg-[var(--app-tone-3,#6366f1)]/15 text-white/80 hover:text-white',
     glass:
-      'bg-white/10 hover:bg-white/20 text-white border border-white/15 backdrop-blur-xl shadow-md transition-all active:scale-95',
+      'bg-[var(--app-tone-3,#6366f1)]/10 hover:bg-[var(--app-tone-3,#6366f1)]/20 text-white border border-[var(--app-tone-3,#6366f1)]/30 backdrop-blur-xl shadow-md transition-all active:scale-95',
   };
 
   const sizeClasses = {
