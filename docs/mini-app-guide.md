@@ -31,6 +31,8 @@ packages/ui/
 │   ├── AppButton.tsx           # Nút bấm chuẩn macOS (primary Tone 3, secondary, glass, ghost, danger)
 │   ├── AppTabs.tsx             # Bộ chuyển tab phong cách macOS Native (segmented, pills)
 │   ├── AppSelect.tsx           # Dropdown select macOS Dark Glassmorphism thay thế hoàn toàn <select> native
+│   ├── AppInput.tsx            # Trường nhập liệu văn bản macOS Dark Glassmorphism (đồng bộ visual với AppSelect)
+│   ├── AppTextarea.tsx         # Khung nhập liệu nhiều dòng macOS Dark Glassmorphism (custom-scrollbar, resize-y)
 │   ├── MiniAppShell.tsx        # Khung ứng dụng wrapper: Header -> Main -> Footer + Splash & Overlays
 │   ├── MiniAppHeader.tsx       # Titlebar Overlay macOS (an toàn 76px Traffic Lights, data-tauri-drag-region)
 │   ├── MiniAppStatusBar.tsx    # Thanh trạng thái chân trang (h-7, dóng thẳng hàng mép card với px-4.5 sm:px-5)

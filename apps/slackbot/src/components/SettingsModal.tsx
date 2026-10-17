@@ -12,7 +12,7 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
-import { AppSelect, AppSelectOption } from '@nexus/ui';
+import { AppSelect, AppSelectOption, AppInput, AppTextarea } from '@nexus/ui';
 import type {
   AIConfig,
   PersonaConfig,
@@ -192,19 +192,17 @@ export function SettingsModal({
                     </span>
                   )}
                 </div>
-                <div className="relative">
-                  <input
-                    type={showTokens ? 'text' : 'password'}
-                    value={userTokenInput}
-                    onChange={(e) => setUserTokenInput(e.target.value)}
-                    placeholder={
-                      credentials?.hasUserToken
-                        ? 'Nhập mã mới để ghi đè (xoxp-...)'
-                        : 'xoxp-your-user-token'
-                    }
-                    className="w-full bg-black/40 border border-violet-500/25 rounded-lg px-3 py-2 text-white/90 placeholder:text-white/30 text-xs focus:outline-hidden focus:border-violet-500 font-mono"
-                  />
-                </div>
+                <AppInput
+                  type={showTokens ? 'text' : 'password'}
+                  value={userTokenInput}
+                  onChange={(e) => setUserTokenInput(e.target.value)}
+                  placeholder={
+                    credentials?.hasUserToken
+                      ? 'Nhập mã mới để ghi đè (xoxp-...)'
+                      : 'xoxp-your-user-token'
+                  }
+                  inputClassName="font-mono"
+                />
               </div>
 
               {/* App-Level Token (xapp-) */}
@@ -220,19 +218,17 @@ export function SettingsModal({
                     </span>
                   )}
                 </div>
-                <div className="relative">
-                  <input
-                    type={showTokens ? 'text' : 'password'}
-                    value={appTokenInput}
-                    onChange={(e) => setAppTokenInput(e.target.value)}
-                    placeholder={
-                      credentials?.hasAppToken
-                        ? 'Nhập mã mới để ghi đè (xapp-...)'
-                        : 'xapp-your-app-token'
-                    }
-                    className="w-full bg-black/40 border border-violet-500/25 rounded-lg px-3 py-2 text-white/90 placeholder:text-white/30 text-xs focus:outline-hidden focus:border-violet-500 font-mono"
-                  />
-                </div>
+                <AppInput
+                  type={showTokens ? 'text' : 'password'}
+                  value={appTokenInput}
+                  onChange={(e) => setAppTokenInput(e.target.value)}
+                  placeholder={
+                    credentials?.hasAppToken
+                      ? 'Nhập mã mới để ghi đè (xapp-...)'
+                      : 'xapp-your-app-token'
+                  }
+                  inputClassName="font-mono"
+                />
               </div>
 
               <div className="flex items-center justify-between pt-1">
@@ -289,18 +285,20 @@ export function SettingsModal({
 
                 {formData.identity.enablePrefix && (
                   <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={formData.identity.defaultPrefix}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          identity: { ...formData.identity, defaultPrefix: e.target.value },
-                        })
-                      }
-                      placeholder="[Bot] "
-                      className="w-32 bg-black/40 border border-violet-500/25 rounded-lg px-2.5 py-1.5 text-white/90 text-xs font-mono focus:outline-hidden focus:border-violet-500"
-                    />
+                    <div className="w-32">
+                      <AppInput
+                        size="sm"
+                        value={formData.identity.defaultPrefix}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            identity: { ...formData.identity, defaultPrefix: e.target.value },
+                          })
+                        }
+                        placeholder="[Bot] "
+                        inputClassName="font-mono"
+                      />
+                    </div>
                     <span className="text-[11px] text-white/50 font-mono">
                       Xem trước:{' '}
                       <span className="text-violet-300">
@@ -369,11 +367,8 @@ export function SettingsModal({
 
               {/* Signature */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-medium text-white/80">
-                  Chữ ký cuối tin nhắn
-                </label>
-                <input
-                  type="text"
+                <AppInput
+                  label="Chữ ký cuối tin nhắn"
                   value={formData.persona.signature}
                   onChange={(e) =>
                     setFormData({
@@ -382,16 +377,14 @@ export function SettingsModal({
                     })
                   }
                   placeholder="— _Soạn tự động bởi SlackBot_"
-                  className="w-full bg-black/40 border border-violet-500/25 rounded-lg px-3 py-2 text-white/90 text-xs focus:outline-hidden focus:border-violet-500 font-mono"
+                  inputClassName="font-mono"
                 />
               </div>
 
               {/* System Prompt */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-medium text-white/80">
-                  Chỉ dẫn hệ thống (System Prompt)
-                </label>
-                <textarea
+                <AppTextarea
+                  label="Chỉ dẫn hệ thống (System Prompt)"
                   rows={4}
                   value={formData.ai.systemPrompt}
                   onChange={(e) =>
@@ -400,7 +393,6 @@ export function SettingsModal({
                       ai: { ...formData.ai, systemPrompt: e.target.value },
                     })
                   }
-                  className="w-full bg-black/40 border border-violet-500/25 rounded-lg p-2.5 text-white/90 text-xs leading-relaxed focus:outline-hidden focus:border-violet-500"
                 />
               </div>
             </div>

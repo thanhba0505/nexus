@@ -411,14 +411,16 @@ Mọi cửa sổ miniapp khi đặt cạnh nhau trên macOS đều lập tức m
 
 ## 18. Bộ Thành Phần Dùng Chung Chuẩn Hóa (`@nexus/ui`)
 
-Các ứng dụng trong monorepo tái sử dụng 6 core component chính từ `@nexus/ui`:
+Các ứng dụng trong monorepo tái sử dụng 8 core component chính từ `@nexus/ui`:
 
 - **`AppLayout`**: Khung cửa sổ chuẩn mực với hào quang canvas, tự động gán biến theme 5-tone, hỗ trợ đầy đủ các slot `header`, `sidebar`, `footer`, `overlays`, `splash`.
-- **`AppSidebar`**: Thanh điều hướng thu gọn zero-jitter với icon anchor `X=32px`, slide-out label, floating tooltip và overflow-visible chống thanh cuộn ngang ngoài ý muốn.
+- **`AppSidebar`**: Thanh điều hướng thu gọn zero-jitter với icon anchor `X=32px`, slide-out label, floating tooltip và overflow-visible chống thanh cuộn ngang ngoài ý muốn. Tooltip ở chế độ thu gọn sử dụng nền Tone 5 đơn sắc 100% không xuyên thấu và chỉ hiển thị nhãn chức năng.
 - **`ContentCard`**: Thẻ kính mờ acrylic 5-tone với cấu trúc tiêu đề, icon, badge trạng thái, action buttons và padding đối xứng `p-4.5 sm:p-5`.
 - **`AppButton`**: Nút bấm nhận diện thương hiệu hỗ trợ các biến thể `primary` (Tone 3 CTA), `secondary`, `glass`, `ghost`, `danger`, tích hợp phím tắt kbd và spinner trạng thái tải.
 - **`AppTabs`**: Bộ chuyển tab phong cách macOS Native với hai biến thể `segmented` và `pills`, hiển thị số lượng badge và active animation mượt mà.
-- **`AppSelect`**: Dropdown select chuẩn macOS Dark Glassmorphism thay thế hoàn toàn `<select>` native OS, hỗ trợ generic type-safe `T extends string`, keyboard navigation (`ArrowUp`/`ArrowDown`/`Enter`/`Space`/`Escape`/`Tab`), auto scroll-into-view, nền Tone 5 đơn sắc cố định chống loang màu, option items phẳng không viền, trạng thái Selected (Tone 3 đặc 100%, chữ trắng, icon check trắng), Hover/Highlight (Tone 3 độ mờ 30%, chữ trắng).
+- **`AppSelect`**: Dropdown select chuẩn macOS Dark Glassmorphism thay thế hoàn toàn `<select>` native OS, hỗ trợ generic type-safe `T extends string`, keyboard navigation đầy đủ, auto scroll-into-view, nền Tone 5 đơn sắc cố định chống loang màu, option items phẳng không viền, trạng thái Selected (Tone 3 đặc 100%, chữ trắng, icon check trắng), Hover/Highlight (Tone 3 độ mờ 20% nhạt hơn rõ rệt, chữ trắng).
+- **`AppInput`**: Trường nhập văn bản một dòng đồng bộ 100% phong cách macOS Dark Glassmorphism với `AppSelect` (nền Tone 5 phẳng đơn sắc, viền `--app-border`, hover/focus viền Tone 3), hỗ trợ `leadingIcon`, `trailingSlot`, `size="sm"` ($32\text{px}$) & `size="md"` ($38\text{px}$).
+- **`AppTextarea`**: Khung nhập văn bản nhiều dòng đồng bộ 100% phong cách với `AppSelect` và `AppInput`, tích hợp thanh cuộn tinh tế `custom-scrollbar`, tự do co giãn chiều dọc `resize-y`.
 
 ---
 
@@ -583,12 +585,12 @@ import { AppSelect, AppSelectOption } from '@nexus/ui';
      - Phụ đề (`description`): `text-white/85`.
      - Icon Option & Icon Checkmark: `text-white`.
    - **Mục đang rê chuột / phím điều hướng (`isHighlighted` và không `isSelected`)**:
-     - Nền: Tone 3 độ mờ 30% `bg-[var(--app-tone-3)]/30`.
+     - Nền: Tone 3 độ mờ 20% `bg-[var(--app-tone-3)]/20` (nhạt hơn rõ rệt so với mục được chọn).
      - Tiêu đề chính: `text-white font-medium`.
      - Phụ đề (`description`): `text-[var(--app-tone-1)]/85`.
      - Icon Option: `text-[var(--app-tone-2)]`.
    - **Mục bình thường**:
-     - Nền trong suốt, hover vào nhận `hover:bg-[var(--app-tone-3)]/30 hover:text-white`.
+     - Nền trong suốt, hover vào nhận `hover:bg-[var(--app-tone-3)]/20 hover:text-white`.
      - Tiêu đề chính: `text-[var(--app-tone-1,#f0fdf9)]/80`.
      - Phụ đề (`description`): `text-[var(--app-tone-2)]/60`.
      - Icon Option: `text-[var(--app-tone-2)]/70`.
@@ -598,6 +600,39 @@ import { AppSelect, AppSelectOption } from '@nexus/ui';
    - **Bàn phím toàn diện**: Hỗ trợ phím `ArrowDown`, `ArrowUp` để di chuyển highlight qua lại các mục (tự động bỏ qua các option bị `disabled`), nhấn `Enter` hoặc `Space` để chọn mục, `Tab` để đóng menu.
    - **Auto Scroll-Into-View**: Khi mở menu hoặc dùng phím di chuyển, mục được highlight tự động cuộn vào tầm nhìn của khung nhìn (`targetItem.scrollIntoView({ block: 'nearest' })`).
    - **Generic Type-Safe**: Khai báo kiểu dữ liệu an toàn `AppSelect<T extends string = string>` giúp IDE tự động gợi ý giá trị và ngăn chặn lỗi type.
+
+---
+
+## 23. Quy Chuẩn Trường Nhập Liệu `AppInput` & `AppTextarea` Đồng Bộ Với `AppSelect`
+
+### Thống nhất toàn diện phong cách trường nhập liệu
+
+Toàn bộ ô nhập liệu văn bản (`<input>`, `<textarea>`) trong hệ sinh thái Nexus bắt buộc sử dụng hai thành phần dùng chung `AppInput` và `AppTextarea` từ `@nexus/ui`, chia sẻ cùng ngôn ngữ thiết kế với `AppSelect`:
+
+```typescript
+import { AppInput, AppTextarea } from '@nexus/ui';
+```
+
+1. **Bộ thuộc tính hình thức đồng bộ (Unified Visual Tokens)**:
+   - **Nền đơn sắc Tone 5**: `bg-[var(--app-tone-5,#070714)]` phẳng, không gradient, không rò rỉ nền phía sau.
+   - **Viền token**: `border border-[var(--app-border)]`.
+   - **Hiệu ứng Hover**: `hover:border-[var(--app-tone-3,#6366f1)]/50`.
+   - **Hiệu ứng Focus**: `focus:border-[var(--app-tone-3,#6366f1)]/60 focus:ring-1 focus:ring-[var(--app-tone-3,#6366f1)]/40 focus:outline-hidden`.
+   - **Màu chữ**: `text-[var(--app-tone-1,#f0fdf9)]`.
+   - **Placeholder**: `placeholder:text-[var(--app-tone-2)]/40`.
+
+2. **Kích thước chuẩn hóa**:
+   - `size="md"`: `rounded-xl px-3 py-2 text-xs min-h-[38px]`.
+   - `size="sm"`: `rounded-lg px-2.5 py-1.5 text-xs min-h-[32px]`.
+
+3. **Tính năng mở rộng trong `AppInput`**:
+   - Hỗ trợ `leadingIcon`: Tự động căn lề và tính toán padding trái an toàn (`pl-8` hoặc `pl-9`).
+   - Hỗ trợ `trailingSlot`: Vị trí gắn nút bật/tắt mật khẩu, nút copy hoặc badge xác thực.
+   - Hỗ trợ `label`, `error`, `hint` tự động liên kết ngữ nghĩa `aria-describedby` và ID tương ứng.
+
+4. **Tính năng mở rộng trong `AppTextarea`**:
+   - Tích hợp thanh cuộn tinh tế `custom-scrollbar`.
+   - Cho phép co giãn chiều cao theo chiều dọc `resize-y` mà không làm hỏng lưới đệm ngang.
 
 ---
 

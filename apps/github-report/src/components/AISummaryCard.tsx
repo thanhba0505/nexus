@@ -1,6 +1,14 @@
 import { useState } from 'react';
 import { Sparkles, Edit3, Check, Copy, Bot, Calendar } from 'lucide-react';
-import { AsyncContent, Skeleton, Spinner, ContentCard, AppButton, AppTabs } from '@nexus/ui';
+import {
+  AsyncContent,
+  Skeleton,
+  Spinner,
+  ContentCard,
+  AppButton,
+  AppTabs,
+  AppTextarea,
+} from '@nexus/ui';
 import { parseSummaryText } from '../lib/report-utils';
 import type { AISummaryResult, DateMode } from '../types';
 
@@ -155,7 +163,7 @@ export function AISummaryCard({
       >
         {isEditing ? (
           <div className="flex flex-col gap-2.5">
-            <textarea
+            <AppTextarea
               autoFocus
               value={editText}
               onChange={(e) => setEditText(e.target.value)}
@@ -164,7 +172,7 @@ export function AISummaryCard({
                 if (e.key === 'Enter' && e.metaKey) saveEdit();
               }}
               rows={4}
-              className="w-full resize-none rounded-xl border border-sky-500/30 bg-black/40 p-3 font-sans text-xs leading-relaxed text-white/90 placeholder-white/40 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400/40"
+              textareaClassName="font-sans leading-relaxed resize-none p-3"
               placeholder="Mỗi dòng là một gạch đầu dòng…"
             />
             <div className="flex justify-end gap-2">

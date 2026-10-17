@@ -9,7 +9,14 @@ import {
   Terminal,
   Settings,
 } from 'lucide-react';
-import { ContentCard, AppButton, AppSelect, AppSelectOption } from '@nexus/ui';
+import {
+  ContentCard,
+  AppButton,
+  AppSelect,
+  AppSelectOption,
+  AppInput,
+  AppTextarea,
+} from '@nexus/ui';
 import { AppSettings, PrereqStatus } from '../types';
 import { DEFAULT_PROMPT } from '../services/storage';
 
@@ -156,7 +163,7 @@ export function SettingsView({
                   <span>Mặc định</span>
                 </button>
               </div>
-              <textarea
+              <AppTextarea
                 value={formData.ai.promptTemplate}
                 onChange={(e) =>
                   setFormData({
@@ -165,15 +172,13 @@ export function SettingsView({
                   })
                 }
                 rows={5}
-                className="w-full p-2.5 rounded-lg bg-black/40 border border-sky-500/25 text-white/90 placeholder-white/30 focus:outline-none focus:border-sky-400/80 focus:ring-1 focus:ring-sky-400/40 font-mono text-[11px] leading-relaxed resize-none"
+                textareaClassName="font-mono text-[11px] leading-relaxed resize-none"
               />
             </div>
 
             <div>
-              <label className="block text-white/80 font-medium mb-1">
-                Chỉ Dẫn Nghiệp Vụ Bổ Sung
-              </label>
-              <input
+              <AppInput
+                label="Chỉ Dẫn Nghiệp Vụ Bổ Sung"
                 type="text"
                 value={formData.ai.customInstructions}
                 onChange={(e) =>
@@ -183,7 +188,6 @@ export function SettingsView({
                   })
                 }
                 placeholder="Ví dụ: Tập trung vào kết quả bàn giao, bỏ qua các commit merge…"
-                className="w-full h-8 px-2.5 rounded-lg bg-black/40 border border-sky-500/25 text-white/90 placeholder-white/40 text-xs focus:outline-none focus:border-sky-400/80 focus:ring-1 focus:ring-sky-400/40 transition-colors"
               />
             </div>
           </div>
@@ -323,24 +327,26 @@ export function SettingsView({
               <label className="block text-white/80 font-medium">
                 GitHub Personal Access Token (Dự phòng cho máy chưa cài `gh`)
               </label>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Key className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-white/40" />
-                  <input
+              <div className="flex gap-2 items-center">
+                <div className="flex-1">
+                  <AppInput
+                    leadingIcon={Key}
                     type="password"
                     value={tokenInput}
                     onChange={(e) => setTokenInput(e.target.value)}
                     placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-                    className="w-full h-8 pl-8 pr-2.5 rounded-lg bg-black/40 border border-sky-500/25 text-white placeholder-white/40 focus:outline-none focus:border-sky-400/80 font-mono text-[11px]"
+                    inputClassName="font-mono text-[11px]"
+                    size="sm"
                   />
                 </div>
-                <button
+                <AppButton
                   onClick={handleSaveTokenClick}
                   disabled={!tokenInput.trim()}
-                  className="h-8 px-3 rounded-lg bg-sky-500 hover:bg-sky-400 disabled:opacity-40 text-white font-medium text-xs transition-colors"
+                  variant="primary"
+                  size="sm"
                 >
                   {tokenSaved ? 'Đã lưu' : 'Lưu Keychain'}
-                </button>
+                </AppButton>
               </div>
               <p className="text-[11px] text-white/40 leading-relaxed">
                 {prereqStatus?.hasGithubToken

@@ -69,7 +69,6 @@ export function AppSidebar({
             data-no-drag
             style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
             className="group relative flex items-center w-full h-10 rounded-xl text-[var(--app-tone-2)] hover:text-[var(--app-tone-1)] hover:bg-[var(--app-tone-3)]/15 transition-colors"
-            title={isExpanded ? 'Thu gọn thanh bên' : 'Mở rộng thanh bên'}
           >
             {/* Fixed Icon Anchor (X=32px zero-jitter) */}
             <div className="w-12 h-10 shrink-0 flex items-center justify-center">
@@ -95,7 +94,7 @@ export function AppSidebar({
 
             {/* Floating Tooltip in Collapsed Mode */}
             {!isExpanded && (
-              <div className="pointer-events-none absolute left-full ml-3 z-50 whitespace-nowrap rounded-lg border border-[var(--app-tone-3)]/40 bg-[var(--app-tone-5)]/95 px-2.5 py-1 text-xs font-medium text-[var(--app-tone-1)] shadow-2xl backdrop-blur-xl opacity-0 scale-95 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100">
+              <div className="pointer-events-none absolute left-full ml-3 z-50 whitespace-nowrap rounded-lg border border-[var(--app-tone-3)]/40 bg-[var(--app-tone-5,#070714)] px-2.5 py-1 text-xs font-medium text-[var(--app-tone-1)] shadow-2xl opacity-0 scale-95 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100">
                 Mở rộng thanh bên
               </div>
             )}
@@ -119,7 +118,6 @@ export function AppSidebar({
             <div key={tab.id} className="relative">
               <button
                 onClick={() => onTabChange(tab.id)}
-                title={tab.label}
                 data-no-drag
                 style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
                 className={clsx(
@@ -173,13 +171,8 @@ export function AppSidebar({
 
                 {/* Floating Tooltip in Collapsed Mode */}
                 {!isExpanded && (
-                  <div className="pointer-events-none absolute left-full ml-3 z-50 flex items-center gap-2 whitespace-nowrap rounded-lg border border-[var(--app-tone-3)]/40 bg-[var(--app-tone-5)]/95 px-2.5 py-1 text-xs font-medium text-[var(--app-tone-1)] shadow-2xl backdrop-blur-xl opacity-0 scale-95 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100">
-                    <span>{tab.label}</span>
-                    {tab.shortcut && (
-                      <span className="text-[10px] font-mono text-[var(--app-tone-3)] bg-[var(--app-tone-3)]/15 px-1 py-0.5 rounded border border-[var(--app-tone-3)]/25">
-                        {tab.shortcut}
-                      </span>
-                    )}
+                  <div className="pointer-events-none absolute left-full ml-3 z-50 whitespace-nowrap rounded-lg border border-[var(--app-tone-3)]/40 bg-[var(--app-tone-5,#070714)] px-2.5 py-1 text-xs font-medium text-[var(--app-tone-1)] shadow-2xl opacity-0 scale-95 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100">
+                    {tab.label}
                   </div>
                 )}
               </button>

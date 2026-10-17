@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { X, Hash, Lock, Users, User, Plus, Trash2, Check, Shield } from 'lucide-react';
-import { AppSelect, AppSelectOption } from '@nexus/ui';
+import { AppSelect, AppSelectOption, AppInput } from '@nexus/ui';
 import type { ConversationRule } from '../types';
 
 const CHANNEL_TYPE_OPTIONS: AppSelectOption<ConversationRule['type']>[] = [
@@ -146,21 +146,24 @@ export function ConversationsModal({
                 />
               </div>
 
-              <input
-                type="text"
-                value={newChannelId}
-                onChange={(e) => setNewChannelId(e.target.value)}
-                placeholder="Channel ID (vd: C0123ABC)"
-                className="w-36 bg-black/40 border border-violet-500/25 rounded-lg px-2.5 py-1.5 text-white/90 text-xs font-mono focus:outline-hidden focus:border-violet-500"
-              />
+              <div className="w-36">
+                <AppInput
+                  size="sm"
+                  value={newChannelId}
+                  onChange={(e) => setNewChannelId(e.target.value)}
+                  placeholder="Channel ID (vd: C0123ABC)"
+                  inputClassName="font-mono"
+                />
+              </div>
 
-              <input
-                type="text"
-                value={newChannelName}
-                onChange={(e) => setNewChannelName(e.target.value)}
-                placeholder="Tên kênh (vd: team-standup)"
-                className="flex-1 bg-black/40 border border-violet-500/25 rounded-lg px-2.5 py-1.5 text-white/90 text-xs focus:outline-hidden focus:border-violet-500"
-              />
+              <div className="flex-1">
+                <AppInput
+                  size="sm"
+                  value={newChannelName}
+                  onChange={(e) => setNewChannelName(e.target.value)}
+                  placeholder="Tên kênh (vd: team-standup)"
+                />
+              </div>
 
               <button
                 type="button"
@@ -214,14 +217,16 @@ export function ConversationsModal({
                     </div>
 
                     {/* Custom Prefix */}
-                    <input
-                      type="text"
-                      value={rule.customPrefix ?? ''}
-                      onChange={(e) => handlePrefixChange(idx, e.target.value)}
-                      placeholder={defaultPrefix}
-                      title="Tiền tố riêng cho hội thoại này"
-                      className="w-24 bg-black/40 border border-violet-500/25 rounded-lg px-2 py-1 text-white/80 text-[11px] font-mono focus:outline-hidden focus:border-violet-500"
-                    />
+                    <div className="w-24">
+                      <AppInput
+                        size="sm"
+                        value={rule.customPrefix ?? ''}
+                        onChange={(e) => handlePrefixChange(idx, e.target.value)}
+                        placeholder={defaultPrefix}
+                        title="Tiền tố riêng cho hội thoại này"
+                        inputClassName="font-mono text-[11px]"
+                      />
+                    </div>
 
                     {/* Mentions only toggle */}
                     <label

@@ -233,8 +233,8 @@ export function AppSelect<T extends string = string>({
                     isSelected
                       ? 'bg-[var(--app-tone-3)] text-white font-semibold shadow-xs'
                       : isHighlighted
-                        ? 'bg-[var(--app-tone-3)]/30 text-white font-medium'
-                        : 'text-[var(--app-tone-1,#f0fdf9)]/80 hover:bg-[var(--app-tone-3)]/30 hover:text-white',
+                        ? 'bg-[var(--app-tone-3)]/20 text-white font-medium'
+                        : 'text-[var(--app-tone-1,#f0fdf9)]/80 hover:bg-[var(--app-tone-3)]/20 hover:text-white',
                   ),
                 )}
               >
