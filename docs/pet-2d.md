@@ -89,20 +89,19 @@ flowchart TD
 Toàn bộ các phân khu chức năng được bao bọc đồng bộ trong thẻ chứa cao cấp mang phong cách kính mờ Dark Teal:
 
 ```tsx
-relative shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-[#082620]/85 via-[#061c18]/90 to-[#031411]/95 border border-[#00c49a]/30 p-5 shadow-2xl backdrop-blur-xl
+relative shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-[#082620]/85 via-[#061c18]/90 to-[#031411]/95 border border-[#00c49a]/30 p-4.5 sm:p-5 shadow-2xl backdrop-blur-xl
 ```
 
 ### 3.2. Tab 1: Tổng Quan (Overview - ⌘1)
 
 - **Thẻ PetHeroCard**:
-  - Avatar động xem trước cử động với hiệu ứng glow xanh ngọc `#00c49a`.
-  - Hiển thị tên nhân vật, mô tả, huy hiệu trạng thái (`Đang hoạt động` / `Đã thu hồi`).
-  - **Master Switch (Công tắc Thả/Thu hồi Pet)**: Gạt công tắc để mở hoặc ẩn chú Pet ngoài desktop.
-  - **Telemetry thời gian thực dạng Chips**: Hệ thống parameter chips độc lập (`Activity`, `Tọa độ X, Y`, `Scale`) với `whitespace-nowrap` và `flex-wrap`, không bao giờ bị chèn ép hay bẻ gãy từ khi thay đổi kích thước cửa sổ hoặc mở rộng sidebar.
-  - **Nút phản ứng nhanh**: `Về giữa` (Center), `Ghim vị trí` (Pause/Resume), và `Thu hồi / Thả Pet`.
-- **Thẻ Chỉ Số Giám Sát Thời Gian Thực (Live Telemetry Container Card)**:
+  - Avatar động xem trước cử động với hiệu ứng glow xanh ngọc `#00c49a` bên trái.
+  - Khối thông tin bên phải chứa: Tên nhân vật, huy hiệu trạng thái (`Đang hoạt động` / `Đã thu hồi`), mô tả ngắn.
+  - Cụm nút hành động tích hợp ngay bên dưới mô tả: `Về giữa` (Center), `Ghim vị trí` (Pause/Resume), và `Thu hồi / Thả Pet` (Master Switch).
+  - Bố cục đối xứng trục dọc (`items-center`) với lề đệm cân bằng trên/dưới tuyệt đối (`p-4.5 sm:p-5`).
+- **Thẻ Chỉ Số Giám Sát Thời Gian Thực**:
   - Thẻ tọa độ Desktop `(X, Y)` & hướng di chuyển (`⬅️ Sang trái` / `➡️ Sang phải`).
-  - Thẻ hành động Mascot & số lượng frame Shimeji.
+  - Thẻ hành động Mascot Việt hóa chuẩn (`Đang quan sát`, `Đang đi dạo`, `Rơi tự do`, `Bị nhấc bổng`, `Đang leo tường`, `Đang ngồi nghỉ`) & số lượng frame Shimeji.
   - Thẻ hồ sơ kích thước (`scale`), tốc độ (`speed`) và trạng thái gia tốc trọng lực.
 - **Thẻ Chuyển Nhanh Phân Khu Chức Năng**: 2 nút điều hướng nhanh sang Thư viện Pet (`⌘2`) và Cài đặt nâng cao (`⌘3`).
 

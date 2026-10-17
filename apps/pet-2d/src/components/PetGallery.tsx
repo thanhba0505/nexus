@@ -10,12 +10,12 @@ interface PetGalleryProps {
 
 export function PetGallery({ pets, activePetId, onSelectPet, onDeletePet }: PetGalleryProps) {
   return (
-    <div className="relative shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-[#082620]/85 via-[#061c18]/90 to-[#031411]/95 border border-[#00c49a]/30 p-5 shadow-2xl backdrop-blur-xl space-y-4">
+    <div className="relative shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-[#082620]/85 via-[#061c18]/90 to-[#031411]/95 border border-[#00c49a]/30 p-4.5 sm:p-5 shadow-2xl backdrop-blur-xl">
       {/* Background ambient glow */}
       <div className="absolute -top-12 -right-12 w-48 h-48 bg-[#00c49a]/15 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header */}
-      <div className="flex items-center justify-between relative z-10">
+      <div className="flex items-center justify-between mb-3.5 relative z-10">
         <div className="flex items-center gap-2.5">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#00c49a]/35 bg-[#00c49a]/15 text-[#00c49a] shadow-xs">
             <Sparkles className="w-4 h-4" />

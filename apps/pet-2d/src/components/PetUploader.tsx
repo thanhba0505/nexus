@@ -66,12 +66,12 @@ export function PetUploader({ onPetImported }: PetUploaderProps) {
   };
 
   return (
-    <div className="relative shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-[#082620]/85 via-[#061c18]/90 to-[#031411]/95 border border-[#00c49a]/30 p-5 shadow-2xl backdrop-blur-xl space-y-4">
+    <div className="relative shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-[#082620]/85 via-[#061c18]/90 to-[#031411]/95 border border-[#00c49a]/30 p-4.5 sm:p-5 shadow-2xl backdrop-blur-xl">
       {/* Background ambient glow */}
       <div className="absolute -top-12 -right-12 w-48 h-48 bg-[#00c49a]/15 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header */}
-      <div className="flex items-center gap-2.5 relative z-10">
+      <div className="flex items-center gap-2.5 mb-2 relative z-10">
         <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-[#00c49a]/35 bg-[#00c49a]/15 text-[#00c49a] shadow-xs">
           <FolderPlus className="w-4 h-4" />
         </div>
@@ -85,7 +85,7 @@ export function PetUploader({ onPetImported }: PetUploaderProps) {
         </div>
       </div>
 
-      <p className="text-xs text-[#5eead4]/80 leading-relaxed relative z-10">
+      <p className="text-xs text-[#5eead4]/80 leading-relaxed mb-3.5 relative z-10">
         Nhập đường dẫn đến thư mục chứa các file ảnh Shimeji (
         <code className="text-[#00c49a] bg-[#00c49a]/15 px-1 py-0.5 rounded border border-[#00c49a]/30 font-mono text-[11px]">
           shime1.png

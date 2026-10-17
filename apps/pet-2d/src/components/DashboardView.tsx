@@ -38,6 +38,15 @@ const TABS: TabDefinition[] = [
   { id: 'settings', label: 'Cài đặt & Vật lý', icon: Sliders, shortcut: '⌘3' },
 ];
 
+const STATE_VI_MAP: Record<string, string> = {
+  idle: 'Đang quan sát',
+  walking: 'Đang đi dạo',
+  falling: 'Rơi tự do',
+  dragged: 'Bị nhấc bổng',
+  climbing: 'Đang leo tường',
+  sitting: 'Đang ngồi nghỉ',
+};
+
 export function DashboardView() {
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -331,14 +340,14 @@ export function DashboardView() {
               />
 
               {/* 2. Standardized Live Telemetry Container Card */}
-              <div className="relative shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-[#082620]/85 via-[#061c18]/90 to-[#031411]/95 border border-[#00c49a]/30 p-5 shadow-2xl backdrop-blur-xl space-y-4">
+              <div className="relative shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-[#082620]/85 via-[#061c18]/90 to-[#031411]/95 border border-[#00c49a]/30 p-4.5 sm:p-5 shadow-2xl backdrop-blur-xl">
                 <div className="absolute -top-12 -right-12 w-48 h-48 bg-[#00c49a]/15 rounded-full blur-3xl pointer-events-none" />
 
-                <div className="flex items-center justify-between relative z-10">
+                <div className="flex items-center justify-between mb-3.5 relative z-10">
                   <div className="flex items-center gap-2">
                     <Activity className="w-4 h-4 text-[#00c49a]" />
                     <h3 className="text-sm font-semibold text-[#f0fdf9]">
-                      Chỉ Số Giám Sát Thời Gian Thực (Live Telemetry)
+                      Chỉ Số Giám Sát Thời Gian Thực
                     </h3>
                   </div>
                   <span className="text-[10px] font-mono text-[#00c49a] bg-[#00c49a]/15 px-2 py-0.5 rounded-full border border-[#00c49a]/30">
@@ -385,8 +394,8 @@ export function DashboardView() {
                         }`}
                       />
                     </div>
-                    <div className="text-sm font-semibold text-[#f0fdf9] mb-1 capitalize truncate">
-                      {isSpawned ? telemetry.state : 'Đã thu hồi'}
+                    <div className="text-sm font-semibold text-[#f0fdf9] mb-1 truncate">
+                      {isSpawned ? STATE_VI_MAP[telemetry.state] || telemetry.state : 'Đã thu hồi'}
                     </div>
                     <p className="text-[11px] text-[#2dd4bf]/75">
                       Hoạt ảnh:{' '}
@@ -422,10 +431,10 @@ export function DashboardView() {
               </div>
 
               {/* 3. Standardized Quick Navigation Container Card */}
-              <div className="relative shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-[#082620]/85 via-[#061c18]/90 to-[#031411]/95 border border-[#00c49a]/30 p-5 shadow-2xl backdrop-blur-xl space-y-4">
+              <div className="relative shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-[#082620]/85 via-[#061c18]/90 to-[#031411]/95 border border-[#00c49a]/30 p-4.5 sm:p-5 shadow-2xl backdrop-blur-xl">
                 <div className="absolute -top-12 -right-12 w-48 h-48 bg-[#00c49a]/15 rounded-full blur-3xl pointer-events-none" />
 
-                <div className="flex items-center gap-2 relative z-10">
+                <div className="flex items-center gap-2 mb-3.5 relative z-10">
                   <ArrowRight className="w-4 h-4 text-[#00c49a]" />
                   <h3 className="text-sm font-semibold text-[#f0fdf9]">
                     Chuyển Nhanh Phân Khu Chức Năng
@@ -500,7 +509,7 @@ export function DashboardView() {
               <BehaviorSettingsCard config={config} onUpdateConfig={handleUpdateConfig} />
 
               {/* Quick macOS Interaction Guide */}
-              <div className="relative shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-[#082620]/85 via-[#061c18]/90 to-[#031411]/95 border border-[#00c49a]/30 p-5 shadow-2xl backdrop-blur-xl flex items-start gap-3.5 text-[#5eead4]/85">
+              <div className="relative shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-[#082620]/85 via-[#061c18]/90 to-[#031411]/95 border border-[#00c49a]/30 p-4.5 sm:p-5 shadow-2xl backdrop-blur-xl flex items-start gap-3.5 text-[#5eead4]/85">
                 <Info className="w-4 h-4 text-[#00c49a] shrink-0 mt-0.5" />
                 <div className="text-xs leading-relaxed">
                   <span className="font-semibold text-[#f0fdf9]">Mẹo tương tác trên macOS:</span>{' '}
