@@ -239,7 +239,7 @@ export function DashboardView() {
 
               {/* Smooth Title Slide-out */}
               <div
-                className={`flex items-center justify-between flex-1 min-w-0 pr-2.5 overflow-hidden transition-all duration-300 ease-in-out ${
+                className={`flex items-center flex-1 min-w-0 pr-2.5 overflow-hidden transition-all duration-300 ease-in-out ${
                   isSidebarExpanded
                     ? 'opacity-100 max-w-[160px] translate-x-0'
                     : 'opacity-0 max-w-0 -translate-x-2 pointer-events-none'
@@ -247,9 +247,6 @@ export function DashboardView() {
               >
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-[#5eead4]/70 truncate">
                   Điều Hướng
-                </span>
-                <span className="text-[10px] text-[#00c49a] font-mono bg-[#00c49a]/10 px-1.5 py-0.5 rounded border border-[#00c49a]/20 shrink-0">
-                  Thu gọn
                 </span>
               </div>
 
@@ -262,8 +259,8 @@ export function DashboardView() {
             </button>
           </div>
 
-          {/* Sidebar Navigation Items */}
-          <div className="flex-1 px-2 py-3 space-y-1.5 overflow-y-auto custom-scrollbar">
+          {/* Sidebar Navigation Items - overflow-visible ensures no scrollbar ever appears */}
+          <div className="flex-1 px-2 py-3 space-y-1.5 overflow-visible">
             {TABS.map((tab) => {
               const isActive = activeTab === tab.id;
               const Icon = tab.icon;
@@ -271,6 +268,7 @@ export function DashboardView() {
                 <div key={tab.id} className="relative">
                   <button
                     onClick={() => setActiveTab(tab.id)}
+                    title={tab.label}
                     className={`group relative flex items-center w-full h-11 rounded-xl transition-all ${
                       isActive
                         ? 'bg-[#00c49a] text-[#031411] font-bold shadow-[0_2px_12px_rgba(0,196,154,0.45)]'
@@ -286,9 +284,9 @@ export function DashboardView() {
                       />
                     </div>
 
-                    {/* Smooth Title & Shortcut Slide-out */}
+                    {/* Smooth Title Slide-out (Icon + Tab Name only when expanded) */}
                     <div
-                      className={`flex items-center justify-between flex-1 min-w-0 pr-2.5 overflow-hidden transition-all duration-300 ease-in-out ${
+                      className={`flex items-center flex-1 min-w-0 pr-2.5 overflow-hidden transition-all duration-300 ease-in-out ${
                         isSidebarExpanded
                           ? 'opacity-100 max-w-[160px] translate-x-0'
                           : 'opacity-0 max-w-0 -translate-x-2 pointer-events-none'
@@ -300,15 +298,6 @@ export function DashboardView() {
                         }`}
                       >
                         {tab.label}
-                      </span>
-                      <span
-                        className={`text-[10px] font-mono px-1.5 py-0.5 rounded shrink-0 ${
-                          isActive
-                            ? 'bg-[#031411]/20 text-[#031411]'
-                            : 'bg-[#00c49a]/10 text-[#5eead4]/70 border border-[#00c49a]/20'
-                        }`}
-                      >
-                        {tab.shortcut}
                       </span>
                     </div>
 
@@ -325,48 +314,6 @@ export function DashboardView() {
                 </div>
               );
             })}
-          </div>
-
-          {/* Sidebar Bottom: Active Pet Widget */}
-          <div className="p-2 border-t border-[#00c49a]/15 shrink-0">
-            <div className="group relative flex items-center w-full h-12 rounded-xl bg-[#031411]/80 border border-[#00c49a]/20">
-              {/* Fixed Avatar Anchor */}
-              <div className="w-12 h-12 shrink-0 flex items-center justify-center">
-                <div className="relative w-7 h-7 rounded-lg bg-[#051915] border border-[#00c49a]/30 flex items-center justify-center p-0.5 shrink-0 overflow-hidden">
-                  <img
-                    src={activePet?.previewUrl || '/sprites/default/shime1.png'}
-                    alt="pet"
-                    className="w-5 h-5 object-contain"
-                  />
-                  {isSpawned && (
-                    <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-[#00c49a] ring-1 ring-[#031411]" />
-                  )}
-                </div>
-              </div>
-
-              {/* Smooth Info Slide-out */}
-              <div
-                className={`flex flex-col justify-center flex-1 min-w-0 pr-2.5 overflow-hidden transition-all duration-300 ease-in-out ${
-                  isSidebarExpanded
-                    ? 'opacity-100 max-w-[160px] translate-x-0'
-                    : 'opacity-0 max-w-0 -translate-x-2 pointer-events-none'
-                }`}
-              >
-                <p className="text-[11px] font-semibold text-[#f0fdf9] truncate">
-                  {activePet?.name || 'Anya'}
-                </p>
-                <p className="text-[9px] text-[#5eead4]/70 font-mono truncate">
-                  {isSpawned ? 'Đang hoạt động' : 'Đã thu hồi'}
-                </p>
-              </div>
-
-              {/* Floating Tooltip in Collapsed Mode */}
-              {!isSidebarExpanded && (
-                <div className="pointer-events-none absolute left-full ml-3 z-50 whitespace-nowrap rounded-lg border border-[#00c49a]/40 bg-[#041915]/95 px-2.5 py-1 text-xs font-medium text-[#f0fdf9] shadow-2xl backdrop-blur-xl opacity-0 scale-95 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100">
-                  {activePet?.name || 'Anya'} • {isSpawned ? 'Đang bật' : 'Đã tắt'}
-                </div>
-              )}
-            </div>
           </div>
         </aside>
 

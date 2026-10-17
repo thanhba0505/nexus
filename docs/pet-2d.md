@@ -79,9 +79,9 @@ flowchart TD
   - Hiển thị 3 biểu tượng chính căn giữa (`Sparkles`, `Layers`, `Sliders`).
   - **Floating Tooltip Thông Minh**: Khi người dùng hover chuột vào bất kỳ icon nào, một tooltip nổi kính mờ (`bg-[#041915]/95 border-[#00c49a]/40`) xuất hiện ngay bên phải hiển thị tên tab kèm phím tắt.
 - **Trạng Thái Mở Rộng (Expanded - `w-56`)**:
-  - Hiển thị đầy đủ Biểu tượng, Tên Tab ("Tổng quan", "Thư viện Pet", "Cài đặt & Vật lý") và nhãn phím tắt tương ứng (`⌘1`, `⌘2`, `⌘3`).
-  - Widget thu nhỏ ở chân thanh bên hiển thị ảnh đại diện và trạng thái hoạt động của Pet hiện tại.
-- **Khóa Cứng Trục Hoành Icon (Anchored Icon Position - Zero Jitter)**: Mọi biểu tượng (Toggle, Tabs, Pet Avatar) đều nằm trong hộp chứa cố định `w-12 shrink-0`, tâm icon luôn cố định ở vị trí X = 32px từ mép trái; khi đóng/mở sidebar chỉ có thanh title và badge trượt mượt mà ra bên phải mà không làm icon dịch chuyển hay biến đổi kích thước.
+  - Hiển thị thanh thoát Biểu tượng và Tên Tab ("Tổng quan", "Thư viện Pet", "Cài đặt & Vật lý"), tinh gọn không hiển thị badge phím tắt để tối ưu sự tập trung.
+- **Khóa Cứng Trục Hoành Icon (Anchored Icon Position - Zero Jitter)**: Mọi biểu tượng (Toggle, Tabs) đều nằm trong hộp chứa cố định `w-12 shrink-0`, tâm icon luôn cố định ở vị trí X = 32px từ mép trái; khi đóng/mở sidebar chỉ có thanh title trượt mượt mà ra bên phải mà không làm icon dịch chuyển hay biến đổi kích thước.
+- **Triệt Tiêu Hoàn Toàn Thanh Cuộn Ngang (Zero Horizontal Scrollbar)**: Sử dụng cấu trúc `overflow-visible` cho container tabs, đảm bảo không gian nổi cho tooltip và loại bỏ triệt để thanh cuộn ngang.
 - **Hiệu Ứng Chuyển Động (Animation)**: Mượt mà chuẩn native với `transition-all duration-300 ease-in-out`.
 
 ### 3.1. Chuẩn Hóa Thẻ Container (Container Card Standardization)
