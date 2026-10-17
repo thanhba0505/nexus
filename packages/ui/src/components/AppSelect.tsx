@@ -165,10 +165,10 @@ export function AppSelect<T extends string = string>({
         className={twMerge(
           clsx(
             'group w-full flex items-center justify-between gap-2.5 text-left transition-all duration-150 select-none outline-hidden',
-            'bg-[var(--app-tone-5,#070714)]/80 backdrop-blur-md border border-[var(--app-border)] text-[var(--app-tone-1,#f0fdf9)]/90',
-            'hover:border-[var(--app-tone-3,#6366f1)]/50 hover:bg-[var(--app-tone-4,#0c1929)]/50',
+            'bg-[var(--app-tone-5,#070714)] border border-[var(--app-border)] text-[var(--app-tone-1,#f0fdf9)]',
+            'hover:border-[var(--app-tone-3,#6366f1)]/50',
             isOpen &&
-              'border-[var(--app-tone-3,#6366f1)]/60 ring-1 ring-[var(--app-tone-3,#6366f1)]/40 bg-[var(--app-tone-4,#0c1929)]/70',
+              'border-[var(--app-tone-3,#6366f1)]/60 ring-1 ring-[var(--app-tone-3,#6366f1)]/40',
             size === 'sm'
               ? 'px-2.5 py-1.5 text-xs rounded-lg min-h-[32px]'
               : 'px-3 py-2 text-xs rounded-xl min-h-[38px]',
@@ -205,7 +205,7 @@ export function AppSelect<T extends string = string>({
           className={clsx(
             'absolute left-0 right-0 top-full mt-1.5 z-50 max-h-60 overflow-y-auto custom-scrollbar',
             'rounded-xl p-1.5 shadow-2xl shadow-black/80 space-y-0.5',
-            'bg-gradient-to-b from-[var(--app-tone-4,#0c1929)]/95 to-[var(--app-tone-5,#070714)]/98 backdrop-blur-2xl border border-[var(--app-border)]',
+            'bg-[var(--app-tone-5,#070714)] border border-[var(--app-border)]',
             'animate-in fade-in zoom-in-95 duration-150 origin-top',
           )}
         >
@@ -231,10 +231,10 @@ export function AppSelect<T extends string = string>({
                     'flex items-center justify-between gap-2.5 px-2.5 py-2 rounded-lg text-xs cursor-pointer transition-colors select-none',
                     option.disabled && 'opacity-40 cursor-not-allowed pointer-events-none',
                     isSelected
-                      ? 'bg-[var(--app-tone-3)]/30 text-[var(--app-tone-1,#f0fdf9)] border border-[var(--app-tone-3)]/40 font-semibold shadow-xs'
+                      ? 'bg-[var(--app-tone-3)]/25 text-[var(--app-tone-1,#f0fdf9)] font-semibold'
                       : isHighlighted
-                        ? 'bg-[var(--app-tone-3)]/20 text-[var(--app-tone-1,#f0fdf9)] border border-[var(--app-tone-3)]/20 font-medium'
-                        : 'text-[var(--app-tone-1,#f0fdf9)]/80 hover:bg-[var(--app-tone-3)]/20 hover:text-[var(--app-tone-1,#f0fdf9)] border border-transparent',
+                        ? 'bg-[var(--app-tone-3)]/15 text-[var(--app-tone-1,#f0fdf9)] font-medium'
+                        : 'text-[var(--app-tone-1,#f0fdf9)]/80 hover:bg-[var(--app-tone-3)]/15 hover:text-[var(--app-tone-1,#f0fdf9)]',
                   ),
                 )}
               >
