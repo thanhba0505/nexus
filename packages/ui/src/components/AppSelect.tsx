@@ -231,10 +231,10 @@ export function AppSelect<T extends string = string>({
                     'flex items-center justify-between gap-2.5 px-2.5 py-2 rounded-lg text-xs cursor-pointer transition-colors select-none',
                     option.disabled && 'opacity-40 cursor-not-allowed pointer-events-none',
                     isSelected
-                      ? 'bg-[var(--app-tone-3)]/25 text-[var(--app-tone-1,#f0fdf9)] font-semibold'
+                      ? 'bg-[var(--app-tone-3)] text-white font-semibold shadow-xs'
                       : isHighlighted
-                        ? 'bg-[var(--app-tone-3)]/15 text-[var(--app-tone-1,#f0fdf9)] font-medium'
-                        : 'text-[var(--app-tone-1,#f0fdf9)]/80 hover:bg-[var(--app-tone-3)]/15 hover:text-[var(--app-tone-1,#f0fdf9)]',
+                        ? 'bg-[var(--app-tone-3)]/30 text-white font-medium'
+                        : 'text-[var(--app-tone-1,#f0fdf9)]/80 hover:bg-[var(--app-tone-3)]/30 hover:text-white',
                   ),
                 )}
               >
@@ -243,23 +243,34 @@ export function AppSelect<T extends string = string>({
                     <OptionIcon
                       className={clsx(
                         'w-3.5 h-3.5 shrink-0 mt-0.5',
-                        isSelected ? 'text-[var(--app-tone-3)]' : 'text-[var(--app-tone-2)]/70',
+                        isSelected
+                          ? 'text-white'
+                          : isHighlighted
+                            ? 'text-[var(--app-tone-2)]'
+                            : 'text-[var(--app-tone-2)]/70',
                       )}
                     />
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="truncate leading-snug">{option.label}</div>
                     {option.description && (
-                      <div className="text-[10px] text-[var(--app-tone-2)]/70 truncate leading-tight mt-0.5">
+                      <div
+                        className={clsx(
+                          'text-[10px] truncate leading-tight mt-0.5',
+                          isSelected
+                            ? 'text-white/85'
+                            : isHighlighted
+                              ? 'text-[var(--app-tone-1)]/85'
+                              : 'text-[var(--app-tone-2)]/60',
+                        )}
+                      >
                         {option.description}
                       </div>
                     )}
                   </div>
                 </div>
 
-                {isSelected && (
-                  <Check className="w-3.5 h-3.5 text-[var(--app-tone-3)] shrink-0 ml-1" />
-                )}
+                {isSelected && <Check className="w-3.5 h-3.5 text-white shrink-0 ml-1" />}
               </div>
             );
           })}
