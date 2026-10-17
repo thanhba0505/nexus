@@ -80,6 +80,12 @@
   hr {
     border-color: var(--app-border, rgba(var(--app-tone-3-rgb, 99, 102, 241), 0.25));
   }
+  input,
+  textarea,
+  button,
+  select {
+    outline: none;
+  }
 }
 
 body {

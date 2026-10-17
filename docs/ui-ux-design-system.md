@@ -617,7 +617,7 @@ import { AppInput, AppTextarea } from '@nexus/ui';
    - **Nền đơn sắc Tone 5**: `bg-[var(--app-tone-5,#070714)]` phẳng, không gradient, không rò rỉ nền phía sau.
    - **Viền token**: `border border-[var(--app-border)]`.
    - **Hiệu ứng Hover**: `hover:border-[var(--app-tone-3,#6366f1)]/50`.
-   - **Hiệu ứng Focus**: `focus:border-[var(--app-tone-3,#6366f1)]/60 focus:ring-1 focus:ring-[var(--app-tone-3,#6366f1)]/40 focus:outline-hidden`.
+   - **Hiệu ứng Focus**: `focus:outline-none focus:border-[var(--app-tone-3,#6366f1)]/70 focus:ring-1 focus:ring-[var(--app-tone-3,#6366f1)]/40`. Toàn bộ `input, textarea, button, select` đều được khóa chặn native focus ring tại `@layer base` (`outline: none`).
    - **Màu chữ**: `text-[var(--app-tone-1,#f0fdf9)]`.
    - **Placeholder**: `placeholder:text-[var(--app-tone-2)]/40`.
 

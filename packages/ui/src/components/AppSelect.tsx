@@ -164,11 +164,12 @@ export function AppSelect<T extends string = string>({
         aria-expanded={isOpen}
         className={twMerge(
           clsx(
-            'group w-full flex items-center justify-between gap-2.5 text-left transition-all duration-150 select-none outline-hidden',
+            'group w-full flex items-center justify-between gap-2.5 text-left transition-all duration-150 select-none outline-none',
             'bg-[var(--app-tone-5,#070714)] border border-[var(--app-border)] text-[var(--app-tone-1,#f0fdf9)]',
             'hover:border-[var(--app-tone-3,#6366f1)]/50',
+            'focus:outline-none focus:border-[var(--app-tone-3,#6366f1)]/70 focus:ring-1 focus:ring-[var(--app-tone-3,#6366f1)]/40',
             isOpen &&
-              'border-[var(--app-tone-3,#6366f1)]/60 ring-1 ring-[var(--app-tone-3,#6366f1)]/40',
+              'border-[var(--app-tone-3,#6366f1)]/70 ring-1 ring-[var(--app-tone-3,#6366f1)]/40',
             size === 'sm'
               ? 'px-2.5 py-1.5 text-xs rounded-lg min-h-[32px]'
               : 'px-3 py-2 text-xs rounded-xl min-h-[38px]',

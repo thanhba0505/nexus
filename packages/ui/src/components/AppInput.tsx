@@ -56,11 +56,11 @@ export const AppInput = forwardRef<HTMLInputElement, AppInputProps>(
             disabled={disabled}
             className={twMerge(
               clsx(
-                'w-full text-xs transition-all duration-150 outline-hidden select-text',
+                'w-full text-xs transition-all duration-150 outline-none select-text',
                 'bg-[var(--app-tone-5,#070714)] border border-[var(--app-border)] text-[var(--app-tone-1,#f0fdf9)]',
                 'placeholder:text-[var(--app-tone-2)]/40',
                 'hover:border-[var(--app-tone-3,#6366f1)]/50',
-                'focus:border-[var(--app-tone-3,#6366f1)]/60 focus:ring-1 focus:ring-[var(--app-tone-3,#6366f1)]/40',
+                'focus:outline-none focus:border-[var(--app-tone-3,#6366f1)]/70 focus:ring-1 focus:ring-[var(--app-tone-3,#6366f1)]/40',
                 size === 'sm'
                   ? 'px-2.5 py-1.5 rounded-lg min-h-[32px]'
                   : 'px-3 py-2 rounded-xl min-h-[38px]',
