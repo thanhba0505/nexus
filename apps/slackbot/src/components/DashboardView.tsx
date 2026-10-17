@@ -80,9 +80,9 @@ export function DashboardView({
               </div>
             </div>
 
-            {/* Live Prefix Preview Card */}
-            <div className="mt-4 rounded-xl border border-violet-500/25 bg-black/40 p-3.5">
-              <div className="flex items-center justify-between mb-2">
+            {/* Live Prefix Preview Section */}
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center justify-between px-0.5">
                 <span className="text-[10px] font-semibold text-white/50 uppercase tracking-wider">
                   Bản Xem Trước Tin Nhắn Trên Slack (Message Prefix Engine)
                 </span>
@@ -90,7 +90,7 @@ export function DashboardView({
                   Prefix: {settings.identity.enablePrefix ? settings.identity.defaultPrefix : 'Tắt'}
                 </span>
               </div>
-              <div className="flex items-start gap-2.5 rounded-lg bg-violet-500/[0.04] p-3 border border-violet-500/20">
+              <div className="flex items-start gap-3 rounded-xl bg-violet-500/[0.06] p-3.5 border border-violet-500/20">
                 <div className="h-7 w-7 rounded-md bg-violet-600/30 border border-violet-500/30 flex items-center justify-center text-violet-300 font-semibold text-xs shrink-0">
                   U
                 </div>
