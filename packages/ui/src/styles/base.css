@@ -14,6 +14,7 @@
   --app-tone-3-rgb: 99, 102, 241;
   --app-tone-5-rgb: 7, 7, 20;
   --app-glow: rgba(99, 102, 241, 0.18);
+  --app-border: rgba(99, 102, 241, 0.25);
 }
 
 /* 1. Theme: Nexus Launcher (Royal Indigo) */
@@ -26,6 +27,7 @@
   --app-tone-3-rgb: 99, 102, 241;
   --app-tone-5-rgb: 7, 7, 20;
   --app-glow: rgba(99, 102, 241, 0.18);
+  --app-border: rgba(99, 102, 241, 0.25);
 }
 
 /* 2. Theme: GitHub Report (Sky Blue) */
@@ -39,6 +41,7 @@
   --app-tone-3-rgb: 14, 165, 233;
   --app-tone-5-rgb: 3, 13, 23;
   --app-glow: rgba(14, 165, 233, 0.18);
+  --app-border: rgba(14, 165, 233, 0.25);
 }
 
 /* 3. Theme: SlackBot (Electric Violet) */
@@ -51,6 +54,7 @@
   --app-tone-3-rgb: 139, 92, 246;
   --app-tone-5-rgb: 9, 5, 20;
   --app-glow: rgba(139, 92, 246, 0.18);
+  --app-border: rgba(139, 92, 246, 0.25);
 }
 
 /* 4. Theme: 2D Pet (Mint / Teal) */
@@ -64,6 +68,18 @@
   --app-tone-3-rgb: 0, 196, 154;
   --app-tone-5-rgb: 3, 20, 17;
   --app-glow: rgba(0, 196, 154, 0.18);
+  --app-border: rgba(0, 196, 154, 0.25);
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--app-border, rgba(var(--app-tone-3-rgb, 99, 102, 241), 0.25));
+  }
+  hr {
+    border-color: var(--app-border, rgba(var(--app-tone-3-rgb, 99, 102, 241), 0.25));
+  }
 }
 
 body {
@@ -142,12 +158,12 @@ textarea,
 }
 
 *::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--app-border, rgba(var(--app-tone-3-rgb, 99, 102, 241), 0.25));
   border-radius: 9999px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(var(--app-tone-3-rgb, 99, 102, 241), 0.5);
 }
 
 /* Dynamic Branded Scrollbar */

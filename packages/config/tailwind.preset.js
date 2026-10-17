@@ -3,15 +3,18 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      borderColor: {
+        DEFAULT: 'var(--app-border, rgba(var(--app-tone-3-rgb, 99, 102, 241), 0.25))',
+      },
       spacing: {
         4.5: '1.125rem',
       },
       colors: {
         launchpad: {
           bg: 'rgba(10, 15, 30, 0.45)',
-          dock: 'rgba(255, 255, 255, 0.12)',
-          border: 'rgba(255, 255, 255, 0.15)',
-          hover: 'rgba(255, 255, 255, 0.18)',
+          dock: 'rgba(var(--app-tone-3-rgb, 99, 102, 241), 0.12)',
+          border: 'var(--app-border, rgba(var(--app-tone-3-rgb, 99, 102, 241), 0.25))',
+          hover: 'rgba(var(--app-tone-3-rgb, 99, 102, 241), 0.18)',
         },
         // Semantic Dynamic Tokens mapping to current theme CSS Variables
         app: {
@@ -73,7 +76,7 @@ export default {
       boxShadow: {
         squircle: '0 8px 24px -4px rgba(0, 0, 0, 0.35)',
         'squircle-hover': '0 12px 32px -4px rgba(0, 0, 0, 0.45)',
-        dock: '0 20px 40px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.2)',
+        dock: '0 20px 40px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(var(--app-tone-3-rgb, 99, 102, 241), 0.25)',
       },
       keyframes: {
         'menu-in': {

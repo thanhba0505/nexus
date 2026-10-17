@@ -82,7 +82,7 @@ export function LaunchpadHeader({
           >
             <Settings className="w-4 h-4" />
             {hasNexusUpdate && (
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-amber-400 rounded-full border border-slate-900 animate-pulse" />
+              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-amber-400 rounded-full border border-[var(--app-tone-5,#070714)] animate-pulse" />
             )}
           </button>
           {settingsMenu}
