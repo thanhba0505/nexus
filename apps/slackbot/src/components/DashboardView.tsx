@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   Key,
   ShieldCheck,
@@ -7,17 +6,18 @@ import {
   Hash,
   ExternalLink,
   GitPullRequest,
-  CheckCircle2,
   AlertCircle,
   Plus,
 } from 'lucide-react';
-import { ContentCard, AppButton, AppTabs, TabItem } from '@nexus/ui';
+import { ContentCard, AppButton } from '@nexus/ui';
 import type { SlackAppSettings, SlackCredentialsDto, SlackStatusDto } from '../types';
 
 export interface DashboardViewProps {
   settings: SlackAppSettings;
   status: SlackStatusDto | null;
   credentials: SlackCredentialsDto | null;
+  activeTab?: 'overview' | 'conversations';
+  onTabChange?: (tab: 'overview' | 'conversations') => void;
   onOpenSettings: () => void;
   onOpenConversations: () => void;
 }
@@ -26,57 +26,35 @@ export function DashboardView({
   settings,
   status,
   credentials,
+  activeTab = 'overview',
+  onTabChange,
   onOpenSettings,
   onOpenConversations,
 }: DashboardViewProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'conversations'>('overview');
   const isReady = status?.hasUserToken && status?.hasAppToken;
   const activeConversations = settings.conversations.filter((c) => c.enabled);
 
-  const TABS: TabItem[] = [
-    { id: 'overview', label: 'Tổng quan BOT', icon: Bot },
-    {
-      id: 'conversations',
-      label: 'Kênh & Whitelist',
-      icon: Hash,
-      count: activeConversations.length,
-    },
-  ];
-
   return (
-    <div className="flex-1 overflow-y-auto custom-scrollbar space-y-4 p-4 select-none text-xs">
-      {/* Top Tab Bar */}
-      <div className="flex items-center justify-between pb-1">
-        <AppTabs
-          items={TABS}
-          activeId={activeTab}
-          onChange={(id) => setActiveTab(id as 'overview' | 'conversations')}
-          variant="segmented"
-          size="sm"
-        />
-
-        <div className="flex items-center gap-2">
-          {isReady ? (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-500/15 text-emerald-300 text-[11px] font-medium">
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              <span>Tokens Đã Sẵn Sàng</span>
-            </span>
-          ) : (
-            <AppButton
-              size="sm"
-              variant="secondary"
-              onClick={onOpenSettings}
-              icon={AlertCircle}
-              className="text-amber-300 border-amber-500/30 bg-amber-500/15 hover:bg-amber-500/25"
-            >
-              Cấu hình Token ngay
-            </AppButton>
-          )}
-        </div>
-      </div>
-
+    <div className="space-y-4 select-none text-xs">
       {activeTab === 'overview' ? (
         <div className="space-y-4 animate-in fade-in duration-150">
+          {!isReady && (
+            <div className="flex items-center justify-between p-3 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-200">
+              <div className="flex items-center gap-2 text-xs">
+                <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>Chưa cấu hình đầy đủ User Token (xoxp-) và App Token (xapp-).</span>
+              </div>
+              <AppButton
+                size="sm"
+                variant="secondary"
+                onClick={onOpenSettings}
+                className="text-amber-300 border-amber-500/30 bg-amber-500/15 hover:bg-amber-500/25"
+              >
+                Cấu hình Token ngay
+              </AppButton>
+            </div>
+          )}
+
           {/* Banner Trạng Thái Danh Tính & Token */}
           <ContentCard variant="acrylic" padding="md">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -266,7 +244,7 @@ export function DashboardView({
             {settings.conversations.length > 4 && (
               <div className="mt-2 text-center">
                 <button
-                  onClick={() => setActiveTab('conversations')}
+                  onClick={() => onTabChange?.('conversations')}
                   className="text-[11px] text-violet-300 hover:text-white transition-colors"
                 >
                   + Xem thêm {settings.conversations.length - 4} hội thoại khác...

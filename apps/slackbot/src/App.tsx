@@ -1,17 +1,29 @@
 import { useState } from 'react';
-import { MessageSquare, Sparkles } from 'lucide-react';
-import { AppSplashScreen, AppLayout, useAppBootstrap, useHotkeys } from '@nexus/ui';
+import { MessageSquare, Sparkles, Bot, Hash, Settings } from 'lucide-react';
+import {
+  AppSplashScreen,
+  AppLayout,
+  AppSidebar,
+  useAppBootstrap,
+  useHotkeys,
+  AppSidebarTab,
+} from '@nexus/ui';
 import { UnifiedHeader } from './components/UnifiedHeader';
 import { StatusBar } from './components/StatusBar';
 import { SettingsModal } from './components/SettingsModal';
 import { ConversationsModal } from './components/ConversationsModal';
 import { DashboardView } from './components/DashboardView';
+import { SettingsView } from './components/SettingsView';
 import { useSlackSettings } from './hooks/use-slack-settings';
 import { useSlackStatus } from './hooks/use-slack-status';
 import { slackbotApi } from './services/slackbot-api';
 import type { ConversationRule } from './types';
 
+export type SlackbotTab = 'overview' | 'conversations' | 'settings';
+
 export default function App() {
+  const [activeTab, setActiveTab] = useState<SlackbotTab>('overview');
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isConversationsOpen, setIsConversationsOpen] = useState(false);
 
@@ -59,13 +71,28 @@ export default function App() {
     });
   };
 
+  const TABS: AppSidebarTab[] = [
+    { id: 'overview', label: 'Tổng quan BOT', icon: Bot, shortcut: '⌘1' },
+    {
+      id: 'conversations',
+      label: 'Kênh & Whitelist',
+      icon: Hash,
+      shortcut: '⌘2',
+      badge: settings.conversations.filter((c) => c.enabled).length,
+    },
+    { id: 'settings', label: 'Cấu hình & Token', icon: Settings, shortcut: '⌘3' },
+  ];
+
   useHotkeys(
     {
       'mod+r': () => {
         if (isBusy) return;
         refresh();
       },
-      'mod+,': () => setIsSettingsOpen((open) => !open),
+      'mod+1': () => setActiveTab('overview'),
+      'mod+2': () => setActiveTab('conversations'),
+      'mod+3': () => setActiveTab('settings'),
+      'mod+,': () => setActiveTab((tab) => (tab === 'settings' ? 'overview' : 'settings')),
       escape:
         (isSettingsOpen || isConversationsOpen) &&
         (() => {
@@ -73,7 +100,10 @@ export default function App() {
           setIsConversationsOpen(false);
         }),
     },
-    { enabled: boot.isReady, enableInInputs: ['escape', 'mod+r', 'mod+,'] },
+    {
+      enabled: boot.isReady,
+      enableInInputs: ['escape', 'mod+r', 'mod+,', 'mod+1', 'mod+2', 'mod+3'],
+    },
   );
 
   return (
@@ -105,8 +135,18 @@ export default function App() {
           enablePrefix={settings.identity.enablePrefix}
           allowedChannelsCount={settings.conversations.filter((c) => c.enabled).length}
           onRefresh={refresh}
-          onOpenSettings={() => setIsSettingsOpen(true)}
-          onOpenConversations={() => setIsConversationsOpen(true)}
+          onOpenSettings={() => setActiveTab('settings')}
+          onOpenConversations={() => setActiveTab('conversations')}
+        />
+      }
+      sidebar={
+        <AppSidebar
+          tabs={TABS}
+          activeTab={activeTab}
+          onTabChange={(id) => setActiveTab(id as SlackbotTab)}
+          isExpanded={isSidebarExpanded}
+          onToggleExpand={() => setIsSidebarExpanded((prev) => !prev)}
+          title="Điều Hướng"
         />
       }
       footer={
@@ -142,15 +182,28 @@ export default function App() {
           )}
         </>
       }
-      mainClassName="gap-2.5 overflow-hidden p-3"
+      mainClassName="p-4.5 sm:p-5 space-y-4 overflow-y-auto custom-scrollbar"
     >
-      <DashboardView
-        settings={settings}
-        status={slackStatus.status}
-        credentials={slackStatus.credentials}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-        onOpenConversations={() => setIsConversationsOpen(true)}
-      />
+      {activeTab === 'settings' ? (
+        <SettingsView
+          settings={settings}
+          credentials={slackStatus.credentials}
+          status={slackStatus.status}
+          onSaveSettings={(next) => void appSettings.save(next)}
+          onSaveCredentials={handleSaveCredentials}
+          onDeleteCredentials={handleDeleteCredentials}
+        />
+      ) : (
+        <DashboardView
+          settings={settings}
+          status={slackStatus.status}
+          credentials={slackStatus.credentials}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          onOpenSettings={() => setActiveTab('settings')}
+          onOpenConversations={() => setIsConversationsOpen(true)}
+        />
+      )}
     </AppLayout>
   );
 }

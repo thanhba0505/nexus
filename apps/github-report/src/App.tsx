@@ -1,16 +1,39 @@
 import { useState } from 'react';
-import { GitPullRequest, Sparkles } from 'lucide-react';
-import { AppSplashScreen, AppLayout, useAppBootstrap, useHotkeys, useLatestRef } from '@nexus/ui';
+import { GitPullRequest, Sparkles, Settings } from 'lucide-react';
+import {
+  AppSplashScreen,
+  AppLayout,
+  AppSidebar,
+  useAppBootstrap,
+  useHotkeys,
+  useLatestRef,
+} from '@nexus/ui';
 import { UnifiedHeader } from './components/UnifiedHeader';
 import { AISummaryCard } from './components/AISummaryCard';
 import { PRTimelineCard } from './components/PRTimelineCard';
 import { StatusBar } from './components/StatusBar';
+import { SettingsView } from './components/SettingsView';
 import { SettingsModal } from './components/SettingsModal';
 import { useAppSettings } from './hooks/use-app-settings';
 import { useGithubReport } from './hooks/use-github-report';
 import { githubReportApi } from './services/github-report-api';
 import { getDestinationLabel } from './lib/report-utils';
 import type { DateMode, PrereqStatus } from './types';
+
+export type GithubReportTab = 'standup' | 'timeline' | 'settings';
+
+interface TabDefinition {
+  id: GithubReportTab;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  shortcut: string;
+}
+
+const TABS: TabDefinition[] = [
+  { id: 'standup', label: 'Daily Standup', icon: Sparkles, shortcut: '⌘1' },
+  { id: 'timeline', label: 'Lịch sử PRs', icon: GitPullRequest, shortcut: '⌘2' },
+  { id: 'settings', label: 'Cài đặt', icon: Settings, shortcut: '⌘3' },
+];
 
 /**
  * Luồng UI (xem docs/mini-app-guide.md):
@@ -20,8 +43,10 @@ import type { DateMode, PrereqStatus } from './types';
  *    useEffect nào tự gọi API, nên không thể xảy ra vòng lặp.
  */
 export default function App() {
+  const [activeTab, setActiveTab] = useState<GithubReportTab>('standup');
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [dateMode, setDateMode] = useState<DateMode>('today');
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [prereqStatus, setPrereqStatus] = useState<PrereqStatus | null>(null);
 
   const appSettings = useAppSettings();
@@ -64,6 +89,9 @@ export default function App() {
 
   useHotkeys(
     {
+      'mod+1': () => setActiveTab('standup'),
+      'mod+2': () => setActiveTab('timeline'),
+      'mod+3': () => setActiveTab('settings'),
       'mod+r': () => {
         if (isBusy) return;
         refresh();
@@ -80,10 +108,13 @@ export default function App() {
         if (isBusy || !canReveal) return;
         void report.revealDestination();
       },
-      'mod+,': () => setIsSettingsOpen((open) => !open),
-      escape: isSettingsOpen && (() => setIsSettingsOpen(false)),
+      'mod+,': () => setActiveTab((tab) => (tab === 'settings' ? 'standup' : 'settings')),
+      escape: isSettingsModalOpen && (() => setIsSettingsModalOpen(false)),
     },
-    { enabled: boot.isReady, enableInInputs: ['escape', 'mod+r', 'mod+,'] },
+    {
+      enabled: boot.isReady,
+      enableInInputs: ['escape', 'mod+r', 'mod+,', 'mod+1', 'mod+2', 'mod+3'],
+    },
   );
 
   return (
@@ -121,16 +152,25 @@ export default function App() {
           onRefresh={refresh}
           onCopySummary={() => void report.copySummary()}
           onRevealDestination={() => void report.revealDestination()}
-          onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenSettings={() => setActiveTab('settings')}
+        />
+      }
+      sidebar={
+        <AppSidebar
+          tabs={TABS}
+          activeTab={activeTab}
+          onTabChange={(id) => setActiveTab(id as GithubReportTab)}
+          isExpanded={isSidebarExpanded}
+          onToggleExpand={() => setIsSidebarExpanded((prev) => !prev)}
+          title="Điều Hướng"
         />
       }
       footer={<StatusBar status={report.status} prereqStatus={prereqStatus} />}
       overlays={
-        // Mount lại mỗi lần mở → form luôn khởi tạo từ settings mới nhất (không phải mặc định).
-        isSettingsOpen && (
+        isSettingsModalOpen && (
           <SettingsModal
             isOpen
-            onClose={() => setIsSettingsOpen(false)}
+            onClose={() => setIsSettingsModalOpen(false)}
             settings={settings}
             onSaveSettings={(next) => void appSettings.save(next)}
             prereqStatus={prereqStatus}
@@ -138,31 +178,54 @@ export default function App() {
           />
         )
       }
-      mainClassName="gap-2.5 overflow-hidden p-3"
+      mainClassName="p-4.5 sm:p-5 space-y-4 overflow-y-auto custom-scrollbar"
     >
-      <AISummaryCard
-        summary={summaryTask.data}
-        isLoading={isBusy}
-        loadingLabel={
-          prsTask.isRunning ? 'Đang chờ dữ liệu PR & commits…' : 'Đang tóm tắt bằng Local AI…'
-        }
-        error={summaryTask.error}
-        canGenerate={hasPrs && !prsTask.isRunning}
-        isCopied={report.isCopied}
-        onGenerate={() => void report.regenerateSummary()}
-        onCopy={() => void report.copySummary()}
-        onUpdateBullets={report.updateBullets}
-      />
+      {activeTab === 'standup' && (
+        <div className="space-y-4 animate-in fade-in duration-150">
+          <AISummaryCard
+            summary={summaryTask.data}
+            isLoading={isBusy}
+            loadingLabel={
+              prsTask.isRunning ? 'Đang chờ dữ liệu PR & commits…' : 'Đang tóm tắt bằng Local AI…'
+            }
+            error={summaryTask.error}
+            canGenerate={hasPrs && !prsTask.isRunning}
+            isCopied={report.isCopied}
+            onGenerate={() => void report.regenerateSummary()}
+            onCopy={() => void report.copySummary()}
+            onUpdateBullets={report.updateBullets}
+            dateMode={dateMode}
+            onDateModeChange={changeDateMode}
+          />
+        </div>
+      )}
 
-      <PRTimelineCard
-        prs={report.prs}
-        isLoading={prsTask.isRunning}
-        isBusy={isBusy}
-        error={prsTask.error}
-        selectedPrNumbers={report.selectedPrNumbers}
-        onTogglePr={report.togglePr}
-        onSetAllSelected={report.setAllSelected}
-      />
+      {activeTab === 'timeline' && (
+        <div className="space-y-4 animate-in fade-in duration-150">
+          <PRTimelineCard
+            prs={report.prs}
+            isLoading={prsTask.isRunning}
+            isBusy={isBusy}
+            error={prsTask.error}
+            selectedPrNumbers={report.selectedPrNumbers}
+            onTogglePr={report.togglePr}
+            onSetAllSelected={report.setAllSelected}
+            dateMode={dateMode}
+            onDateModeChange={changeDateMode}
+          />
+        </div>
+      )}
+
+      {activeTab === 'settings' && (
+        <div className="space-y-4 animate-in fade-in duration-150">
+          <SettingsView
+            settings={settings}
+            onSaveSettings={(next) => void appSettings.save(next)}
+            prereqStatus={prereqStatus}
+            onSaveToken={saveToken}
+          />
+        </div>
+      )}
     </AppLayout>
   );
 }

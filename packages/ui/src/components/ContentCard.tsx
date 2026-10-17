@@ -75,7 +75,10 @@ export function ContentCard({
       {hasHeader && (
         <div
           className={twMerge(
-            clsx('flex items-center justify-between mb-3.5 relative z-10', headerClassName),
+            clsx(
+              'flex items-center justify-between border-b border-[var(--app-tone-3)]/15 pb-2.5 mb-3 relative z-10',
+              headerClassName,
+            ),
           )}
         >
           <div className="flex items-center gap-2.5 min-w-0">

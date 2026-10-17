@@ -1,5 +1,6 @@
 import { PetConfig, PetItem, PetTelemetry } from '../types/pet';
 import { Sparkles, Compass, Pause, Play, EyeOff } from 'lucide-react';
+import { ContentCard } from '@nexus/ui';
 
 interface PetHeroCardProps {
   config: PetConfig;
@@ -21,7 +22,7 @@ export function PetHeroCard({
   onTogglePause,
 }: PetHeroCardProps) {
   return (
-    <div className="relative shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-[#082620]/85 via-[#061c18]/90 to-[#031411]/95 border border-[#00c49a]/30 p-4.5 sm:p-5 shadow-2xl backdrop-blur-xl">
+    <ContentCard variant="acrylic" padding="md" className="relative shrink-0 overflow-hidden">
       {/* Background ambient glow */}
       <div className="absolute -top-12 -right-12 w-48 h-48 bg-[#00c49a]/20 rounded-full blur-3xl pointer-events-none" />
 
@@ -120,6 +121,6 @@ export function PetHeroCard({
           </div>
         </div>
       </div>
-    </div>
+    </ContentCard>
   );
 }

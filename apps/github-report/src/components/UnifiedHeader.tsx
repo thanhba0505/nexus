@@ -1,13 +1,5 @@
-import {
-  RefreshCw,
-  Copy,
-  Check,
-  Settings,
-  ExternalLink,
-  Calendar,
-  GitPullRequest,
-} from 'lucide-react';
-import { MiniAppHeader, AppButton, AppTabs } from '@nexus/ui';
+import { RefreshCw, Copy, Check, Settings, ExternalLink, GitPullRequest } from 'lucide-react';
+import { MiniAppHeader, AppButton } from '@nexus/ui';
 import type { DateMode } from '../types';
 
 export interface UnifiedHeaderProps {
@@ -29,8 +21,8 @@ export interface UnifiedHeaderProps {
 }
 
 export function UnifiedHeader({
-  dateMode,
-  onDateModeChange,
+  dateMode: _dateMode,
+  onDateModeChange: _onDateModeChange,
   prCount,
   commitCount,
   isBusy,
@@ -67,18 +59,6 @@ export function UnifiedHeader({
             commits
           </div>
         </div>
-      }
-      centerSlot={
-        <AppTabs
-          items={[
-            { id: 'today', label: 'Hôm nay', icon: Calendar },
-            { id: 'last_workday', label: 'Ngày trước' },
-          ]}
-          activeId={dateMode}
-          onChange={(id) => !isBusy && onDateModeChange(id as DateMode)}
-          variant="segmented"
-          size="sm"
-        />
       }
       rightSlot={
         <div

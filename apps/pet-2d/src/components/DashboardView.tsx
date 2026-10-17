@@ -225,11 +225,11 @@ export function DashboardView() {
           }
         />
       }
-      mainClassName="p-4.5 sm:p-5 md:p-6 space-y-5"
+      mainClassName="p-4.5 sm:p-5 space-y-4 overflow-y-auto custom-scrollbar"
     >
       {/* TAB 1: TỔNG QUAN (OVERVIEW) */}
       {activeTab === 'overview' && (
-        <div className="space-y-5 animate-in fade-in duration-200">
+        <div className="space-y-4 animate-in fade-in duration-200">
           {/* 1. Hero Live Status & Master Switch */}
           <PetHeroCard
             config={config}
@@ -371,7 +371,7 @@ export function DashboardView() {
 
       {/* TAB 2: THƯ VIỆN PET (GALLERY & IMPORT) */}
       {activeTab === 'gallery' && (
-        <div className="space-y-5 animate-in fade-in duration-200">
+        <div className="space-y-4 animate-in fade-in duration-200">
           <PetGallery
             pets={pets}
             activePetId={config.activePetId}
@@ -385,7 +385,7 @@ export function DashboardView() {
 
       {/* TAB 3: CÀI ĐẶT & VẬT LÝ (SETTINGS) */}
       {activeTab === 'settings' && (
-        <div className="space-y-5 animate-in fade-in duration-200">
+        <div className="space-y-4 animate-in fade-in duration-200">
           <BehaviorSettingsCard config={config} onUpdateConfig={handleUpdateConfig} />
 
           {/* Quick macOS Interaction Guide */}

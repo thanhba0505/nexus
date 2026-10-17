@@ -6,10 +6,11 @@ import {
   ChevronDown,
   ChevronRight,
   FolderGit2,
+  Calendar,
 } from 'lucide-react';
 import { openUrl } from '@tauri-apps/plugin-opener';
-import { AsyncContent, Skeleton, ContentCard, AppButton } from '@nexus/ui';
-import type { PRReportItem } from '../types';
+import { AsyncContent, Skeleton, ContentCard, AppButton, AppTabs } from '@nexus/ui';
+import type { PRReportItem, DateMode } from '../types';
 
 export interface PRTimelineCardProps {
   prs: PRReportItem[] | undefined;
@@ -19,6 +20,8 @@ export interface PRTimelineCardProps {
   selectedPrNumbers: Set<number>;
   onTogglePr: (prNumber: number) => void;
   onSetAllSelected: (isSelected: boolean) => void;
+  dateMode?: DateMode;
+  onDateModeChange?: (mode: DateMode) => void;
 }
 
 const STATE_BADGE: Record<string, string> = {
@@ -60,7 +63,7 @@ function TimelineSkeleton() {
 
 function TimelineEmpty() {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-2.5 p-6 text-center">
+    <div className="flex h-full flex-col items-center justify-center gap-2.5 py-7 text-center">
       <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-sky-500/25 bg-sky-500/10 text-sky-400">
         <GitPullRequest className="h-5 w-5" />
       </div>
@@ -83,6 +86,8 @@ export function PRTimelineCard({
   selectedPrNumbers,
   onTogglePr,
   onSetAllSelected,
+  dateMode,
+  onDateModeChange,
 }: PRTimelineCardProps) {
   const [collapsedPrs, setCollapsedPrs] = useState<Set<number>>(() => new Set());
   const items = prs ?? [];
@@ -113,14 +118,28 @@ export function PRTimelineCard({
       }
       icon={FolderGit2}
       actions={
-        <AppButton
-          size="sm"
-          variant="ghost"
-          onClick={() => onSetAllSelected(!isAllSelected)}
-          disabled={!hasItems || isLoading || isBusy}
-        >
-          {isAllSelected ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
-        </AppButton>
+        <div className="flex items-center gap-2">
+          {dateMode && onDateModeChange && (
+            <AppTabs
+              items={[
+                { id: 'today', label: 'Hôm nay', icon: Calendar },
+                { id: 'last_workday', label: 'Ngày trước' },
+              ]}
+              activeId={dateMode}
+              onChange={(id) => !isBusy && onDateModeChange(id as DateMode)}
+              variant="segmented"
+              size="sm"
+            />
+          )}
+          <AppButton
+            size="sm"
+            variant="ghost"
+            onClick={() => onSetAllSelected(!isAllSelected)}
+            disabled={!hasItems || isLoading || isBusy}
+          >
+            {isAllSelected ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
+          </AppButton>
+        </div>
       }
       variant="acrylic"
       padding="md"

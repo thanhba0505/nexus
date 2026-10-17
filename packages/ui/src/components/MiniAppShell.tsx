@@ -82,7 +82,7 @@ export function MiniAppStatusBar({
     <footer
       className={twMerge(
         clsx(
-          'flex h-7 w-full shrink-0 select-none items-center justify-between gap-3 border-t border-[var(--app-tone-3,#6366f1)]/20 bg-[var(--app-tone-5,#070714)]/95 px-3 text-[11px]',
+          'flex h-7 w-full shrink-0 select-none items-center justify-between gap-3 border-t border-[var(--app-tone-3,#6366f1)]/20 bg-[var(--app-tone-5,#070714)]/95 px-4.5 sm:px-5 text-[11px]',
           className,
         ),
       )}
