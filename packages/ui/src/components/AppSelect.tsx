@@ -165,10 +165,10 @@ export function AppSelect<T extends string = string>({
         className={twMerge(
           clsx(
             'group w-full flex items-center justify-between gap-2.5 text-left transition-all duration-150 select-none outline-hidden',
-            'bg-black/40 border border-[var(--app-tone-3)]/25 text-white/90',
-            'hover:border-[var(--app-tone-3)]/45 hover:bg-black/50',
+            'bg-[var(--app-tone-5,#070714)]/80 backdrop-blur-md border border-[var(--app-border)] text-[var(--app-tone-1,#f0fdf9)]/90',
+            'hover:border-[var(--app-tone-3,#6366f1)]/50 hover:bg-[var(--app-tone-4,#0c1929)]/50',
             isOpen &&
-              'border-[var(--app-tone-3)]/60 ring-1 ring-[var(--app-tone-3)]/40 bg-black/60',
+              'border-[var(--app-tone-3,#6366f1)]/60 ring-1 ring-[var(--app-tone-3,#6366f1)]/40 bg-[var(--app-tone-4,#0c1929)]/70',
             size === 'sm'
               ? 'px-2.5 py-1.5 text-xs rounded-lg min-h-[32px]'
               : 'px-3 py-2 text-xs rounded-xl min-h-[38px]',
@@ -180,14 +180,16 @@ export function AppSelect<T extends string = string>({
           {SelectedIcon && (
             <SelectedIcon className="w-3.5 h-3.5 text-[var(--app-tone-3)] shrink-0" />
           )}
-          <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
+          <span className={clsx('truncate', !selectedOption && 'text-[var(--app-tone-2)]/60')}>
+            {selectedOption ? selectedOption.label : placeholder}
+          </span>
         </div>
 
         <ChevronDown
           className={twMerge(
             clsx(
-              'w-3.5 h-3.5 text-white/40 shrink-0 transition-transform duration-200',
-              'group-hover:text-white/70',
+              'w-3.5 h-3.5 text-[var(--app-tone-2)]/60 shrink-0 transition-transform duration-200',
+              'group-hover:text-[var(--app-tone-1)]',
               isOpen && 'rotate-180 text-[var(--app-tone-3)]',
             ),
           )}
@@ -202,8 +204,8 @@ export function AppSelect<T extends string = string>({
           tabIndex={-1}
           className={clsx(
             'absolute left-0 right-0 top-full mt-1.5 z-50 max-h-60 overflow-y-auto custom-scrollbar',
-            'rounded-xl p-1 shadow-2xl shadow-black/80',
-            'bg-[var(--app-tone-5,#070714)]/95 backdrop-blur-2xl border border-[var(--app-tone-3,#6366f1)]/30',
+            'rounded-xl p-1.5 shadow-2xl shadow-black/80 space-y-0.5',
+            'bg-gradient-to-b from-[var(--app-tone-4,#0c1929)]/95 to-[var(--app-tone-5,#070714)]/98 backdrop-blur-2xl border border-[var(--app-border)]',
             'animate-in fade-in zoom-in-95 duration-150 origin-top',
           )}
         >
@@ -229,10 +231,10 @@ export function AppSelect<T extends string = string>({
                     'flex items-center justify-between gap-2.5 px-2.5 py-2 rounded-lg text-xs cursor-pointer transition-colors select-none',
                     option.disabled && 'opacity-40 cursor-not-allowed pointer-events-none',
                     isSelected
-                      ? 'bg-[var(--app-tone-3)]/20 text-[var(--app-tone-1,#f0fdf9)] font-medium'
+                      ? 'bg-[var(--app-tone-3)]/30 text-[var(--app-tone-1,#f0fdf9)] border border-[var(--app-tone-3)]/40 font-semibold shadow-xs'
                       : isHighlighted
-                        ? 'bg-white/[0.08] text-white'
-                        : 'text-white/80 hover:bg-[var(--app-tone-3)]/15 hover:text-white',
+                        ? 'bg-[var(--app-tone-3)]/20 text-[var(--app-tone-1,#f0fdf9)] border border-[var(--app-tone-3)]/20 font-medium'
+                        : 'text-[var(--app-tone-1,#f0fdf9)]/80 hover:bg-[var(--app-tone-3)]/20 hover:text-[var(--app-tone-1,#f0fdf9)] border border-transparent',
                   ),
                 )}
               >
@@ -241,14 +243,14 @@ export function AppSelect<T extends string = string>({
                     <OptionIcon
                       className={clsx(
                         'w-3.5 h-3.5 shrink-0 mt-0.5',
-                        isSelected ? 'text-[var(--app-tone-3)]' : 'text-white/50',
+                        isSelected ? 'text-[var(--app-tone-3)]' : 'text-[var(--app-tone-2)]/70',
                       )}
                     />
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="truncate leading-snug">{option.label}</div>
                     {option.description && (
-                      <div className="text-[10px] text-white/45 truncate leading-tight mt-0.5">
+                      <div className="text-[10px] text-[var(--app-tone-2)]/70 truncate leading-tight mt-0.5">
                         {option.description}
                       </div>
                     )}
