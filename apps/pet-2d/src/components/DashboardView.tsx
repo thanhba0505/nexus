@@ -303,11 +303,8 @@ export function DashboardView() {
 
                     {/* Floating Tooltip in Collapsed Mode */}
                     {!isSidebarExpanded && (
-                      <div className="pointer-events-none absolute left-full ml-3 z-50 flex items-center gap-2 whitespace-nowrap rounded-lg border border-[#00c49a]/40 bg-[#041915]/95 px-2.5 py-1 text-xs font-medium text-[#f0fdf9] shadow-2xl backdrop-blur-xl opacity-0 scale-95 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100">
-                        <span>{tab.label}</span>
-                        <span className="text-[10px] font-mono text-[#00c49a] bg-[#00c49a]/15 px-1 py-0.2 rounded border border-[#00c49a]/25">
-                          {tab.shortcut}
-                        </span>
+                      <div className="pointer-events-none absolute left-full ml-3 z-50 whitespace-nowrap rounded-lg border border-[#00c49a]/40 bg-[#041915]/95 px-2.5 py-1 text-xs font-medium text-[#f0fdf9] shadow-2xl backdrop-blur-xl opacity-0 scale-95 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100">
+                        {tab.label}
                       </div>
                     )}
                   </button>

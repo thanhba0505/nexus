@@ -34,9 +34,9 @@ export function PetHeroCard({
       {/* Background ambient glow */}
       <div className="absolute -top-12 -right-12 w-48 h-48 bg-[#00c49a]/20 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-5 relative z-10">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 relative z-10">
         {/* Left: Animated Avatar & Info */}
-        <div className="flex items-center gap-4.5">
+        <div className="flex items-center gap-6 sm:gap-7 min-w-0 flex-1">
           <div className="relative w-20 h-20 rounded-2xl bg-[#041613]/90 border border-[#00c49a]/30 flex items-center justify-center p-2 shadow-inner group shrink-0">
             <img
               src={activePet?.previewUrl || '/sprites/default/shime1.png'}
@@ -54,8 +54,8 @@ export function PetHeroCard({
             )}
           </div>
 
-          <div>
-            <div className="flex items-center gap-2 mb-1">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
               <h2 className="text-base font-semibold text-[#f0fdf9] tracking-tight">
                 {activePet?.name || 'Anya Forger (Chibi)'}
               </h2>
@@ -70,33 +70,39 @@ export function PetHeroCard({
               </span>
             </div>
 
-            <p className="text-xs text-[#5eead4]/80 line-clamp-1 max-w-sm mb-2">
+            <p className="text-xs text-[#5eead4]/80 line-clamp-1 max-w-sm mb-2.5">
               {activePet?.description || 'Nhân vật hoạt ảnh 13 frames chuẩn Shimeji'}
             </p>
 
-            {/* Live telemetry row */}
-            <div className="flex items-center gap-3 text-[11px] text-[#5eead4]/90 font-mono">
-              <span className="flex items-center gap-1 text-[#00c49a]">
-                <Activity className="w-3.5 h-3.5 text-[#00c49a]" />
+            {/* Live telemetry parameter chips */}
+            <div className="flex flex-wrap items-center gap-2 pt-0.5">
+              {/* Chip 1: Mascot state */}
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#041915]/90 border border-[#00c49a]/25 text-[#00c49a] text-[11px] font-mono whitespace-nowrap shadow-xs">
+                <Activity className="w-3.5 h-3.5 text-[#00c49a] shrink-0" />
                 <span className="font-semibold">
                   {isSpawned ? stateLabelMap[telemetry.state] || telemetry.state : 'Nghỉ'}
                 </span>
-              </span>
-              <span className="text-[#14b8a6]/40">•</span>
-              <span className="text-[#5eead4]/80">
-                Tọa độ: X: {Math.round(telemetry.x)}, Y: {Math.round(telemetry.y)}
-              </span>
-              <span className="text-[#14b8a6]/40">•</span>
-              <span className="flex items-center gap-1 text-[#2dd4bf]">
-                <Maximize2 className="w-3 h-3 text-[#2dd4bf]" />
-                <span>{config.scale}x</span>
-              </span>
+              </div>
+
+              {/* Chip 2: Coordinates */}
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#041915]/90 border border-[#00c49a]/25 text-[#5eead4] text-[11px] font-mono whitespace-nowrap shadow-xs">
+                <span className="text-[#2dd4bf]/70">Tọa độ:</span>
+                <span className="font-semibold">
+                  X: {Math.round(telemetry.x)}, Y: {Math.round(telemetry.y)}
+                </span>
+              </div>
+
+              {/* Chip 3: Scale */}
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#041915]/90 border border-[#00c49a]/25 text-[#2dd4bf] text-[11px] font-mono whitespace-nowrap shadow-xs">
+                <Maximize2 className="w-3 h-3 text-[#00c49a] shrink-0" />
+                <span className="font-semibold">{config.scale}x</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Right: Quick action controls */}
-        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+        <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-end shrink-0">
           <button
             onClick={onResetPosition}
             disabled={!isSpawned}

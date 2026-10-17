@@ -98,8 +98,8 @@ relative shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-[#082620]/8
   - Avatar động xem trước cử động với hiệu ứng glow xanh ngọc `#00c49a`.
   - Hiển thị tên nhân vật, mô tả, huy hiệu trạng thái (`Đang hoạt động` / `Đã thu hồi`).
   - **Master Switch (Công tắc Thả/Thu hồi Pet)**: Gạt công tắc để mở hoặc ẩn chú Pet ngoài desktop.
-  - **Telemetry thời gian thực**: Trạng thái (`Walking`, `Idle`, `Climbing`, `Falling`) và tọa độ `(X, Y)` live.
-  - **Nút phản ứng nhanh**: `Về giữa` (Center) và `Ghim vị trí` (Pause/Resume).
+  - **Telemetry thời gian thực dạng Chips**: Hệ thống parameter chips độc lập (`Activity`, `Tọa độ X, Y`, `Scale`) với `whitespace-nowrap` và `flex-wrap`, không bao giờ bị chèn ép hay bẻ gãy từ khi thay đổi kích thước cửa sổ hoặc mở rộng sidebar.
+  - **Nút phản ứng nhanh**: `Về giữa` (Center), `Ghim vị trí` (Pause/Resume), và `Thu hồi / Thả Pet`.
 - **Thẻ Chỉ Số Giám Sát Thời Gian Thực (Live Telemetry Container Card)**:
   - Thẻ tọa độ Desktop `(X, Y)` & hướng di chuyển (`⬅️ Sang trái` / `➡️ Sang phải`).
   - Thẻ hành động Mascot & số lượng frame Shimeji.
