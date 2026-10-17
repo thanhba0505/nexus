@@ -24,6 +24,14 @@
       "version": "0.5.0",
       "description": "GitHub PR and commit monitor",
       "downloadUrl": "https://github.com/thanhba0505/nexus/releases/download/v0.5.0/GitHub_Report_0.5.0_aarch64.dmg"
+    },
+    {
+      "id": "pet-2d",
+      "name": "2D Pet",
+      "bundleId": "com.thanhba.nexus.pet2d",
+      "version": "0.5.0",
+      "description": "2D Chibi Desktop Companion for macOS",
+      "downloadUrl": "https://github.com/thanhba0505/nexus/releases/download/v0.5.0/Pet_2D_0.5.0_aarch64.dmg"
     }
   ]
 }

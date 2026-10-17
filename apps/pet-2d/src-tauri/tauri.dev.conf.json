@@ -1,0 +1,5 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Pet_2D (Dev)",
+  "identifier": "com.thanhba.nexus.pet2d.dev"
+}

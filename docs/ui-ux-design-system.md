@@ -32,7 +32,7 @@ The existing dark desktop aesthetic is intentional and should remain the foundat
 - Inspired by carefully crafted developer tools and native desktop applications.
 - Compact enough for daily productivity, but never cramped.
 - Strong visual hierarchy without excessive decoration.
-- Cyan or blue accents for primary actions, focus, selection, and important interactive elements.
+- App-specific brand accents for primary actions, focus, selection, and important interactive elements, orchestrated under the Mini-App Palette Identity Architecture.
 - Neutral dark surfaces with subtle tonal differences.
 - Fine borders only where they clarify grouping or separation.
 - Crisp typography, consistent alignment, and predictable interaction patterns.
@@ -57,19 +57,62 @@ Organize colors into semantic roles:
 - **Secondary text**: supporting descriptions and metadata.
 - **Muted text**: timestamps and low-priority information.
 - **Border**: subtle separation between related surfaces.
-- **Accent**: the existing cyan/blue brand color.
+- **Accent**: application-specific brand accent token (see Section 3.1).
 - **Semantic colors**: success, warning, error, and informational states.
 
 ### Rules:
 
 - Establish hierarchy through subtle surface differences instead of surrounding every element with a border.
 - Avoid pure black and pure white as the default for every surface and text element.
-- Do not use multiple competing accent colors without a clear semantic purpose.
+- Do not use multiple competing accent colors within the same app without a clear semantic purpose.
 - Avoid decorative gradients, glowing borders, excessive shadows, and unnecessary glassmorphism.
 - Reserve bright accent colors for elements that deserve attention.
 - Ensure disabled and secondary controls remain distinguishable without competing with primary actions.
 - Maintain sufficient contrast for readable text and essential UI elements.
 - Make light and dark appearances consistent if both are supported.
+
+### 3.1. Mini-App Palette Identity Architecture (Hệ Thống Bảng Màu Nhận Diện Độc Lập)
+
+Để mang lại trải nghiệm đa nhiệm trực quan trên macOS (giúp người dùng phân biệt tức thì ứng dụng đang thao tác trên Dock, Mission Control, hoặc Stage Manager), Nexus áp dụng **Mô hình Bảng Màu Nhận Diện Độc Lập**.
+
+Mỗi mini app trong monorepo sở hữu một **Brand Accent Color** riêng biệt, thay vì bị ép buộc dùng chung một màu đồng nhất:
+
+| Ứng Dụng               | Brand Accent Name                              | Hex Code       | Tailwind Token                  | Ý Nghĩa Nhận Diện & Trải Nghiệm macOS                                                                                                       |
+| :--------------------- | :--------------------------------------------- | :------------- | :------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Nexus Launcher**     | Indigo / Royal Purple                          | `#6366f1`      | `indigo-500`                    | Sâu lắng, quyền lực, đóng vai trò trạm chỉ huy trung tâm (Command Center host).                                                             |
+| **GitHub Report**      | Sky Blue / Cyan                                | `#0ea5e9`      | `sky-500`                       | Tươi sáng, phản ánh màu trời và công nghệ phát triển phần mềm (Dev & Git tools).                                                            |
+| **SlackBot**           | Electric Violet / Slack Aubergine              | `#8b5cf6`      | `violet-500`                    | Lấy cảm hứng từ sắc tím thương hiệu Aubergine đặc trưng của Slack, hiện đại và năng động.                                                   |
+| **2D Pet**             | Mint / Teal                                    | `#00c49a`      | `teal-500` / `#00c49a`          | Xanh ngọc Mint/Teal tươi trẻ, thân thiện cho nhân vật đồng hành ảo macOS (Desktop Mascot & Companion).                                      |
+| **Ứng dụng tương lai** | Context-driven (Emerald, Amber, Rose, Teal...) | Tự do lựa chọn | e.g. `emerald-500`, `amber-500` | Linh hoạt theo ngữ cảnh: Finance/Monitoring (`#10b981`), Alert/Status (`#f59e0b`), Deadline/Analytics (`#f43f5e`), Cloud/Infra (`#14b8a6`). |
+
+#### Công Thức Ánh Xạ Semantic Accent Tokens Cho Từng App:
+
+Mỗi mini app kế thừa nền tối đồng nhất (Dark Acrylic Neutral Surfaces) và mở rộng biến thể màu nhận diện của mình theo công thức semantic chuẩn:
+
+- **`accent-base`**: Màu thương hiệu chủ đạo (`bg-<accent>-600`, `text-<accent>-400`, `border-<accent>-500/50`) cho các nút Primary Action, active tab, và selection highlight.
+- **`accent-hover`**: Trạng thái tương tác khi hover (`hover:bg-<accent>-500`, `hover:text-<accent>-300`).
+- **`accent-glow`**: Hiệu ứng hào quang nền tinh tế cho active indicator hoặc icon glowing (`rgba(<accent_rgb>, 0.15)`).
+- **`accent-ring`**: Viền focus bàn phím macOS chuẩn Accessibility (`focus-visible:ring-2 focus-visible:ring-<accent>-500/40`).
+- **`accent-badge`**: Nền mờ cho các pill/badge trạng thái (`bg-<accent>-500/10 text-<accent>-300 border-<accent>-500/20`).
+- **`accent-icon`**: Điểm nhấn nhận diện trên thanh Header và App Icon (`text-<accent>-400`).
+
+### 3.2. App-Specific Theme Immersion Model (Cơ Chế Trải Nghiệm Màu Sắc Toàn Diện Theo Từng App)
+
+Thay vì chỉ sử dụng một màu nền xám trung tính chung (`slate-950`) và điểm xuyết một vài nút bấm có màu accent, Nexus yêu cầu các mini app áp dụng **Full App-wide Theme Immersion**: **Toàn bộ canvas nền, các lớp bề mặt (surfaces), viền mờ (borders), ánh hào quang (ambient glow), tông màu văn bản (text tints), và thanh cuộn (custom scrollbars) đều được ngâm (immersed) trong dải sắc thái thương hiệu đặc trưng của ứng dụng đó**.
+
+#### So Sánh Giữa Mô Hình Cũ (Accent-Only) và Mô Hình Toàn Diện (Full Immersion):
+
+| Thành Phần Giao Diện | Mô Hình Accent-Only (Lỗi Thời) | Mô Hình Full Theme Immersion (Chuẩn Nexus Mới)                                                     |
+| :------------------- | :----------------------------- | :------------------------------------------------------------------------------------------------- |
+| **Root Canvas**      | Xám xỉn chung (`slate-950`)    | Sâu thẳm mang sắc thái thương hiệu (`#031411` Dark Teal cho 2D Pet, `#0d0b18` cho SlackBot).       |
+| **Atmospheric Glow** | Không có                       | Radial Gradient tinh tế phản chiếu từ đỉnh cửa sổ (`rgba(accent, 0.18)` chuyển dần về trong suốt). |
+| **Surface 1 (Base)** | Nền card xám đơn điệu          | Bề mặt tối kính mờ pha sắc thái thương hiệu (`#061c18/80`, viền `rgba(accent, 0.2)`).              |
+| **Surface 2 (Card)** | Thẻ xám viền trắng mờ          | Bề mặt nâng kính acrylic (`#082620/65`, viền `rgba(accent, 0.25)`, hover `#0c332b`).               |
+| **Surface 3 (High)** | Nền active trơn                | Bề mặt nổi bật tối đa (`#0e3d34/95`, viền `rgba(accent, 0.6)`).                                    |
+| **Header & Tabs**    | Header slate-900 khô cứng      | Header kính mờ pha màu thương hiệu (`#051b17/90`), Segmented Tab bar đổ bóng ngọc sang trọng.      |
+| **Typography Tints** | Trắng và xám slate nhạt        | Trắng ánh ngọc (`#f0fdf9`), chữ phụ pha sắc teal (`#5eead4`), chữ mờ (`#2dd4bf/75`).               |
+| **Scrollbars**       | Scrollbar hệ thống macOS xám   | Thumb thanh mảnh mang màu thương hiệu (`rgba(accent, 0.25)`, hover `rgba(accent, 0.5)`).           |
+| **Context Menu**     | Menu xám đen chung             | Kính mờ siêu tối ngâm sắc thái thương hiệu (`#041915/95`, viền `rgba(accent, 0.35)`).              |
 
 ---
 

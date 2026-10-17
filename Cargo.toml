@@ -4,6 +4,7 @@ members = [
     "apps/nexus/src-tauri",
     "apps/slackbot/src-tauri",
     "apps/github-report/src-tauri",
+    "apps/pet-2d/src-tauri",
 ]
 
 [workspace.dependencies]

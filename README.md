@@ -27,6 +27,7 @@ Bạn chỉ cần tải ứng dụng **Nexus Hub** duy nhất. Nexus đóng vai 
 ### 📥 Tải Bản Phát Hành Mới Nhất
 
 <!-- NEXUS_DOWNLOAD_SECTION_START -->
+
 > 💡 **Bấm trực tiếp vào nút bên dưới để tải ngay file cài đặt `.dmg` về máy (Direct Download)**:
 
 <p align="center">
@@ -35,12 +36,13 @@ Bạn chỉ cần tải ứng dụng **Nexus Hub** duy nhất. Nexus đóng vai 
   </a>
 </p>
 
-| Thông Tin Phát Hành | Chi Tiết |
-| :--- | :--- |
-| 🏷️ **Phiên Bản Hiện Tại** | `v0.5.0` |
-| 📦 **Tệp Cài Đặt Khuyên Dùng** | [`Nexus_0.5.0_aarch64.dmg`](https://github.com/thanhba0505/nexus/releases/download/v0.5.0/Nexus_0.5.0_aarch64.dmg) |
-| ⚡ **Cách Thức Tải** | **Tải Trực Tiếp (Direct Download)** — Trình duyệt tự tải file về, không cần qua trang trung gian |
-| 📋 **Xem Chi Tiết Bản Phát Hành** | [📦 Xem GitHub Releases & Changelog](https://github.com/thanhba0505/nexus/releases/latest) |
+| Thông Tin Phát Hành               | Chi Tiết                                                                                                           |
+| :-------------------------------- | :----------------------------------------------------------------------------------------------------------------- |
+| 🏷️ **Phiên Bản Hiện Tại**         | `v0.5.0`                                                                                                           |
+| 📦 **Tệp Cài Đặt Khuyên Dùng**    | [`Nexus_0.5.0_aarch64.dmg`](https://github.com/thanhba0505/nexus/releases/download/v0.5.0/Nexus_0.5.0_aarch64.dmg) |
+| ⚡ **Cách Thức Tải**              | **Tải Trực Tiếp (Direct Download)** — Trình duyệt tự tải file về, không cần qua trang trung gian                   |
+| 📋 **Xem Chi Tiết Bản Phát Hành** | [📦 Xem GitHub Releases & Changelog](https://github.com/thanhba0505/nexus/releases/latest)                         |
+
 <!-- NEXUS_DOWNLOAD_SECTION_END -->
 
 ---
@@ -78,13 +80,13 @@ Mỗi ứng dụng trong Nexus là một **macOS Native Application Bundle (`.ap
 |   └──────────────────────┬────────────────────────────────┬───────────────────────┘   |
 |                          │                                │                           |
 |                          ▼                                ▼                           |
-|   ┌──────────────────────────────────────────┐     ┌──────────────────────────────┐   |
-|   │            📊 GITHUB REPORT              │     │         💬 SLACKBOT          │   |
-|   │  Quét PRs & commits • Local AI Standup   │     │  Tự động hóa Slack • Webhook │   |
-|   │  Phím tắt macOS • Bảo mật Keychain       │     │  Thông báo công việc tức thì │   |
-|   └──────────────────────────────────────────┘     └──────────────────────────────┘   |
-|                                                                                       |
-+---------------------------------------------------------------------------------------+
+|   ┌──────────────────────────────────────────┐     ┌──────────────────────────────┐   ┌──────────────────────────────┐   |
+|   │            📊 GITHUB REPORT              │     │         💬 SLACKBOT          │   │          🐾 2D PET           │   |
+|   │  Quét PRs & commits • Local AI Standup   │     │  Tự động hóa Slack • Webhook │   │  Anime Chibi Desktop Mascot  │   |
+|   │  Phím tắt macOS • Bảo mật Keychain       │     │  Thông báo công việc tức thì │   │  Gravity Physics • Shimeji   │   |
+|   └──────────────────────────────────────────┘     └──────────────────────────────┘   └──────────────────────────────┘   |
+|                                                                                                                          |
++--------------------------------------------------------------------------------------------------------------------------+
 ```
 
 ### 1. 🪐 Nexus Hub (`apps/nexus`)
@@ -111,6 +113,17 @@ Mỗi ứng dụng trong Nexus là một **macOS Native Application Bundle (`.ap
 - **Vai trò**: Trợ lý tự động hóa công việc và tương tác nhanh với workspace Slack.
 - **Tính năng nổi bật**: Gửi thông báo tự động, nhận webhook công việc, quản lý lịch nhắc việc nội bộ.
 
+### 4. 🐾 2D Pet (`apps/pet-2d`)
+
+- **Vai trò**: Nhân vật ảo Anime Chibi (Desktop Companion / Shimeji) đồng hành giải tỏa căng thẳng trên macOS.
+- **Tính năng nổi bật**:
+  - Cửa sổ vô hình 100% trong suốt, không viền, không cản trở chuột khi làm việc.
+  - Động cơ vật lý trọng lực: rơi tự do, chạm sàn nảy nhẹ, leo trèo viền màn hình và nhảy dù xuống.
+  - Thao tác kéo thả native (`startDragging`) nhấc bổng nhân vật đi khắp màn hình.
+  - Menu chuột phải Dark Glassmorphism: chỉnh kích thước (1x/1.5x/2x), tốc độ, ghim vị trí, đổi bộ sprite Shimeji.
+  - Đóng gói sẵn 13 frames bé Anya Forger và hỗ trợ kéo thả folder ảnh Shimeji từ máy tính.
+  - Đặc tả chi tiết: 👉 [`docs/pet-2d.md`](docs/pet-2d.md).
+
 ---
 
 ## 🏛️ Kiến Trúc Kỹ Thuật (Architecture Highlights)
@@ -133,7 +146,8 @@ nexus/
 ├── apps/
 │   ├── nexus/               # App chính: Nexus Launchpad Hub (Cổng 1420)
 │   ├── github-report/       # Mini App: GitHub PR Monitor & Standup AI (Cổng 1422)
-│   └── slackbot/            # Mini App: Slack Assistant & Automation (Cổng 1421)
+│   ├── slackbot/            # Mini App: Slack Assistant & Automation (Cổng 1421)
+│   └── pet-2d/              # Mini App: 2D Anime Chibi Mascot & Physics (Cổng 1423)
 ├── packages/
 │   ├── config/              # @nexus/config: Tailwind presets, ESLint 9, TSConfigs
 │   ├── shared/              # @nexus/shared: Registry apps, kiểu dữ liệu dùng chung

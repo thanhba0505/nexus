@@ -1290,7 +1290,7 @@ dependencies = [
 
 [[package]]
 name = "github-report"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "keyring",
  "serde",
@@ -2134,7 +2134,7 @@ checksum = "650eef8c711430f1a879fdd01d4745a7deea475becfb90269c06775983bbf086"
 
 [[package]]
 name = "nexus"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "keyring",
  "serde",
@@ -2565,6 +2565,19 @@ name = "percent-encoding"
 version = "2.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
+
+[[package]]
+name = "pet_2d"
+version = "0.5.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-opener",
+ "tauri-plugin-store",
+ "thiserror 2.0.21",
+]
 
 [[package]]
 name = "phf"
@@ -3266,7 +3279,7 @@ checksum = "0c790de23124f9ab44544d7ac05d60440adc586479ce501c1d6d7da3cd8c9cf5"
 
 [[package]]
 name = "slackbot"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "keyring",
  "serde",

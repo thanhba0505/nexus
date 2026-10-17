@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00c49a" />
+      <stop offset="100%" stop-color="#0f766e" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- Background squircle -->
+  <rect x="32" y="32" width="448" height="448" rx="112" fill="url(#bg)" filter="url(#shadow)" />
+
+  <!-- Chibi Head Outline -->
+  <g transform="translate(0, 20)">
+    <!-- Hair back -->
+    <ellipse cx="256" cy="240" rx="140" ry="130" fill="#f472b6" />
+    
+    <!-- Face -->
+    <ellipse cx="256" cy="250" rx="115" ry="105" fill="#fff1f2" />
+
+    <!-- Horns / Cat accessories -->
+    <polygon points="125,180 85,110 165,140" fill="#1e1e24" />
+    <polygon points="120,175 90,115 110,145" fill="#fbbf24" />
+    <polygon points="387,180 427,110 347,140" fill="#1e1e24" />
+    <polygon points="392,175 422,115 402,145" fill="#fbbf24" />
+
+    <!-- Eyes (Big Anime Emerald Green) -->
+    <ellipse cx="195" cy="255" rx="28" ry="38" fill="#059669" />
+    <ellipse cx="195" cy="258" rx="20" ry="28" fill="#10b981" />
+    <circle cx="188" cy="242" r="10" fill="#ffffff" />
+    <circle cx="204" cy="265" r="5" fill="#ffffff" />
+
+    <ellipse cx="317" cy="255" rx="28" ry="38" fill="#059669" />
+    <ellipse cx="317" cy="258" rx="20" ry="28" fill="#10b981" />
+    <circle cx="310" cy="242" r="10" fill="#ffffff" />
+    <circle cx="326" cy="265" r="5" fill="#ffffff" />
+
+    <!-- Cheeks Blush -->
+    <ellipse cx="170" cy="285" rx="18" ry="10" fill="#f43f5e" opacity="0.5" />
+    <ellipse cx="342" cy="285" rx="18" ry="10" fill="#f43f5e" opacity="0.5" />
+
+    <!-- Cute Smile -->
+    <path d="M 238,295 Q 256,315 274,295" stroke="#e11d48" stroke-width="6" stroke-linecap="round" fill="none" />
+
+    <!-- Hair Bangs -->
+    <path d="M 145,210 Q 170,270 190,230 Q 220,280 256,220 Q 292,280 322,230 Q 342,270 367,210 Q 385,120 256,120 Q 127,120 145,210 Z" fill="#f9a8d4" />
+
+    <!-- Sparkles -->
+    <path d="M 370,140 Q 385,140 385,125 Q 385,140 400,140 Q 385,140 385,155 Q 385,140 370,140 Z" fill="#fef08a" />
+    <path d="M 115,290 Q 125,290 125,280 Q 125,290 135,290 Q 125,290 125,300 Q 125,290 115,290 Z" fill="#fef08a" />
+  </g>
+</svg>

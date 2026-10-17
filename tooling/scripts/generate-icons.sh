@@ -31,6 +31,7 @@ generate_app_icons() {
 generate_app_icons "nexus"
 generate_app_icons "slackbot"
 generate_app_icons "github-report"
+generate_app_icons "pet-2d"
 
 echo ""
-echo -e "${GREEN}🎉 All icons for Nexus, SlackBot, and GitHub Report have been created!${NC}"
+echo -e "${GREEN}🎉 All icons for Nexus, SlackBot, GitHub Report, and 2D Pet have been created!${NC}"

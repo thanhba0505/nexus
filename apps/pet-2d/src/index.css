@@ -1,0 +1,55 @@
+@import '@nexus/ui/styles/base.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  background-color: transparent !important;
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Atmospheric Ambient Canvas for 2D Pet Dark Teal Theme */
+.pet-ambient-canvas {
+  background:
+    radial-gradient(
+      circle at 50% -10%,
+      rgba(0, 196, 154, 0.18) 0%,
+      rgba(3, 20, 17, 0.8) 60%,
+      #031411 100%
+    ),
+    #031411;
+}
+
+/* Custom Mint/Teal Scrollbars */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 196, 154, 0.25);
+  border-radius: 9999px;
+  border: 1px solid rgba(0, 196, 154, 0.1);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 196, 154, 0.5);
+}
+
+/* Accent Selection Highlight */
+::selection {
+  background-color: rgba(0, 196, 154, 0.35);
+  color: #f0fdf9;
+}

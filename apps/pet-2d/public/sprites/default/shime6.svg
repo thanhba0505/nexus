@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+    <g transform="rotate(-5 64 64)">
+      <!-- Back Hair Bob -->
+      <ellipse cx="64" cy="48" rx="32" ry="30" fill="#f472b6"/>
+      <path d="M 32,48 Q 30,76 44,78 L 84,78 Q 98,76 96,48 Z" fill="#f472b6"/>
+
+      <!-- Legs -->
+      <path d="M 52,98 L 42,112" stroke="#1e1e24" stroke-width="8" stroke-linecap="round"/>
+               <ellipse cx="40" cy="114" rx="6" ry="4" fill="#78350f"/>
+      <path d="M 76,98 L 86,112" stroke="#1e1e24" stroke-width="8" stroke-linecap="round"/>
+                <ellipse cx="88" cy="114" rx="6" ry="4" fill="#78350f"/>
+
+      <!-- Dress Body (Eden Academy Black & Gold) -->
+      <path d="M 48,70 L 38,98 Q 64,102 90,98 L 80,70 Z" fill="#1e1e24"/>
+      <!-- Gold Trim on Dress Bottom -->
+      <path d="M 39,96 Q 64,100 89,96" stroke="#fbbf24" stroke-width="2.5" fill="none"/>
+      <!-- White Shirt Collar -->
+      <polygon points="56,70 64,78 72,70" fill="#f8fafc"/>
+      <polygon points="61,70 64,75 67,70" fill="#e11d48"/>
+
+      <!-- Arms -->
+      <path d="M 44,68 Q 28,52 32,40" stroke="#1e1e24" stroke-width="7" stroke-linecap="round" fill="none"/>
+      <path d="M 84,68 Q 100,52 96,40" stroke="#1e1e24" stroke-width="7" stroke-linecap="round" fill="none"/>
+
+      <!-- Head & Face -->
+      <ellipse cx="64" cy="40" rx="27" ry="24" fill="#fee2e2"/>
+      <!-- Cheeks Blush -->
+      <ellipse cx="44" cy="51" rx="5" ry="3" fill="#f43f5e" opacity="0.45"/>
+      <ellipse cx="84" cy="51" rx="5" ry="3" fill="#f43f5e" opacity="0.45"/>
+
+      <!-- Eyes & Mouth -->
+      
+      <!-- Super sparkle Waku Waku eyes -->
+      <ellipse cx="50" cy="46" rx="9" ry="12" fill="#047857"/>
+      <ellipse cx="50" cy="47" rx="7" ry="10" fill="#34d399"/>
+      <polygon points="50,39 52,44 57,44 53,47 55,52 50,49 45,52 47,47 43,44 48,44" fill="#ffffff"/>
+      
+      <ellipse cx="78" cy="46" rx="9" ry="12" fill="#047857"/>
+      <ellipse cx="78" cy="47" rx="7" ry="10" fill="#34d399"/>
+      <polygon points="78,39 80,44 85,44 81,47 83,52 78,49 73,52 75,47 71,44 76,44" fill="#ffffff"/>
+    
+      <path d="M 59,56 Q 64,64 69,56 Z" fill="#e11d48"/>
+
+      <!-- Front Hair Bangs -->
+      <path d="M 36,34 Q 40,50 46,40 Q 54,52 60,38 Q 66,52 74,40 Q 80,50 86,34 Q 92,14 64,16 Q 36,14 36,34 Z" fill="#f9a8d4"/>
+      <!-- Side Strands -->
+      <path d="M 37,36 Q 32,60 38,68 Q 42,56 41,42" fill="#f9a8d4"/>
+      <path d="M 91,36 Q 96,60 90,68 Q 86,56 87,42" fill="#f9a8d4"/>
+
+      <!-- Anya Hair Horn Ornaments (Cones) -->
+      <!-- Left Horn -->
+      <polygon points="34,26 24,12 42,18" fill="#1e1e24"/>
+      <polygon points="32,25 25,14 30,16" fill="#fbbf24"/>
+      <!-- Right Horn -->
+      <polygon points="94,26 104,12 86,18" fill="#1e1e24"/>
+      <polygon points="96,25 103,14 98,16" fill="#fbbf24"/>
+    </g>
+  </svg>

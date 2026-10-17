@@ -4,7 +4,11 @@ import { APP_CATEGORY, APP_STATUS, AppId, NexusAppMeta } from '../types/app-regi
  * Danh sách ID các mini app mặc định hiển thị trên màn hình chính Launchpad.
  * Sử dụng Enum AppId thay vì hardcoded string mảng.
  */
-export const DEFAULT_INSTALLED_APP_IDS: readonly AppId[] = [AppId.SLACKBOT, AppId.GITHUB_REPORT];
+export const DEFAULT_INSTALLED_APP_IDS: readonly AppId[] = [
+  AppId.SLACKBOT,
+  AppId.GITHUB_REPORT,
+  AppId.PET_2D,
+];
 
 /**
  * Nexus Launcher Core App Meta (Host App)
@@ -37,7 +41,7 @@ export const NEXUS_APPS: readonly NexusAppMeta[] = [
     status: APP_STATUS.READY,
     category: APP_CATEGORY.CHAT,
     iconName: 'MessageSquare',
-    accentColor: '#10b981',
+    accentColor: '#8b5cf6',
   },
   {
     id: AppId.GITHUB_REPORT,
@@ -50,5 +54,17 @@ export const NEXUS_APPS: readonly NexusAppMeta[] = [
     category: APP_CATEGORY.DEV,
     iconName: 'GitPullRequest',
     accentColor: '#0ea5e9',
+  },
+  {
+    id: AppId.PET_2D,
+    name: '2D Pet',
+    description: 'Nhân vật ảo anime Chibi 2D đồng hành trên màn hình macOS',
+    bundleId: 'com.thanhba.nexus.pet2d',
+    port: 1423,
+    version: '0.5.0',
+    status: APP_STATUS.READY,
+    category: APP_CATEGORY.GAMES,
+    iconName: 'Sparkles',
+    accentColor: '#00c49a',
   },
 ] as const;

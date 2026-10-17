@@ -2,6 +2,7 @@ export enum AppId {
   NEXUS = 'nexus',
   SLACKBOT = 'slackbot',
   GITHUB_REPORT = 'github-report',
+  PET_2D = 'pet-2d',
 }
 
 export const APP_CATEGORY = {
