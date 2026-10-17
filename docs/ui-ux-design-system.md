@@ -411,13 +411,193 @@ Mọi cửa sổ miniapp khi đặt cạnh nhau trên macOS đều lập tức m
 
 ## 18. Bộ Thành Phần Dùng Chung Chuẩn Hóa (`@nexus/ui`)
 
-Các ứng dụng trong monorepo tái sử dụng 5 core component chính từ `@nexus/ui`:
+Các ứng dụng trong monorepo tái sử dụng 6 core component chính từ `@nexus/ui`:
 
 - **`AppLayout`**: Khung cửa sổ chuẩn mực với hào quang canvas, tự động gán biến theme 5-tone, hỗ trợ đầy đủ các slot `header`, `sidebar`, `footer`, `overlays`, `splash`.
 - **`AppSidebar`**: Thanh điều hướng thu gọn zero-jitter với icon anchor `X=32px`, slide-out label, floating tooltip và overflow-visible chống thanh cuộn ngang ngoài ý muốn.
 - **`ContentCard`**: Thẻ kính mờ acrylic 5-tone với cấu trúc tiêu đề, icon, badge trạng thái, action buttons và padding đối xứng `p-4.5 sm:p-5`.
 - **`AppButton`**: Nút bấm nhận diện thương hiệu hỗ trợ các biến thể `primary` (Tone 3 CTA), `secondary`, `glass`, `ghost`, `danger`, tích hợp phím tắt kbd và spinner trạng thái tải.
 - **`AppTabs`**: Bộ chuyển tab phong cách macOS Native với hai biến thể `segmented` và `pills`, hiển thị số lượng badge và active animation mượt mà.
+- **`AppSelect`**: Dropdown select chuẩn macOS Dark Glassmorphism thay thế hoàn toàn `<select>` native OS, hỗ trợ generic type-safe `T extends string`, keyboard navigation (`ArrowUp`/`ArrowDown`/`Enter`/`Space`/`Escape`/`Tab`), auto scroll-into-view, nền Tone 5 đơn sắc cố định chống loang màu, option items phẳng không viền, trạng thái Selected (Tone 3 đặc 100%, chữ trắng, icon check trắng), Hover/Highlight (Tone 3 độ mờ 30%, chữ trắng).
+
+---
+
+## 19. Triệt Tiêu Viền Mặc Định Tailwind Preflight (Zero Tailwind Preflight Border Reset)
+
+### Vấn đề gốc rễ
+
+Tailwind CSS mặc định đi kèm Preflight (dựa trên Modern Normalize) tự động gán giá trị màu viền mặc định cho toàn bộ các phần tử HTML:
+
+```css
+/* Tailwind Preflight mặc định */
+*,
+::before,
+::after {
+  border-color: #e5e7eb; /* Màu xám sáng trung tính làm hỏng dark mode */
+}
+```
+
+Khi một component viết tắt class `border` hoặc `border-b` mà thiếu chỉ định màu sắc rõ ràng (ví dụ quên `border-[var(--app-border)]`), Preflight sẽ áp dụng `#e5e7eb`, tạo ra các đường viền xám trắng thô ráp, phá vỡ hoàn toàn không gian kính mờ Dark Glassmorphism và làm sai lệch bảng màu 5-Tone của miniapp.
+
+### Cơ chế bảo vệ 2 tầng chuẩn mực
+
+Hệ thống Nexus thiết lập cơ chế phòng thủ 2 tầng để triệt tiêu vĩnh viễn vấn đề này:
+
+1. **Tầng 1 — Cấu hình Preset Tailwind (`packages/config/tailwind.preset.js`)**:
+   Ghi đè giá trị `borderColor.DEFAULT` của theme để mọi class `border` không màu tự động trỏ về biến CSS token `--app-border`:
+
+   ```javascript
+   // packages/config/tailwind.preset.js
+   module.exports = {
+     theme: {
+       extend: {
+         borderColor: {
+           DEFAULT: 'var(--app-border, rgba(255, 255, 255, 0.08))',
+         },
+       },
+     },
+   };
+   ```
+
+2. **Tầng 2 — Reset CSS tầng Base (`packages/ui/src/styles/base.css`)**:
+   Can thiệp trực tiếp vào `@layer base` của CSS cascade để đè hoàn toàn Preflight:
+   ```css
+   /* packages/ui/src/styles/base.css */
+   @layer base {
+     *,
+     ::before,
+     ::after {
+       border-color: var(--app-border, rgba(255, 255, 255, 0.08));
+     }
+   }
+   ```
+
+### Quy chuẩn khai báo `--app-border` theo từng theme Mini App
+
+Mỗi mini app bắt buộc khai báo biến `--app-border` được ngâm (tint) theo màu nhận diện thương hiệu Tone 3 với độ trong suốt 15% – 25%:
+
+- **SlackBot (`violet`)**: `--app-border: rgba(139, 92, 246, 0.25);`
+- **GitHub Report (`sky`)**: `--app-border: rgba(14, 165, 233, 0.25);`
+- **2D Pet (`emerald / mint`)**: `--app-border: rgba(0, 196, 154, 0.25);`
+- **Fallback chuẩn**: `rgba(255, 255, 255, 0.08)` khi chưa nạp theme.
+
+---
+
+## 20. Quy Chuẩn Bố Cục 2 Cột Thẳng Hàng Trục Dọc & Mathematical Padding Grid
+
+### Silhouette 2 Cột Chuẩn Mực
+
+Tất cả các mini app trong hệ sinh thái Nexus áp dụng kiến trúc bố cục 2 cột cố định:
+
+- **Header (`MiniAppHeader` / `UnifiedHeader`)**: Chiều cao chuẩn `h-[38px]`, tích hợp khoảng đệm an toàn `pl-[76px]` tránh Traffic Lights macOS, gắn `data-tauri-drag-region`.
+- **Thanh bên trái (`AppSidebar`)**:
+  - Thu gọn (collapsed): Chiều rộng cố định `w-16` (64px), neo icon tuyệt đối tại tâm $X=32\text{px}$.
+  - Mở rộng (expanded): Chiều rộng cố định `w-56` (224px).
+  - Tích hợp nút toggle và floating tooltip khi ở chế độ thu gọn.
+- **Vùng nội dung chính (`<main>`)**: Tràn đều phần diện tích còn lại (`flex-1 min-w-0`), tích hợp `overflow-y-auto custom-scrollbar`.
+- **Thanh trạng thái chân trang (`MiniAppStatusBar` / `StatusBar`)**: Chiều cao chuẩn `h-7` (28px).
+
+### Khóa Chết Lưới Đệm Ngoại Vi (Mathematical Padding Grid)
+
+- Vùng `<main>` cố định khoảng đệm: `p-4.5 sm:p-5 space-y-4` (tương đương 18px – 20px).
+- **Nghiêm cấm Double Padding**: Tuyệt đối không bọc thêm các `div` có padding ngoài (`p-4`, `p-3`, `px-4`) bên trong `<main>`. Toàn bộ thẻ `ContentCard` phải được đặt trực tiếp bên trong `<main>` để đón nhận padding đồng nhất từ khung ngoài.
+
+### Thẳng Hàng Trục Dọc Chân Trang (Vertical Footer Alignment)
+
+- Thanh trạng thái `MiniAppStatusBar` được nâng padding hai bên lên `px-4.5 sm:px-5`.
+- **Hiệu ứng thị giác**: Mép trái của icon trạng thái và text message ở chân trang thẳng hàng 100% theo trục dọc với mép trái của thẻ `ContentCard` phía trên, tạo nên một đường dóng thị giác tinh tế chuẩn macOS.
+
+### Cân Bằng Đệm Dọc Trong `ContentCard`
+
+Nhằm triệt tiêu tình trạng đỉnh card bị thừa đệm quá mức so với đáy:
+
+- Khi thẻ có Header/Actions: Sử dụng đường kẻ hairline tinh tế `border-b border-[var(--app-tone-3)]/15 pb-2.5 mb-3` phân tách tiêu đề và thân thẻ.
+- Khi hiển thị Empty State: Căn giữa toàn khối với `py-7 text-center` thay vì lạm dụng các khoảng cách `mt-*` / `mb-*` tùy tiện.
+
+---
+
+## 21. Quy Tắc Giới Hạn Đóng Khung (Anti-Nesting Rule — Tối Đa 1 Lớp Block Có Khung Trong Card Chính)
+
+### Triết lý "Anti Box-in-a-Box-in-a-Card"
+
+Một trong những lỗi UI phổ biến làm giao diện desktop trở nên nặng nề, rối mắt và nghiệp dư là lồng nhiều lớp container có đường viền đóng khung vào nhau (Double-Framed Containers).
+
+```text
+❌ TRÁNH: Đóng khung 2 lớp lồng nhau gây rối mắt
+┌─ ContentCard (Khung 1: border border-[var(--app-border)]) ──────────────┐
+│  ┌─ Section Container (Khung 2: border border-[var(--app-tone-3)]/20) ─┐│
+│  │  Tiêu đề nhóm & Metadata                                            ││
+│  │  ┌─ Preview Box (Khung 3: border border-white/10) ────────────────┐ ││
+│  │  │  Nội dung chi tiết preview                                     │ ││
+│  │  └────────────────────────────────────────────────────────────────┘ ││
+│  └─────────────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────────────┘
+
+✅ CHUẨN NEXUS: Tối đa 1 lớp block có khung bên trong Card chính
+┌─ ContentCard (Khung thẻ chính: border border-[var(--app-border)]) ──────┐
+│  Tiêu đề nhóm & Metadata (Phẳng hoàn toàn - Text Header thanh thoát)   │
+│  ┌─ Preview Box (Duy nhất 1 lớp block có khung viền bên trong) ────────┐│
+│  │  Nội dung chi tiết preview                                          ││
+│  └─────────────────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Nguyên tắc thực thi:
+
+1. **Quy tắc 1 lớp duy nhất**: Bên trong một thẻ chính `ContentCard`, tối đa chỉ được phép xuất hiện **thêm 1 lớp block có khung viền** (border block) cho mục đích phân tách dữ liệu trực quan đặc biệt (như Code Block, Message Preview, Terminal Log).
+2. **Phẳng hóa tiêu đề và metadata (Flattening)**: Toàn bộ header nhóm, nhãn phân đoạn, thanh công cụ phụ phải được trải phẳng ra ngoài bằng typography thanh nhã (dùng `text-xs font-semibold text-[var(--app-tone-1)]`), không được bọc vào một chiếc hộp có viền thứ hai.
+3. **Phân tách bằng khoảng cách âm thay vì viền**: Sử dụng `space-y-3` hoặc `gap-2.5` kết hợp nền tint mờ nhẹ nhàng thay vì vẽ thêm khung viền stroke cứng.
+
+---
+
+## 22. Quy Chuẩn Dropdown `AppSelect` Chuẩn macOS Dark Glassmorphism
+
+### Cấm tuyệt đối thẻ HTML `<select>` Native OS
+
+Thẻ `<select>` mặc định của trình duyệt hiển thị menu nền trắng xỉn, nút bấm thô cứng của hệ điều hành, không hỗ trợ bàn phím dark mode và phá vỡ 100% thẩm mỹ kính acrylic của ứng dụng. Toàn bộ các dropdown lựa chọn trong hệ thống bắt buộc sử dụng component `AppSelect` từ `@nexus/ui`.
+
+### Đặc tả kỹ thuật giao diện của `AppSelect`
+
+```typescript
+import { AppSelect, AppSelectOption } from '@nexus/ui';
+```
+
+1. **Nút kích hoạt (Trigger Button)**:
+   - Nền Tone 5 phẳng đơn sắc: `bg-[var(--app-tone-5,#070714)]`.
+   - Viền nhận diện thương hiệu: `border border-[var(--app-border)]`.
+   - Chữ sắc nét: `text-[var(--app-tone-1,#f0fdf9)]`.
+   - Mũi tên `ChevronDown`: Tự động xoay 180° khi mở menu (`rotate-180 text-[var(--app-tone-3)]`).
+   - Hai kích thước chuẩn: `size="sm"` (`min-h-[32px] px-2.5 py-1.5 rounded-lg`) và `size="md"` (`min-h-[38px] px-3 py-2 rounded-xl`).
+
+2. **Cửa sổ lựa chọn thả xuống (Dropdown Popover)**:
+   - **Màu nền cố định chống loang màu**: Sử dụng nền Tone 5 đơn sắc phẳng `bg-[var(--app-tone-5,#070714)]`. Tuyệt đối không dùng gradient dọc (`bg-gradient-to-b`) để triệt tiêu hiện tượng dải màu loang lổ.
+   - Viền: `border border-[var(--app-border)] rounded-xl`.
+   - Đổ bóng chiều sâu: `shadow-2xl shadow-black/80`.
+   - Tối ưu cuộn: `max-h-60 overflow-y-auto custom-scrollbar`.
+
+3. **Màu sắc các mục lựa chọn (Option Items — Thiết kế phẳng tương phản cao)**:
+   - **Không kẻ khung viền (Borderless)**: Các option item không có viền stroke bao quanh, chỉ sử dụng màu nền mềm mại để phân biệt trạng thái.
+   - **Mục đang chọn (`isSelected`)**:
+     - Nền: Tone 3 thương hiệu đậm nét 100% `bg-[var(--app-tone-3)]` kèm bóng nhẹ `shadow-xs`.
+     - Tiêu đề chính: `text-white font-semibold`.
+     - Phụ đề (`description`): `text-white/85`.
+     - Icon Option & Icon Checkmark: `text-white`.
+   - **Mục đang rê chuột / phím điều hướng (`isHighlighted` và không `isSelected`)**:
+     - Nền: Tone 3 độ mờ 30% `bg-[var(--app-tone-3)]/30`.
+     - Tiêu đề chính: `text-white font-medium`.
+     - Phụ đề (`description`): `text-[var(--app-tone-1)]/85`.
+     - Icon Option: `text-[var(--app-tone-2)]`.
+   - **Mục bình thường**:
+     - Nền trong suốt, hover vào nhận `hover:bg-[var(--app-tone-3)]/30 hover:text-white`.
+     - Tiêu đề chính: `text-[var(--app-tone-1,#f0fdf9)]/80`.
+     - Phụ đề (`description`): `text-[var(--app-tone-2)]/60`.
+     - Icon Option: `text-[var(--app-tone-2)]/70`.
+
+4. **Tương tác & Khả năng truy cập chuẩn Desktop**:
+   - **Click-Outside & Escape**: Tự động đóng popover khi người dùng nhấp chuột ra ngoài hoặc nhấn phím `Escape`.
+   - **Bàn phím toàn diện**: Hỗ trợ phím `ArrowDown`, `ArrowUp` để di chuyển highlight qua lại các mục (tự động bỏ qua các option bị `disabled`), nhấn `Enter` hoặc `Space` để chọn mục, `Tab` để đóng menu.
+   - **Auto Scroll-Into-View**: Khi mở menu hoặc dùng phím di chuyển, mục được highlight tự động cuộn vào tầm nhìn của khung nhìn (`targetItem.scrollIntoView({ block: 'nearest' })`).
+   - **Generic Type-Safe**: Khai báo kiểu dữ liệu an toàn `AppSelect<T extends string = string>` giúp IDE tự động gợi ý giá trị và ngăn chặn lỗi type.
 
 ---
 
