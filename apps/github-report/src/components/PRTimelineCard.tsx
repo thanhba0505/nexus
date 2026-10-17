@@ -8,7 +8,7 @@ import {
   FolderGit2,
 } from 'lucide-react';
 import { openUrl } from '@tauri-apps/plugin-opener';
-import { AsyncContent, Skeleton } from '@nexus/ui';
+import { AsyncContent, Skeleton, ContentCard, AppButton } from '@nexus/ui';
 import type { PRReportItem } from '../types';
 
 export interface PRTimelineCardProps {
@@ -44,7 +44,7 @@ function TimelineSkeleton() {
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          className="space-y-2 rounded-lg border border-white/[0.05] bg-white/[0.02] p-3"
+          className="space-y-2 rounded-xl border border-white/[0.05] bg-white/[0.02] p-3"
         >
           <div className="flex items-center gap-2">
             <Skeleton className="h-3.5 w-3.5 rounded" />
@@ -107,26 +107,30 @@ export function PRTimelineCard({
   };
 
   return (
-    <section className="flex min-h-0 w-full flex-1 flex-col gap-2.5 overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] p-3.5 backdrop-blur-md">
-      <header className="flex shrink-0 items-center justify-between border-b border-white/[0.06] pb-2.5">
-        <div className="flex items-center gap-2">
-          <FolderGit2 className="h-4 w-4 text-sky-400" />
-          <h3 className="text-xs font-semibold text-white/90">
-            Pull Requests & Commits
-            {prs && <span className="ml-1.5 font-normal text-white/50">({items.length})</span>}
-          </h3>
-        </div>
-        <button
+    <ContentCard
+      title={
+        <span>
+          Pull Requests & Commits{' '}
+          {prs && <span className="font-normal text-white/50">({items.length})</span>}
+        </span>
+      }
+      icon={FolderGit2}
+      actions={
+        <AppButton
+          size="sm"
+          variant="ghost"
           onClick={() => onSetAllSelected(!isAllSelected)}
           disabled={!hasItems || isLoading || isBusy}
-          className="text-[11px] font-medium text-sky-400/80 transition-colors hover:text-sky-300 disabled:cursor-not-allowed disabled:opacity-30"
         >
           {isAllSelected ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
-        </button>
-      </header>
-
+        </AppButton>
+      }
+      variant="acrylic"
+      padding="md"
+      className="flex min-h-0 w-full flex-1 flex-col overflow-hidden"
+    >
       <AsyncContent
-        className="min-h-0 flex-1 overflow-y-auto pr-1"
+        className="min-h-0 flex-1 overflow-y-auto custom-scrollbar pr-1"
         isLoading={isLoading}
         hasData={hasItems}
         error={error}
@@ -141,7 +145,7 @@ export function PRTimelineCard({
             return (
               <li
                 key={`${pr.repository}#${pr.number}`}
-                className={`group rounded-lg border transition-all ${
+                className={`group rounded-xl border transition-all ${
                   isSelected
                     ? 'border-white/[0.08] bg-white/[0.035] hover:bg-white/[0.055]'
                     : 'border-transparent bg-black/20 opacity-45 hover:opacity-75'
@@ -194,7 +198,7 @@ export function PRTimelineCard({
 
                   <button
                     onClick={(e) => handleOpenLink(pr.url, e)}
-                    className="shrink-0 rounded p-1 text-white/30 transition-colors hover:bg-white/10 hover:text-white"
+                    className="shrink-0 rounded-lg p-1 text-white/30 transition-colors hover:bg-white/10 hover:text-white"
                     title="Mở Pull Request trên GitHub"
                   >
                     <ExternalLink className="h-3.5 w-3.5" />
@@ -221,6 +225,6 @@ export function PRTimelineCard({
           })}
         </ul>
       </AsyncContent>
-    </section>
+    </ContentCard>
   );
 }

@@ -20,6 +20,11 @@ export * from './components/MiniAppShell';
 export * from './components/AsyncContent';
 export * from './components/Loading';
 export * from './components/WindowControls';
+export * from './components/AppLayout';
+export * from './components/AppSidebar';
+export * from './components/ContentCard';
+export * from './components/AppButton';
+export * from './components/AppTabs';
 
 // Hooks chuẩn cho mini app (xem docs/mini-app-guide.md)
 export * from './hooks/use-latest-ref';

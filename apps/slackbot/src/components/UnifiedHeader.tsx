@@ -1,5 +1,5 @@
 import { MessageSquare, RefreshCw, Settings, Hash } from 'lucide-react';
-import { MiniAppHeader } from '@nexus/ui';
+import { MiniAppHeader, AppButton } from '@nexus/ui';
 import type { SlackStatusDto } from '../types';
 
 export interface UnifiedHeaderProps {
@@ -75,32 +75,35 @@ export function UnifiedHeader({
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
           className="flex items-center gap-1.5"
         >
-          <button
+          <AppButton
+            size="sm"
+            variant="secondary"
             onClick={onOpenConversations}
-            className="flex h-7 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2 text-xs font-medium text-white/80 transition-colors hover:bg-white/[0.08] hover:text-white"
+            icon={Hash}
             title="Quản lý danh sách hội thoại cho phép"
           >
-            <Hash className="h-3.5 w-3.5 text-violet-400" />
             <span className="hidden md:inline">Kênh & Hội thoại</span>
-          </button>
+          </AppButton>
 
-          <button
+          <AppButton
+            size="sm"
+            variant="ghost"
             onClick={onRefresh}
             disabled={isBusy}
-            className="flex h-7 items-center gap-1.5 rounded-lg px-2 text-xs font-medium text-white/70 transition-colors hover:bg-white/[0.08] hover:text-white active:bg-white/[0.12] disabled:cursor-not-allowed disabled:opacity-40"
+            icon={RefreshCw}
+            loading={isBusy}
             title={isBusy ? 'Đang kiểm tra...' : 'Làm mới trạng thái (⌘R)'}
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${isBusy ? 'animate-spin text-violet-400' : ''}`} />
             <span className="hidden lg:inline">Làm mới</span>
-          </button>
+          </AppButton>
 
-          <button
+          <AppButton
+            size="icon"
+            variant="ghost"
             onClick={onOpenSettings}
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-white/60 transition-colors hover:bg-white/[0.08] hover:text-white active:bg-white/[0.12]"
+            icon={Settings}
             title="Cài đặt (⌘,)"
-          >
-            <Settings className="h-3.5 w-3.5" />
-          </button>
+          />
         </div>
       }
     />

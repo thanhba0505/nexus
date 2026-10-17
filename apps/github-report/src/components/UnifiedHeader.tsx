@@ -7,7 +7,7 @@ import {
   Calendar,
   GitPullRequest,
 } from 'lucide-react';
-import { MiniAppHeader } from '@nexus/ui';
+import { MiniAppHeader, AppButton, AppTabs } from '@nexus/ui';
 import type { DateMode } from '../types';
 
 export interface UnifiedHeaderProps {
@@ -27,11 +27,6 @@ export interface UnifiedHeaderProps {
   onRevealDestination: () => void;
   onOpenSettings: () => void;
 }
-
-const DATE_MODES: { mode: DateMode; label: string; title: string }[] = [
-  { mode: 'today', label: 'Hôm nay', title: 'PR & commit từ 00:00 hôm nay' },
-  { mode: 'last_workday', label: 'Ngày trước', title: 'PR & commit từ ngày làm việc gần nhất' },
-];
 
 export function UnifiedHeader({
   dateMode,
@@ -74,29 +69,16 @@ export function UnifiedHeader({
         </div>
       }
       centerSlot={
-        <div
-          data-no-drag
-          data-tauri-drag-region="false"
-          style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-          className="flex h-7 items-center rounded-lg border border-white/[0.08] bg-black/25 p-0.5"
-        >
-          {DATE_MODES.map(({ mode, label, title }) => (
-            <button
-              key={mode}
-              onClick={() => onDateModeChange(mode)}
-              disabled={isBusy}
-              title={isBusy ? 'Đang thực hiện tác vụ…' : title}
-              className={`flex h-6 items-center gap-1 rounded-md px-2.5 text-[11px] font-medium transition-all disabled:cursor-not-allowed disabled:opacity-40 ${
-                dateMode === mode
-                  ? 'bg-sky-500/90 font-medium text-white shadow-xs'
-                  : 'text-white/60 hover:bg-white/[0.06] hover:text-white'
-              }`}
-            >
-              {mode === 'today' && <Calendar className="h-3 w-3 opacity-80" />}
-              {label}
-            </button>
-          ))}
-        </div>
+        <AppTabs
+          items={[
+            { id: 'today', label: 'Hôm nay', icon: Calendar },
+            { id: 'last_workday', label: 'Ngày trước' },
+          ]}
+          activeId={dateMode}
+          onChange={(id) => !isBusy && onDateModeChange(id as DateMode)}
+          variant="segmented"
+          size="sm"
+        />
       }
       rightSlot={
         <div
@@ -105,58 +87,49 @@ export function UnifiedHeader({
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
           className="flex items-center gap-1.5"
         >
-          <button
+          <AppButton
+            size="sm"
+            variant="ghost"
             onClick={onRefresh}
             disabled={isBusy}
-            className="flex h-7 items-center gap-1.5 rounded-lg px-2 text-xs font-medium text-white/70 transition-colors hover:bg-white/[0.08] hover:text-white active:bg-white/[0.12] disabled:cursor-not-allowed disabled:opacity-40"
+            icon={RefreshCw}
+            loading={isBusy}
             title={isBusy ? 'Đang quét PR & tóm tắt…' : 'Quét lại PR & tóm tắt (⌘R)'}
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${isBusy ? 'animate-spin text-sky-400' : ''}`} />
             <span className="hidden md:inline">Quét PR</span>
-          </button>
+          </AppButton>
 
-          <button
+          <AppButton
+            size="sm"
+            variant={isCopied ? 'secondary' : 'glass'}
             onClick={onCopySummary}
             disabled={!canCopy || isBusy}
-            className={`flex h-7 items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium transition-all disabled:cursor-not-allowed disabled:opacity-30 ${
-              isCopied
-                ? 'border border-emerald-500/30 bg-emerald-500/15 text-emerald-300'
-                : 'border border-white/10 bg-white/[0.06] text-white/90 hover:bg-white/[0.12] hover:text-white'
-            }`}
+            icon={isCopied ? Check : Copy}
             title="Sao chép tóm tắt (⌘C)"
           >
-            {isCopied ? (
-              <>
-                <Check className="h-3.5 w-3.5 text-emerald-400" />
-                <span className="font-semibold text-emerald-300">Đã chép</span>
-              </>
-            ) : (
-              <>
-                <Copy className="h-3.5 w-3.5 text-sky-400" />
-                <span>Sao chép</span>
-              </>
-            )}
-          </button>
+            {isCopied ? 'Đã chép' : 'Sao chép'}
+          </AppButton>
 
           {canReveal && (
-            <button
+            <AppButton
+              size="sm"
+              variant="secondary"
               onClick={onRevealDestination}
               disabled={isBusy}
-              className="flex h-7 items-center gap-1.5 rounded-lg border border-sky-500/25 bg-sky-500/15 px-2.5 text-xs font-medium text-sky-300 transition-colors hover:bg-sky-500/25 hover:text-sky-200 disabled:cursor-not-allowed disabled:opacity-40"
+              icon={ExternalLink}
               title={`Chuyển tới ${destinationLabel} trên trình duyệt (⌘P)`}
             >
-              <ExternalLink className="h-3.5 w-3.5" />
-              <span>{destinationLabel}</span>
-            </button>
+              {destinationLabel}
+            </AppButton>
           )}
 
-          <button
+          <AppButton
+            size="icon"
+            variant="ghost"
             onClick={onOpenSettings}
-            className="flex h-7 w-7 items-center justify-center rounded-lg text-white/60 transition-colors hover:bg-white/[0.08] hover:text-white active:bg-white/[0.12]"
+            icon={Settings}
             title="Cài đặt (⌘,)"
-          >
-            <Settings className="h-3.5 w-3.5" />
-          </button>
+          />
         </div>
       }
     />

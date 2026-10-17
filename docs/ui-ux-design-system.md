@@ -342,6 +342,82 @@ Do not blindly redesign every screen, introduce unnecessary dependencies, or cha
 
 ---
 
+---
+
+## 16. Hệ Thống 5 Sắc Độ Toán Học (5-Tone Mathematical Scale)
+
+Nhằm chuẩn hóa toàn diện trải nghiệm thị giác trên mọi miniapp, hệ thống màu của Nexus tuân thủ công thức phân tầng 5 sắc thái (5-Tone Scale):
+
+```
+Tone 1 (Highlight) ────────► Text nổi bật, tiêu đề card, icon chính
+Tone 2 (Accent)    ────────► Nhãn phụ, hover state, đường dẫn liên kết
+Tone 3 (Brand)     ────────► Nút hành động chính (Primary CTA), active indicators, brand border
+Tone 4 (Surface)   ────────► Bề mặt thẻ kính acrylic (Card background container)
+Tone 5 (Canvas)    ────────► Nền sâu nhất của cửa sổ ứng dụng (Window Canvas)
+```
+
+### Bảng Phối Màu Chuẩn Cho Toàn Bộ Hệ Sinh Thái
+
+| Token      | Ý Nghĩa / Công Năng        | Nexus Launcher            | GitHub Report           | SlackBot                   | 2D Pet                  |
+| :--------- | :------------------------- | :------------------------ | :---------------------- | :------------------------- | :---------------------- |
+| **Tone 1** | Text Highlight / Headline  | `#e0e7ff` (Indigo 100)    | `#e0f2fe` (Sky 100)     | `#ede9fe` (Violet 100)     | `#f0fdf9` (Mint 100)    |
+| **Tone 2** | Accent / Secondary Text    | `#a5b4fc` (Indigo 300)    | `#7dd3fc` (Sky 300)     | `#c4b5fd` (Violet 300)     | `#5eead4` (Teal 300)    |
+| **Tone 3** | Brand Accent / Primary CTA | `#6366f1` (Indigo 500)    | `#0ea5e9` (Sky 500)     | `#8b5cf6` (Violet 500)     | `#00c49a` (Mint 500)    |
+| **Tone 4** | Container Surface Acrylic  | `#131238` (Deep Indigo)   | `#061c2b` (Deep Sky)    | `#1b0a3c` (Deep Violet)    | `#082620` (Dark Teal)   |
+| **Tone 5** | Deepest Canvas Window      | `#070714` (Midnight Dark) | `#030d17` (Deep Ocean)  | `#090514` (Aubergine Dark) | `#031411` (Deep Forest) |
+| **Glow**   | Hào Quang Đỉnh Cửa Sổ      | `rgba(99,102,241,0.16)`   | `rgba(14,165,233,0.16)` | `rgba(139,92,246,0.16)`    | `rgba(0,196,154,0.18)`  |
+
+CSS semantic variables: `--app-tone-1`, `--app-tone-2`, `--app-tone-3`, `--app-tone-4`, `--app-tone-5`, `--app-glow` được kích hoạt tự động theo class theme: `.theme-nexus`, `.theme-github-report`, `.theme-slackbot`, `.theme-pet-2d`.
+
+---
+
+## 17. 7 Tiêu Chí Bất Biến "Nexus Ecosystem DNA"
+
+Mọi cửa sổ miniapp khi đặt cạnh nhau trên macOS đều lập tức mang lại cảm giác đồng nhất tuyệt đối nhờ 7 tiêu chuẩn DNA:
+
+1. **Phân cấp bo góc chuẩn macOS**:
+   - Khung viền cửa sổ Native: `rounded-[14px]` (NSWindow match).
+   - Thẻ và khối container ngoài (`ContentCard`): `rounded-2xl` (16px – 18px).
+   - Nút bấm, ô nhập liệu, tab switcher (`AppButton`, `AppTabs`): `rounded-xl` (12px).
+   - Pill, Badge, Tooltip: `rounded-lg` (8px).
+2. **Đường viền siêu mỏng 1px (Micro-Borders)**:
+   - Cố định độ dày `1px`. Không dùng viền 2px thô ráp.
+   - Viền trung tính: `border-white/[0.08]` đến `border-white/[0.12]`.
+   - Viền thương hiệu: `border-[var(--app-tone-3)]/25` (bình thường) → `border-[var(--app-tone-3)]/60` (hover/active).
+3. **Kính mờ acrylic đa tầng (Multilayer Acrylic Glassmorphism)**:
+   - Sử dụng `backdrop-blur-xl` kết hợp nền gradient 3 điểm dừng:
+     `bg-gradient-to-br from-[var(--app-tone-4)]/85 via-[var(--app-tone-4)]/65 to-[var(--app-tone-5)]/90`.
+   - Đảm bảo độ tương phản chữ đạt chuẩn WCAG AA (> 4.5:1).
+4. **Hào quang đỉnh cửa sổ (Ambient Radial Glow Canvas)**:
+   - Đỉnh cửa sổ phản chiếu một vệt elip mờ:
+     `background: radial-gradient(circle at 50% -10%, var(--app-glow) 0%, rgba(var(--app-tone-5-rgb), 0.8) 60%, var(--app-tone-5) 100%), var(--app-tone-5)`.
+   - Thẻ chính (`ContentCard`) tích hợp điểm sáng góc mềm `blur-3xl`.
+5. **Typography macOS & Tabular Nums**:
+   - Font stack Apple: `-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif`.
+   - Số liệu, commit hash, tọa độ, phím tắt luôn sử dụng `font-mono tabular-nums`.
+6. **Lưới khoảng đệm đối xứng (Symmetric Spacing Grid)**:
+   - Header cố định `h-[38px]`, Footer StatusBar cố định `h-7` (28px).
+   - Thẻ nội dung chuẩn hóa padding `p-4.5 sm:p-5` (`spacing.4.5: 1.125rem`).
+   - Khoảng cách nội bộ: `gap-3` đến `gap-3.5`.
+7. **Trải nghiệm tương tác desktop (Zero-Jitter Desktop Feel)**:
+   - Nút bấm có độ nhún vật lý nhẹ: `active:scale-[0.98] transition-all duration-150`.
+   - Thanh bên (`AppSidebar`): Cố định tâm icon tại `X=32px` trong hộp `w-12 h-11`. Khi thu gọn `w-16` sang `w-56`, icon đứng yên tuyệt đối, tiêu đề trượt ngang mượt mà, tooltip nổi khi thu gọn.
+   - Mọi phần tử tương tác desktop đều gắn cờ `data-no-drag` và `WebkitAppRegion: 'no-drag'`.
+
+---
+
+## 18. Bộ Thành Phần Dùng Chung Chuẩn Hóa (`@nexus/ui`)
+
+Các ứng dụng trong monorepo tái sử dụng 5 core component chính từ `@nexus/ui`:
+
+- **`AppLayout`**: Khung cửa sổ chuẩn mực với hào quang canvas, tự động gán biến theme 5-tone, hỗ trợ đầy đủ các slot `header`, `sidebar`, `footer`, `overlays`, `splash`.
+- **`AppSidebar`**: Thanh điều hướng thu gọn zero-jitter với icon anchor `X=32px`, slide-out label, floating tooltip và overflow-visible chống thanh cuộn ngang ngoài ý muốn.
+- **`ContentCard`**: Thẻ kính mờ acrylic 5-tone với cấu trúc tiêu đề, icon, badge trạng thái, action buttons và padding đối xứng `p-4.5 sm:p-5`.
+- **`AppButton`**: Nút bấm nhận diện thương hiệu hỗ trợ các biến thể `primary` (Tone 3 CTA), `secondary`, `glass`, `ghost`, `danger`, tích hợp phím tắt kbd và spinner trạng thái tải.
+- **`AppTabs`**: Bộ chuyển tab phong cách macOS Native với hai biến thể `segmented` và `pills`, hiển thị số lượng badge và active animation mượt mà.
+
+---
+
 ## Definition of Done
 
 A UI task is complete when it is functionally correct, visually coherent, consistent with Nexus, appropriately accessible, and maintainable.

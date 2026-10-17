@@ -1,12 +1,6 @@
 import { useState } from 'react';
 import { GitPullRequest, Sparkles } from 'lucide-react';
-import {
-  AppSplashScreen,
-  MiniAppShell,
-  useAppBootstrap,
-  useHotkeys,
-  useLatestRef,
-} from '@nexus/ui';
+import { AppSplashScreen, AppLayout, useAppBootstrap, useHotkeys, useLatestRef } from '@nexus/ui';
 import { UnifiedHeader } from './components/UnifiedHeader';
 import { AISummaryCard } from './components/AISummaryCard';
 import { PRTimelineCard } from './components/PRTimelineCard';
@@ -93,7 +87,8 @@ export default function App() {
   );
 
   return (
-    <MiniAppShell
+    <AppLayout
+      theme="github-report"
       splash={
         !boot.isReady && (
           <AppSplashScreen
@@ -168,6 +163,6 @@ export default function App() {
         onTogglePr={report.togglePr}
         onSetAllSelected={report.setAllSelected}
       />
-    </MiniAppShell>
+    </AppLayout>
   );
 }

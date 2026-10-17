@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { MessageSquare, Sparkles } from 'lucide-react';
-import { AppSplashScreen, MiniAppShell, useAppBootstrap, useHotkeys } from '@nexus/ui';
+import { AppSplashScreen, AppLayout, useAppBootstrap, useHotkeys } from '@nexus/ui';
 import { UnifiedHeader } from './components/UnifiedHeader';
 import { StatusBar } from './components/StatusBar';
 import { SettingsModal } from './components/SettingsModal';
@@ -77,7 +77,8 @@ export default function App() {
   );
 
   return (
-    <MiniAppShell
+    <AppLayout
+      theme="slackbot"
       splash={
         !boot.isReady && (
           <AppSplashScreen
@@ -150,6 +151,6 @@ export default function App() {
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenConversations={() => setIsConversationsOpen(true)}
       />
-    </MiniAppShell>
+    </AppLayout>
   );
 }

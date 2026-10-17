@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Sparkles, Edit3, Check, Copy, Bot } from 'lucide-react';
-import { AsyncContent, Skeleton, Spinner } from '@nexus/ui';
+import { AsyncContent, Skeleton, Spinner, ContentCard, AppButton } from '@nexus/ui';
 import { parseSummaryText } from '../lib/report-utils';
 import type { AISummaryResult } from '../types';
 
@@ -17,9 +17,6 @@ export interface AISummaryCardProps {
   onCopy: () => void;
   onUpdateBullets: (bullets: string[]) => void;
 }
-
-const ACTION_BUTTON =
-  'flex h-6.5 items-center gap-1.5 rounded-md px-2 text-[11px] font-medium transition-all disabled:cursor-not-allowed disabled:opacity-30';
 
 function SummarySkeleton({ label }: { label: string }) {
   return (
@@ -59,69 +56,56 @@ export function AISummaryCard({
   };
 
   return (
-    <section className="flex w-full shrink-0 flex-col gap-2.5 rounded-xl border border-white/[0.08] bg-white/[0.03] p-3.5 backdrop-blur-md">
-      {/* Header: luôn giữ nguyên bố cục, nút chỉ disable chứ không ẩn → không nhảy layout */}
-      <header className="flex items-center justify-between gap-2 border-b border-white/[0.06] pb-2.5">
-        <div className="flex min-w-0 items-center gap-2">
-          <Sparkles className="h-4 w-4 text-sky-400" />
-          <h3 className="text-xs font-semibold text-white/90">AI Daily Standup</h3>
-          {summary?.provider && (
-            <span className="flex items-center gap-1 rounded-md border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] text-white/60">
-              <Bot className="h-2.5 w-2.5 text-sky-400/80" />
-              {summary.provider}
-            </span>
-          )}
-        </div>
-
-        <div className="flex shrink-0 items-center gap-1">
-          <button
+    <ContentCard
+      title="AI Daily Standup"
+      icon={Sparkles}
+      badge={
+        summary?.provider && (
+          <span className="flex items-center gap-1 rounded-md border border-white/[0.08] bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10px] text-white/60">
+            <Bot className="h-2.5 w-2.5 text-sky-400/80" />
+            {summary.provider}
+          </span>
+        )
+      }
+      actions={
+        <div className="flex shrink-0 items-center gap-1.5">
+          <AppButton
+            size="sm"
+            variant="glass"
             onClick={onGenerate}
             disabled={isLoading || !canGenerate || isEditing}
-            className={`${ACTION_BUTTON} border border-white/[0.06] bg-white/[0.04] text-white/70 hover:bg-white/[0.08] hover:text-white`}
+            icon={Sparkles}
             title="Tóm tắt lại bằng AI (⌘↵)"
           >
-            <Sparkles className="h-3 w-3 text-sky-400" />
             <span>{hasSummary ? 'Tóm tắt lại' : 'Tóm tắt'}</span>
-          </button>
-          <button
+          </AppButton>
+
+          <AppButton
+            size="sm"
+            variant="glass"
             onClick={isEditing ? saveEdit : startEdit}
             disabled={isLoading || !hasSummary}
-            className={`${ACTION_BUTTON} border border-white/[0.06] bg-white/[0.04] text-white/70 hover:bg-white/[0.08] hover:text-white`}
+            icon={isEditing ? Check : Edit3}
             title="Chỉnh sửa nhanh trước khi gửi"
           >
-            {isEditing ? (
-              <>
-                <Check className="h-3 w-3 text-emerald-400" />
-                <span className="font-semibold text-emerald-300">Lưu</span>
-              </>
-            ) : (
-              <>
-                <Edit3 className="h-3 w-3" />
-                <span>Sửa</span>
-              </>
-            )}
-          </button>
-          <button
+            <span>{isEditing ? 'Lưu' : 'Sửa'}</span>
+          </AppButton>
+
+          <AppButton
+            size="sm"
+            variant={isCopied ? 'secondary' : 'glass'}
             onClick={onCopy}
             disabled={isLoading || !hasSummary}
-            className={`${ACTION_BUTTON} border border-sky-500/25 bg-sky-500/15 text-sky-300 hover:bg-sky-500/25 hover:text-sky-200`}
+            icon={isCopied ? Check : Copy}
             title="Sao chép (⌘C)"
           >
-            {isCopied ? (
-              <>
-                <Check className="h-3 w-3 text-emerald-400" />
-                <span className="font-semibold text-emerald-300">Đã chép</span>
-              </>
-            ) : (
-              <>
-                <Copy className="h-3 w-3" />
-                <span>Chép</span>
-              </>
-            )}
-          </button>
+            <span>{isCopied ? 'Đã chép' : 'Chép'}</span>
+          </AppButton>
         </div>
-      </header>
-
+      }
+      variant="acrylic"
+      padding="md"
+    >
       <AsyncContent
         className="min-h-[64px]"
         isLoading={isLoading}
@@ -129,30 +113,29 @@ export function AISummaryCard({
         error={error}
         skeleton={<SummarySkeleton label={loadingLabel} />}
         empty={
-          <div className="flex min-h-[64px] flex-col items-center justify-center gap-2 py-1 text-center">
+          <div className="flex min-h-[64px] flex-col items-center justify-center gap-2.5 py-2 text-center">
             <p className="text-xs text-white/50">
               {canGenerate
                 ? 'Dữ liệu PR đã sẵn sàng. Bấm để tạo bản tóm tắt Daily Standup.'
                 : 'Không có PR hoặc commit nào trong khoảng thời gian đã chọn.'}
             </p>
             {canGenerate && (
-              <button
+              <AppButton
+                variant="primary"
+                size="md"
                 onClick={onGenerate}
                 disabled={isLoading}
-                className="flex h-7 items-center gap-1.5 rounded-lg border border-sky-500/30 bg-sky-500/20 px-3 text-xs font-medium text-sky-200 transition-colors hover:bg-sky-500/30 hover:text-white active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+                icon={Sparkles}
+                hotkey="⌘↵"
               >
-                <Sparkles className="h-3 w-3 text-sky-400" />
-                <span>Tạo tóm tắt Daily Standup</span>
-                <kbd className="ml-1 rounded bg-black/40 px-1 py-0.5 font-mono text-[9px] text-white/70">
-                  ⌘↵
-                </kbd>
-              </button>
+                Tạo tóm tắt Daily Standup
+              </AppButton>
             )}
           </div>
         }
       >
         {isEditing ? (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2.5">
             <textarea
               autoFocus
               value={editText}
@@ -162,22 +145,16 @@ export function AISummaryCard({
                 if (e.key === 'Enter' && e.metaKey) saveEdit();
               }}
               rows={4}
-              className="w-full resize-none rounded-lg border border-white/[0.12] bg-black/40 p-2.5 font-sans text-xs leading-relaxed text-white/90 placeholder-white/40 focus:border-sky-400/80 focus:outline-none focus:ring-1 focus:ring-sky-400/40"
+              className="w-full resize-none rounded-xl border border-white/[0.12] bg-black/40 p-3 font-sans text-xs leading-relaxed text-white/90 placeholder-white/40 focus:border-sky-400/80 focus:outline-none focus:ring-1 focus:ring-sky-400/40"
               placeholder="Mỗi dòng là một gạch đầu dòng…"
             />
-            <div className="flex justify-end gap-1.5">
-              <button
-                onClick={cancelEdit}
-                className="h-6.5 rounded-md px-2.5 text-[11px] text-white/50 hover:bg-white/[0.06] hover:text-white"
-              >
+            <div className="flex justify-end gap-2">
+              <AppButton variant="ghost" size="sm" onClick={cancelEdit}>
                 Huỷ (Esc)
-              </button>
-              <button
-                onClick={saveEdit}
-                className="h-6.5 rounded-md bg-sky-500 px-3 text-[11px] font-medium text-white shadow-xs hover:bg-sky-400"
-              >
+              </AppButton>
+              <AppButton variant="primary" size="sm" onClick={saveEdit}>
                 Cập nhật (⌘↵)
-              </button>
+              </AppButton>
             </div>
           </div>
         ) : (
@@ -191,6 +168,6 @@ export function AISummaryCard({
           </ul>
         )}
       </AsyncContent>
-    </section>
+    </ContentCard>
   );
 }
